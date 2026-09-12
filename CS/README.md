@@ -30,51 +30,80 @@ y volver a correr `sh setup.sh` para que confirme que sirve. La llave se saca en
 ## Correr
 
 ```sh
-<<<<<<< HEAD
-# todo el sistema, sin Docker ni LLM ni red
-py -3.11 -m tests.test_todo
-
-# un barrido de punta a punta
-py -3.11 -m hormiguero.runner barrido --N 1 2 4 8 --episodios 3 --sin-docker --logs runs
-py -3.11 -m hormiguero.grafo.agregar runs --csv runs/resultados.csv
-py -3.11 -m hormiguero.grafo.mirar runs --salida runs/mapa.html   # la página del mapa
-```
-
-`mirar` genera **una página autocontenida** (un `.html`, sin red ni librerías)
-con el mapa dibujado por contenedor, las cuatro respuestas arriba y el detalle de
-cada nodo al hacer clic. Es para entender un episodio y para la figura del paper;
-las conclusiones salen del `csv`, no del dibujo.
-=======
-pip install -r requirements.txt
+python3 -m tests.test_todo   # todo el sistema, sin Docker, sin LLM, sin red
 ```
 
 ### Verificaciones en el sandbox
 
-Todo el sistema, sin Docker, sin LLM y sin red — `--proveedor simulado` (el
-default) y `--sin-docker` reemplazan contenedores y modelo por guiones fijos.
-Sirve para probar que el arnés, el canal y el mapa de procedencia están bien
-antes de gastar tokens o levantar contenedores:
+Todo el sistema, sin Docker, sin LLM y sin red — `--proveedor simulado` y
+`--sin-docker` reemplazan contenedores y modelo por guiones fijos. Sirve para
+probar que el arnés, el canal y el mapa de procedencia están bien antes de
+gastar tokens o levantar contenedores:
 
 ```sh
 python3 -m tests.test_todo
 
 # un barrido simulado de punta a punta
-python3 -m hormiguero.runner barrido --N 1 2 4 8 --episodios 3 --sin-docker --logs runs
+python3 -m hormiguero.runner barrido --N 1 2 4 8 --episodios 3 --sin-docker --proveedor simulado --logs runs
 python3 -m hormiguero.grafo.agregar runs --csv resultados.csv
+python3 -m hormiguero.grafo.mirar runs --salida mapa.html   # la página del mapa
 python3 -m hormiguero.grafo.exportar runs/ep_instruida_P4_N4_000.jsonl --salida mapa.dot
 ```
 
-### Experimento con agentes reales
+`mirar` genera **una página autocontenida** (un `.html`, sin red ni librerías)
+con el mapa dibujado por contenedor, las cuatro respuestas arriba y el detalle
+de cada nodo al hacer clic. Es para entender un episodio y para la figura del
+paper; las conclusiones salen del `csv`, no del dibujo. `exportar` deja el
+mismo grafo en `.dot` (graphviz), también para la figura del paper.
 
-Necesita modelo de verdad (`ollama` u `openai`) y, salvo que se pase
-`--sin-docker`, contenedores de verdad:
+### Con qué modelo corre
+
+| Proveedor | Para qué |
+|---|---|
+| `deepseek` | **El de verdad.** `deepseek-flash` vía la API compatible con OpenAI |
+| `simulado` | Guion fijo, sin red ni tokens. Prueba el cableado, **no mide nada** |
+| `openai`, `ollama` | Si alguien quiere comparar con otro modelo |
+
+El default sale de `HORMIGUERO_PROVEEDOR` en el `.env` (que `setup.sh` deja en
+`deepseek`), así que no hay que pasar `--proveedor` en cada comando. El runner
+imprime cuál usó al empezar. Para probar sin gastar tokens:
 
 ```sh
-cp .env.example .env    # dentro de CS/, y poner ahi OLLAMA/OPENAI_API_KEY si aplica
+python3 -m hormiguero.runner barrido --N 4 --episodios 2 --sin-docker --proveedor simulado
+```
+
+Para comprobar la llave sin gastar un barrido entero:
+
+```sh
+python3 -m hormiguero.proveedores.deepseek
+```
+
+**Cuidado con el tamaño del barrido.** `--N 1 2 4 8 --episodios 20` son
+`(1+2+4+8) × 20 = 300` episodios-agente y hasta `max_pasos` llamadas cada uno:
+del orden de 3.000 llamadas. Correr primero con `--episodios 2` para ver que
+todo fluye, y recién después el barrido completo.
+
+Dos cosas que DeepSeek no da y conviene tener presentes:
+
+- **No expone `seed`.** El proveedor no lo manda (mandarlo sería arriesgar un
+  400 a mitad del barrido) y usa `temperature 0`. La corrida no es reproducible
+  bit a bit. La réplica contrafactual sigue siendo válida —bloquea `event_id` y
+  vuelve a correr, no depende de que el modelo repita— pero por eso hacen falta
+  **varios episodios por punto**, no uno.
+- El `.env` se busca en la raíz del repo y en `CS/`. Un `CS/.env` gana, por si
+  alguien quiere probar otra llave sin tocar la del equipo.
+
+### Docker de verdad
+
+Salvo que se pase `--sin-docker`, correr episodios con modelo de verdad
+necesita el cluster de contenedores de pie:
+
+```sh
+cp .env.example .env    # dentro de CS/, si hace falta una llave distinta a la del equipo
 
 python3 -m hormiguero.runner levantar --n-partes 4
 python3 -m hormiguero.runner auditar --n-partes 4     # confirma que el cluster aisla bien antes de gastar tokens
-python3 -m hormiguero.runner uno --N 4 --proveedor ollama --logs runs
+python3 -m hormiguero.runner uno --N 4 --logs runs    # usa HORMIGUERO_PROVEEDOR (deepseek por defecto)
 python3 -m hormiguero.runner bajar
 ```
 
@@ -82,7 +111,6 @@ Para `openai` la llave sale de `.env` (`OPENAI_API_KEY`); para `ollama` hace
 falta el daemon corriendo localmente con el modelo ya descargado
 (`ollama pull qwen2.5` o el que se use). Con el cluster de pie, `barrido` y
 `monitor` (abajo) aceptan el mismo `--proveedor`.
->>>>>>> fba16a35dc90c52bc853d2700ab8d1d5297a33fc
 
 ### Las tres curvas
 
@@ -111,60 +139,8 @@ python3 -m hormiguero.runner barrido --N 4 --episodios 20 --logs runs --canal-di
 Los diales quedan grabados en cada evento y el episodio lleva la configuración en
 el nombre, así que las corridas no se pisan ni se promedian entre sí. **Con
 `--proveedor simulado` este barrido no mide nada** (el guion es fijo y no
-<<<<<<< HEAD
-reacciona al canal): necesita modelo de verdad.
-
-### Con qué modelo corre
-
-| Proveedor | Para qué |
-|---|---|
-| `deepseek` | **El de verdad.** `deepseek-flash` vía la API compatible con OpenAI |
-| `simulado` | Guion fijo, sin red ni tokens. Prueba el cableado, **no mide nada** |
-| `openai`, `ollama` | Si alguien quiere comparar con otro modelo |
-
-El default sale de `HORMIGUERO_PROVEEDOR` en el `.env` (que `setup.sh` deja en
-`deepseek`), así que no hay que pasar `--proveedor` en cada comando. El runner
-imprime cuál usó al empezar. Para probar sin gastar tokens:
-
-```sh
-py -3.11 -m hormiguero.runner barrido --N 4 --episodios 2 --sin-docker --proveedor simulado
-```
-
-Para comprobar la llave sin gastar un barrido entero:
-
-```sh
-py -3.11 -m hormiguero.proveedores.deepseek
-```
-
-**Cuidado con el tamaño del barrido.** `--N 1 2 4 8 --episodios 20` son
-`(1+2+4+8) × 20 = 300` episodios-agente y hasta `max_pasos` llamadas cada uno:
-del orden de 3.000 llamadas. Correr primero con `--episodios 2` para ver que
-todo fluye, y recién después el barrido completo.
-
-Dos cosas que DeepSeek no da y conviene tener presentes:
-
-- **No expone `seed`.** El proveedor no lo manda (mandarlo sería arriesgar un
-  400 a mitad del barrido) y usa `temperature 0`. La corrida no es reproducible
-  bit a bit. La réplica contrafactual sigue siendo válida —bloquea `event_id` y
-  vuelve a correr, no depende de que el modelo repita— pero por eso hacen falta
-  **varios episodios por punto**, no uno.
-- El `.env` se busca en la raíz del repo y en `CS/`. Un `CS/.env` gana, por si
-  alguien quiere probar otra llave sin tocar la del equipo.
-
-### Docker de verdad
-
-Antes de correr sin `--sin-docker`, el cluster tiene que existir:
-
-```sh
-py -3.11 -m hormiguero.runner levantar --n-partes 4
-py -3.11 -m hormiguero.runner auditar --n-partes 4    # la tabla de auditoria individual, va al paper
-py -3.11 -m hormiguero.runner uno --N 4 --proveedor ollama
-py -3.11 -m hormiguero.runner bajar
-```
-=======
-reacciona al canal): necesita modelo de verdad (`--proveedor ollama`/`openai`,
-ver [Experimento con agentes reales](#experimento-con-agentes-reales) arriba).
->>>>>>> fba16a35dc90c52bc853d2700ab8d1d5297a33fc
+reacciona al canal): necesita modelo de verdad (`deepseek` por defecto, o
+`ollama`/`openai`; ver [Con qué modelo corre](#con-qué-modelo-corre) arriba).
 
 Si `docker exec` falla porque el daemon está caído o el contenedor no existe,
 el episodio revienta con una excepción en vez de registrar el error como si
