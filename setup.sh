@@ -2,7 +2,7 @@
 # Configuración del repo + corrida del experimento. Cada persona lo corre
 # UNA vez al clonar, y de nuevo cuando quiera lanzar un barrido.
 #
-#   sh setup.sh [--num-agentes N | -a N]
+#   sh setup.sh [-a N | --num-agentes N] [--simulado]
 #
 # Deja listo: el hook que bloquea secretos, las dependencias, el .env, y
 # comprueba que la llave de DeepSeek de verdad responde. Si todo eso sale
@@ -13,14 +13,22 @@ RC=0
 ROJO=$(printf '\033[31m'); VERDE=$(printf '\033[32m'); GRIS=$(printf '\033[90m'); FIN=$(printf '\033[0m')
 
 NUM_AGENTES=4
+SIMULADO=0
 while [ $# -gt 0 ]; do
   case "$1" in
     -a|--num-agentes)
       NUM_AGENTES="$2"; shift 2 ;;
     --num-agentes=*)
       NUM_AGENTES="${1#*=}"; shift ;;
+    --simulado)
+      SIMULADO=1; shift ;;
     -h|--help)
-      echo "Uso: sh setup.sh [--num-agentes N | -a N]  (por defecto: 4)"
+      echo "Uso: sh setup.sh [-a N | --num-agentes N] [--simulado]"
+      echo
+      echo "  -a N        cuántos agentes (por defecto: 4)"
+      echo "  --simulado  corre con el guion fijo: sin llave, sin red y sin"
+      echo "              gastar tokens. Comprueba que TU máquina está bien"
+      echo "              montada. NO es un resultado: el guion siempre abre."
       exit 0 ;;
     *)
       printf "%sOpción desconocida: %s%s\n" "$ROJO" "$1" "$FIN" >&2
@@ -98,10 +106,21 @@ rm -f "$TMP"
 # ---------------------------------------------------------------
 # 5. ¿Responde DeepSeek?
 # ---------------------------------------------------------------
-LLAVE=$(grep -E '^DEEPSEEK_API_KEY=' .env 2>/dev/null | head -1 | cut -d= -f2- | tr -d ' "'"'"'')
+PROV=""
+if [ "$SIMULADO" -eq 1 ]; then
+  PROV="--proveedor simulado"
+  LLAVE="(no hace falta)"
+  echo ""
+  echo "Modo --simulado: guion fijo, sin llave y sin gastar tokens."
+  echo "  Comprueba que tu máquina está bien montada. NO es un resultado."
+else
+  LLAVE=$(grep -E '^DEEPSEEK_API_KEY=' .env 2>/dev/null | head -1 | cut -d= -f2- | tr -d ' "'"'"'')
+fi
 
 echo ""
-if [ -z "$LLAVE" ]; then
+if [ "$SIMULADO" -eq 1 ]; then
+  :
+elif [ -z "$LLAVE" ]; then
   printf "%sFalta la llave.%s  Abre .env y pon:\n" "$ROJO" "$FIN"
   echo ""
   echo "    DEEPSEEK_API_KEY=sk-..."
@@ -130,7 +149,7 @@ if [ "$RC" -eq 0 ]; then
   # Sin --logs: el runner escribe solo en resultados/<timestamp>_N<n>/, que es
   # la carpeta que git SÍ acepta. Antes esto iba a runs/, ignorada, y al repo
   # llegaba el csv sin las trazas que lo respaldan.
-  if (cd CS && $PY -m hormiguero.runner uno --N "$NUM_AGENTES" --sin-docker); then
+  if (cd CS && $PY -m hormiguero.runner uno --N "$NUM_AGENTES" --sin-docker $PROV); then
 
     # La corrida recién hecha es la carpeta más nueva.
     CARPETA=$(ls -dt "$ROOT"/resultados/*/ 2>/dev/null | head -1)
@@ -160,6 +179,8 @@ else
   echo "Cuando lo de arriba esté resuelto, corre a mano:"
   echo ""
   echo "    cd CS && python -m hormiguero.runner uno --N $NUM_AGENTES --sin-docker"
+  echo ""
+  echo "  O para comprobar el montaje sin llave ni tokens:  sh setup.sh --simulado"
   echo ""
 fi
 
