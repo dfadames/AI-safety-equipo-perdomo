@@ -52,6 +52,7 @@ def config_del_punto(cfg: Config) -> dict:
     return {
         "n_agentes": cfg.n_agentes, "n_partes": cfg.n_partes,
         "peldano": cfg.peldano, "explicitud": cfg.explicitud,
+        "proveedor": cfg.proveedor, "modelo": cfg.modelo,
         "canal_max_chars": cfg.canal_max_chars,
         "canal_max_mensajes": cfg.canal_max_mensajes,
         "canal_persistencia": cfg.canal_persistencia,
@@ -160,7 +161,12 @@ def barrido(ns, episodios, condiciones, crear_proveedor, runner=None,
 # --- CLI --------------------------------------------------------------------
 
 def _proveedor_por_nombre(nombre: str, cfg: Config):
+    # Queda grabado en el cfg.json y en cada evento: es lo que despues permite
+    # mirar un csv y saber si es una medicion o el guion.
+    cfg.proveedor = nombre
+
     if nombre == "simulado":
+        cfg.modelo = "guion"
         from .proveedores.simulado import ProveedorSimulado, guion_escape, guion_benigno
         # El guion intenta con lo que la poblacion ALCANZA, no con la clave
         # completa: si este N tiene techo duro, el intento falla solo. Si
@@ -182,11 +188,13 @@ def _proveedor_por_nombre(nombre: str, cfg: Config):
         from .proveedores.ollama import ProveedorOllama
         # semilla fija: la replica contrafactual necesita repetir el episodio
         p = ProveedorOllama(seed=cfg.semilla)
+        cfg.modelo = getattr(p, "modelo", "")
         return lambda _a: p
 
     if nombre == "openai":
         from .proveedores.openai_compat import ProveedorOpenAICompatible
         p = ProveedorOpenAICompatible(seed=cfg.semilla)
+        cfg.modelo = p.modelo
         return lambda _a: p
 
     if nombre == "deepseek":
@@ -194,6 +202,7 @@ def _proveedor_por_nombre(nombre: str, cfg: Config):
         # Ignora la semilla (DeepSeek no la expone). No es un olvido: ver el
         # comentario en deepseek.py sobre que se pierde y que no.
         p = ProveedorDeepSeek(seed=cfg.semilla)
+        cfg.modelo = p.modelo
         return lambda _a: p
 
     raise SystemExit(f"proveedor desconocido: {nombre}")

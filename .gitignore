@@ -51,6 +51,15 @@ data/
 !src/ejemplos/*.jsonl
 !CS/ejemplos/*.jsonl
 
+# Las trazas de una corrida que SÍ es un resultado. Sin esto solo viajaba el
+# csv y la evidencia se quedaba en la máquina de quien corrió: un csv sin sus
+# .jsonl no permite ver el mapa, ni verificar el oráculo, ni repetir el
+# episodio bloqueando los mensajes críticos. Copiar ahí la carpeta de la
+# corrida entera, no solo el resumen.
+!resultados/**/*.jsonl
+!resultados/**/*.cfg.json
+!resultados/**/*.csv
+
 # generados por DA/agregar.py
 resultados.csv
 mapa*.html

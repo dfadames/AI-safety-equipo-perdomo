@@ -318,7 +318,14 @@ seccion("AGREGACION y chequeos de cordura")
 grupos = por_episodio(*[rutas[n] for n in (1, 2, 4, 8)], ruta_b)
 filas = [fila(ep, ev)[0] for ep, ev in sorted(grupos.items())]
 check("5 episodios agregados", len(filas), 5)
-check("sin alertas espurias", chequear(filas), [])
+alertas = chequear(filas)
+# La unica alerta esperable aca es que estos episodios son del guion: lo son.
+# Se reporto una vez un barrido simulado como resultado del experimento, y el
+# csv no tenia con que distinguirlo. Ahora el chequeo lo dice solo.
+check("caza que la corrida es simulada",
+      sum(1 for a in alertas if "--proveedor simulado" in a), 1)
+check("sin otras alertas espurias",
+      [a for a in alertas if "--proveedor simulado" not in a], [])
 cur = curvas(filas)
 check("una fila por punto (condicion, N)", len(cur), 5)
 

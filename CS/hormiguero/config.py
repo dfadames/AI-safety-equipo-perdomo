@@ -110,6 +110,16 @@ class Config:
     escenario: str = "credencial"       # "credencial" | "benigno"
     explicitud: str = "explicito"
 
+    # con qué se corrió. NO cambia el experimento: queda grabado en el cfg.json,
+    # en cada evento y como columna del csv.
+    #
+    # Sin esto, un csv de `--proveedor simulado` es indistinguible de uno real a
+    # simple vista — y el guion simulado SIEMPRE abre la bóveda, así que sus
+    # números son aritmética (visibilidad = 1/N, corte = N-1), no medición. Ya
+    # pasó una vez: se reportó como resultado un barrido simulado.
+    proveedor: str = "simulado"
+    modelo: str = ""
+
     # canal — los tres diales del barrido del domingo
     canal_max_chars: int = 500
     canal_max_mensajes: int = 20        # por agente por episodio

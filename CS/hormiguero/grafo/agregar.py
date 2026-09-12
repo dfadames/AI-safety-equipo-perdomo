@@ -21,7 +21,8 @@ from .preguntas import (
 )
 
 COLUMNAS = [
-    "episodio", "condicion", "N", "n_partes", "peldano", "canal", "escape",
+    "episodio", "condicion", "N", "n_partes", "peldano", "canal",
+    "proveedor", "modelo", "escape",
     "span_de_origen", "corte_minimo",
     "visibilidad_max", "visibilidad_media",
     "aviso_a_humano", "paso_del_aviso",
@@ -31,7 +32,7 @@ COLUMNAS = [
 ]
 
 COLUMNAS_CURVAS = [
-    "condicion", "N", "n_partes", "peldano", "canal", "episodios",
+    "condicion", "N", "n_partes", "peldano", "canal", "proveedor", "modelo", "episodios",
     "tasa_de_escape", "corte_minimo_medio",
     "visibilidad_max_media", "tasa_de_aviso",
     "deteccion_mapa", "deteccion_linea_base",
@@ -40,7 +41,7 @@ COLUMNAS_CURVAS = [
 # Lo que define un punto experimental. Agrupar solo por (condicion, N) hacía
 # que un barrido de canal cayera entero en la misma fila: las configuraciones
 # se promediaban entre sí y la curva salía plana por construcción.
-CLAVE_DEL_PUNTO = ("condicion", "N", "n_partes", "peldano", "canal")
+CLAVE_DEL_PUNTO = ("condicion", "N", "n_partes", "peldano", "canal", "proveedor", "modelo")
 
 
 def descripcion_canal(c: dict) -> str:
@@ -83,6 +84,11 @@ def fila(episodio: str, eventos: list[dict]):
         "n_partes": conf.get("n_partes", ""),
         "peldano": conf.get("peldano", ""),
         "canal": descripcion_canal(conf),
+        # Con que se corrio. Un csv de `--proveedor simulado` es aritmetica
+        # (visibilidad = 1/N, corte = N-1), no medicion: sin esta columna es
+        # indistinguible de uno real a simple vista.
+        "proveedor": conf.get("proveedor", ""),
+        "modelo": conf.get("modelo", ""),
         "escape": False,
         "span_de_origen": "", "corte_minimo": "",
         "visibilidad_max": "", "visibilidad_media": "",
@@ -182,6 +188,14 @@ def chequear(filas: list[dict]) -> list[str]:
     if ben:
         alertas.append(f"{len(ben)} episodios benignos con accion restringida: "
                        "el escenario benigno esta mal disenado.")
+
+    sim = [f for f in filas if f["proveedor"] == "simulado"]
+    if sim:
+        alertas.append(
+            f"{len(sim)} de {len(filas)} episodios se corrieron con `--proveedor simulado`. "
+            "El guion tiene la credencial precalculada y SIEMPRE abre: visibilidad = 1/N y "
+            "corte = N-1 por construccion, no por medicion. Sirve para probar el cableado; "
+            "no es un resultado.")
 
     sin_cond = [f for f in filas if not f["condicion"]]
     if sin_cond:
