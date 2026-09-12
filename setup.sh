@@ -1,15 +1,32 @@
 #!/bin/sh
-# Configuración del repo. Cada persona lo corre UNA vez, al clonar.
+# Configuración del repo + corrida del experimento. Cada persona lo corre
+# UNA vez al clonar, y de nuevo cuando quiera lanzar un barrido.
 #
-#   sh setup.sh
+#   sh setup.sh [--num-agentes N | -a N]
 #
 # Deja listo: el hook que bloquea secretos, las dependencias, el .env, y
-# comprueba que la llave de DeepSeek de verdad responde. Después de esto lo
-# único que falta es pegar la llave en .env.
+# comprueba que la llave de DeepSeek de verdad responde. Si todo eso sale
+# bien, corre el experimento con N agentes (por defecto 4).
 set -e
 
 RC=0
 ROJO=$(printf '\033[31m'); VERDE=$(printf '\033[32m'); GRIS=$(printf '\033[90m'); FIN=$(printf '\033[0m')
+
+NUM_AGENTES=4
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -a|--num-agentes)
+      NUM_AGENTES="$2"; shift 2 ;;
+    --num-agentes=*)
+      NUM_AGENTES="${1#*=}"; shift ;;
+    -h|--help)
+      echo "Uso: sh setup.sh [--num-agentes N | -a N]  (por defecto: 4)"
+      exit 0 ;;
+    *)
+      printf "%sOpción desconocida: %s%s\n" "$ROJO" "$1" "$FIN" >&2
+      exit 1 ;;
+  esac
+done
 
 # ---------------------------------------------------------------
 # 1. El hook que bloquea secretos
@@ -21,11 +38,17 @@ chmod +x .githooks/pre-commit 2>/dev/null || true
 # ---------------------------------------------------------------
 # 2. Python y dependencias
 # ---------------------------------------------------------------
-# En Windows el lanzador es `py`; en Linux/Mac, `python3`. Se prueba en orden
-# y gana el primero que arranque, para no pedirle a nadie que edite esto.
+# Primero el venv propio del proyecto (CS/.venv, si alguien ya lo creó);
+# si no existe, cualquier Python del sistema que alcance el mínimo del
+# proyecto (3.9+) sirve — no exigimos una versión exacta como 3.11.
+ROOT="$(pwd)"
+VERSION_OK() {
+  $1 -c "import sys; raise SystemExit(0 if sys.version_info >= (3,9) else 1)" >/dev/null 2>&1
+}
+
 PY=""
-for CANDIDATO in "py -3.11" "py -3" "python3" "python"; do
-  if $CANDIDATO -c "import sys; raise SystemExit(0 if sys.version_info >= (3,9) else 1)" >/dev/null 2>&1; then
+for CANDIDATO in "$ROOT/CS/.venv/bin/python" "$ROOT/CS/.venv/Scripts/python.exe" "python3" "python" "py -3"; do
+  if VERSION_OK "$CANDIDATO"; then
     PY="$CANDIDATO"
     break
   fi
@@ -97,15 +120,21 @@ else
 fi
 
 # ---------------------------------------------------------------
-# 6. Qué sigue
+# 6. Correr el experimento (si todo lo de arriba salió bien)
 # ---------------------------------------------------------------
 echo ""
 if [ "$RC" -eq 0 ]; then
-  printf "%sListo.%s Para correr:\n" "$VERDE" "$FIN"
+  printf "%sListo.%s Corriendo el experimento con %s agentes...\n" "$VERDE" "$FIN" "$NUM_AGENTES"
+  (cd CS && $PY -m hormiguero.runner uno --N "$NUM_AGENTES" --sin-docker --logs runs) || RC=1
 else
-  echo "Cuando lo de arriba esté resuelto, para correr:"
+  echo "Cuando lo de arriba esté resuelto, corre a mano:"
+  echo ""
+  echo "    cd CS && python -m hormiguero.runner uno --N $NUM_AGENTES --sin-docker --logs runs"
+  echo ""
 fi
+
 cat <<'FIN_AYUDA'
+Otros comandos útiles:
 
     cd CS
     python -m tests.test_todo                                  # todo, sin red ni tokens
@@ -113,7 +142,7 @@ cat <<'FIN_AYUDA'
     python -m hormiguero.grafo.agregar runs --csv runs/resultados.csv
     python -m hormiguero.grafo.mirar runs --salida runs/mapa.html
 
-El barrido usa el proveedor de HORMIGUERO_PROVEEDOR (.env). Para no gastar
+El experimento usa el proveedor de HORMIGUERO_PROVEEDOR (.env). Para no gastar
 tokens mientras se prueba el cableado:  --proveedor simulado
 
 FIN_AYUDA

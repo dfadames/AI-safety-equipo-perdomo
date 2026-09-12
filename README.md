@@ -12,11 +12,24 @@ AI Incident Response Sprint · Hub Bogotá · 12–13 de septiembre de 2026
 sh setup.sh
 ```
 
-Una vez por persona, al clonar. Activa el hook de pre-commit, crea tu `.env` desde la plantilla y verifica que el bloqueo de secretos funciona.
+Una vez por persona, al clonar. Activa el hook de pre-commit, instala las
+dependencias de `CS/` (usa el venv de `CS/.venv` si ya existe, o cualquier
+Python 3.9+ del sistema — no hace falta una versión exacta), crea tu `.env`
+desde la plantilla y verifica que el bloqueo de secretos funciona.
 
 > **Los hooks de git no viajan con `git clone`.** Si no corres `setup.sh`, tu copia del repo no tiene ninguna protección. Es el paso que más se olvida.
 
 Después abre `.env` y pon tu llave.
+
+### Correr el experimento
+
+Si el `.env` ya tiene la llave, `setup.sh` corre el experimento al final
+(`hormiguero.runner uno`, sin Docker). El número de agentes se pasa por
+parámetro, con 4 por defecto:
+
+```sh
+sh setup.sh --num-agentes 3     # o: sh setup.sh -a 3
+```
 
 ---
 
@@ -53,14 +66,16 @@ Falso positivo puntual: agrega `# permitido: no-es-secreto` al final de esa lín
 
 ## Correr el análisis del grafo
 
-El código vivo está en `CS/` (ver `CS/README.md` para el detalle completo):
+El código vivo está en `CS/` (ver `CS/README.md` para el detalle completo).
+`setup.sh --num-agentes N` ya corre un experimento suelto; para un barrido o
+el resto de comandos, a mano:
 
 ```sh
 cd CS
-pip install -r requirements.txt
-py -3.11 -m tests.test_todo                                   # valida todo el sistema sin Docker ni LLM
-py -3.11 -m hormiguero.runner barrido --N 1 2 4 8 --episodios 3 --sin-docker --logs runs
-py -3.11 -m hormiguero.grafo.agregar runs --csv resultados.csv
+python -m tests.test_todo                                     # valida todo el sistema sin Docker ni LLM
+python -m hormiguero.runner uno --N 3 --sin-docker --logs runs # una corrida con 3 agentes
+python -m hormiguero.runner barrido --N 1 2 4 8 --episodios 3 --sin-docker --logs runs
+python -m hormiguero.grafo.agregar runs --csv resultados.csv
 ```
 
 `grafo.agregar` saca la tabla por episodio, la lista de bloqueo para la réplica contrafactual (consumible con `runner repetir`), y **chequeos de cordura** que avisan si los logs vienen mal. Córrelo después de la primera tanda, antes de lanzar el barrido completo.

@@ -16,9 +16,10 @@ Una sola vez, al clonar, **desde la raíz del repo**:
 sh setup.sh
 ```
 
-Activa el hook que bloquea secretos, instala las dependencias, crea el `.env` y
-comprueba que la llave responde. Lo único que hay que hacer a mano es abrir
-`.env` y pegar la llave:
+Activa el hook que bloquea secretos, instala las dependencias (usa el venv de
+`CS/.venv` si ya existe; si no, cualquier Python 3.9+ del sistema — no exige
+una versión exacta), crea el `.env` y comprueba que la llave responde. Lo
+único que hay que hacer a mano es abrir `.env` y pegar la llave:
 
 ```
 DEEPSEEK_API_KEY=sk-...
@@ -26,6 +27,13 @@ DEEPSEEK_API_KEY=sk-...
 
 y volver a correr `sh setup.sh` para que confirme que sirve. La llave se saca en
 <https://platform.deepseek.com> → API keys.
+
+Si la llave ya funciona, `setup.sh` corre de una vez un experimento suelto
+(`hormiguero.runner uno`, sin Docker). El número de agentes es un parámetro:
+
+```sh
+sh setup.sh --num-agentes 3     # o: sh setup.sh -a 3   (por defecto: 4)
+```
 
 ## Correr
 
