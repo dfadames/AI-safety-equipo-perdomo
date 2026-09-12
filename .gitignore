@@ -51,6 +51,10 @@ data/
 !src/ejemplos/*.jsonl
 !CS/ejemplos/*.jsonl
 
+# el compose lo escribe hormiguero/contenedores.py en cada `levantar`, con un
+# servicio por agente segun el N de la corrida: commitearlo seria congelar un N
+docker-compose.yml
+
 # generados por una corrida suelta, fuera de resultados/
 resultados.csv
 resultados_curvas.csv

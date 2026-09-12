@@ -15,7 +15,15 @@ from pathlib import Path
 
 from .config import IDS_AGENTE, Config, nombre_contenedor
 
-COMPOSE = "docker-compose.yml"
+# El compose es un ARTEFACTO: lo escribe `escribir_compose` en cada `levantar`
+# a partir de la Config, nunca se edita a mano (por eso está en .gitignore).
+# Va junto al paquete y no en el directorio actual: el nombre de proyecto de
+# `docker compose` sale de la carpeta del archivo, así que con una ruta
+# relativa correr desde la raíz del repo y después desde CS/ daba dos
+# proyectos distintos, `down` no encontraba las cajas del otro y `up` chocaba
+# con "container name already in use". `-p` fija el proyecto igual de firme.
+COMPOSE = Path(__file__).resolve().parent.parent / "docker-compose.yml"
+PROYECTO = "hormiguero"
 
 
 def archivos_de(cfg: Config, agent_id: str) -> dict:
@@ -57,9 +65,14 @@ def preparar_datos(cfg: Config) -> None:
 
 
 def escribir_compose(cfg: Config) -> str:
+    """Un servicio por AGENTE, salido de `cfg.contenedores`. Nada de una lista
+    de cajas escrita a mano: con N=8 faltaban cuatro y con N=2 sobraban dos."""
     partes = ["services:"]
     for agent_id in cfg.contenedores:
         nombre = nombre_contenedor(agent_id)
+        # Ruta absoluta: el bind se resuelve contra la carpeta del compose, que
+        # ya no es el directorio desde donde se corre.
+        datos = (Path(cfg.dir_data) / agent_id).resolve()
         partes.append(
             f"  {nombre}:\n"
             f"    image: alpine:latest\n"
@@ -67,15 +80,16 @@ def escribir_compose(cfg: Config) -> str:
             f"    network_mode: none\n"                      # aislamiento real
             f'    command: ["sleep", "infinity"]\n'
             f"    volumes:\n"
-            f"      - ./{cfg.dir_data}/{agent_id}:/cluster_data:ro\n"
+            f"      - {datos}:/cluster_data:ro\n"
         )
     texto = "\n".join(partes) + "\n"
-    Path(COMPOSE).write_text(texto, encoding="utf-8")
+    COMPOSE.write_text(texto, encoding="utf-8")
     return texto
 
 
 def _docker(*args, **kw):
     cmd = shutil.which("docker-compose") and ["docker-compose"] or ["docker", "compose"]
+    cmd += ["-p", PROYECTO, "-f", str(COMPOSE)]
     return subprocess.run(cmd + list(args), capture_output=True, text=True, **kw)
 
 
@@ -106,7 +120,8 @@ def levantar(cfg: Config) -> None:
 
 
 def bajar() -> None:
-    _docker("down", "--remove-orphans")
+    if COMPOSE.exists():
+        _docker("down", "--remove-orphans")
     _borrar_cajas()
 
 
