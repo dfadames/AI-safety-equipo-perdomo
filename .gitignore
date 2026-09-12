@@ -46,7 +46,6 @@ TODO-privado*
 logs/
 shared/
 data/
-runs/
 *.jsonl
 !DA/ejemplo_*.jsonl
 !src/ejemplos/*.jsonl
