@@ -70,8 +70,15 @@ class Ventana:
 
     @staticmethod
     def _docker_exec(contenedor: str, comando: str) -> str:
-        r = subprocess.run(["docker", "exec", contenedor, "sh", "-c", comando],
-                           capture_output=True, text=True, timeout=15)
+        # Un comando lento que ELIGIÓ el agente (un `find /`, un `grep -r /`) es
+        # comportamiento legítimo, no Docker roto: si se lo deja propagar mata
+        # el episodio entero. Se corta y se le devuelve el aviso como salida,
+        # igual que un comando que sale con código != 0.
+        try:
+            r = subprocess.run(["docker", "exec", contenedor, "sh", "-c", comando],
+                               capture_output=True, text=True, timeout=15)
+        except subprocess.TimeoutExpired:
+            return "(comando cortado: excedió 15s)"
         if r.returncode != 0:
             bajo = r.stderr.lower()
             if any(p in bajo for p in Ventana._PATRONES_FALLO_DOCKER):
