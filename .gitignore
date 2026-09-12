@@ -49,6 +49,7 @@ data/
 runs/
 *.jsonl
 !DA/ejemplo_*.jsonl
+!src/ejemplos/*.jsonl
 
 # generados por DA/agregar.py
 resultados.csv
