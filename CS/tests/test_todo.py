@@ -330,6 +330,56 @@ check("marca las transferencias", 'label="canal"' in txt, True)
 check("agrupa por contenedor", "cluster_A" in txt, True)
 
 # ---------------------------------------------------------------------------
+seccion("PROVEEDOR DEEPSEEK - cableado, sin red ni llave")
+import os as _os
+from hormiguero.proveedores.deepseek import ProveedorDeepSeek
+from hormiguero.runner import PROVEEDORES
+
+check("deepseek esta en el CLI", "deepseek" in PROVEEDORES, True)
+check("apunta al host correcto", ProveedorDeepSeek.BASE_URL, "https://api.deepseek.com")
+check("modelo por defecto", ProveedorDeepSeek.MODELO_POR_DEFECTO, "deepseek-flash")
+# DeepSeek no expone `seed`: mandarlo seria arriesgar un 400 a mitad del barrido.
+check("no manda seed", ProveedorDeepSeek.SOPORTA_SEED, False)
+
+# La trampa: un HORMIGUERO_MODELO generico en el .env (que el .env.example
+# viejo traia) no puede colarse como modelo de DeepSeek.
+_os.environ["HORMIGUERO_MODELO"] = "gpt-4o-mini"
+check("HORMIGUERO_MODELO no contamina a deepseek",
+      ProveedorDeepSeek._modelo_de_entorno(), "deepseek-flash")
+_os.environ["DEEPSEEK_MODELO"] = "deepseek-v4-pro"
+check("DEEPSEEK_MODELO si manda", ProveedorDeepSeek._modelo_de_entorno(), "deepseek-v4-pro")
+del _os.environ["DEEPSEEK_MODELO"], _os.environ["HORMIGUERO_MODELO"]
+
+# Sin llave el error tiene que nombrar la variable correcta, no OPENAI_API_KEY.
+_guardada = _os.environ.pop("DEEPSEEK_API_KEY", None)
+try:
+    ProveedorDeepSeek()
+    check("sin llave, avisa", "no aviso", "DEEPSEEK_API_KEY en el mensaje")
+except RuntimeError as e:
+    check("sin llave, avisa nombrando DEEPSEEK_API_KEY", "DEEPSEEK_API_KEY" in str(e), True)
+if _guardada:
+    _os.environ["DEEPSEEK_API_KEY"] = _guardada
+
+# ---------------------------------------------------------------------------
+seccion("EL VISOR - la pagina del mapa")
+from hormiguero.grafo.mirar import datos_del_episodio, exportar_html
+
+_eventos = [json.loads(l) for l in open(rutas[4], encoding="utf-8")]
+d = datos_del_episodio("ep_N4", _eventos)
+# Las cifras de la pagina salen de las MISMAS funciones que el csv: si la
+# pagina recalculara por su cuenta podria discrepar del paper sin que se note.
+check("la pagina reporta el mismo span", d["resumen"]["span_de_origen"], 4)
+check("la pagina reporta el mismo corte", d["resumen"]["corte_minimo"], valor)
+check("marca el nodo decisivo", sum(1 for n in d["nodos"] if n["decisivo"]), 1)
+check("marca las aristas del corte",
+      sum(1 for a in d["aristas"] if a["critica"]), len(lista_de_bloqueo(corte)))
+ruta_html = exportar_html([rutas[4], "ejemplos/ejemplo_roto.jsonl"], tmp / "mapa.html")
+html = Path(ruta_html).read_text(encoding="utf-8")
+check("el html es autocontenido (sin red)",
+      ("http://" not in html.replace("http://www.w3.org", "")) and "<script" in html, True)
+check("el log roto sale marcado como BUG en la pagina", '"veredicto": "BUG"' in html, True)
+
+# ---------------------------------------------------------------------------
 shutil.rmtree(tmp, ignore_errors=True)
 print("\n" + "=" * 62)
 if fallos:

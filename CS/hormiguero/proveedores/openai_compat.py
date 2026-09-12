@@ -17,25 +17,61 @@ from ..entorno import cargar_env
 
 
 class ProveedorOpenAICompatible(ProveedorLLM):
+    # Todo lo que cambia entre un backend y otro vive en estos atributos: un
+    # proveedor nuevo es una subclase que redefine unas lineas y nada mas.
+    # Ver `deepseek.py`.
+    NOMBRE = "openai"
+    VARIABLE_LLAVE = "OPENAI_API_KEY"
+    VARIABLES_MODELO = ("OPENAI_MODELO", "HORMIGUERO_MODELO")
+    MODELO_POR_DEFECTO = "gpt-4o-mini"
+    BASE_URL = None
+    SOPORTA_SEED = True             # `seed` no es universal; ver ProveedorDeepSeek
+    TEMPERATURA_POR_DEFECTO = None
+    # Un barrido son cientos de llamadas seguidas: un 429 suelto no puede
+    # matar la corrida entera.
+    MAX_REINTENTOS = 4
+    TIMEOUT = 120.0
+
     def __init__(self, modelo: Optional[str] = None, base_url: Optional[str] = None,
                  api_key: Optional[str] = None, seed: Optional[int] = None,
                  temperature: Optional[float] = None):
         cargar_env()
-        from openai import OpenAI
-        self.modelo = modelo or os.environ.get("HORMIGUERO_MODELO", "gpt-4o-mini")
-        clave = api_key or os.environ.get("OPENAI_API_KEY")
+        self.modelo = modelo or self._modelo_de_entorno()
+        # La llave se revisa ANTES de importar la SDK: falta mucho mas seguido
+        # que el paquete, y asi el error dice lo que de verdad pasa.
+        clave = api_key or os.environ.get(self.VARIABLE_LLAVE)
         if not clave:
             raise RuntimeError(
-                "Falta OPENAI_API_KEY.\n"
-                "  1. cp .env.example .env\n"
-                "  2. abre .env y pon el valor\n"
-                ".env esta en .gitignore, no se sube.")
-        self._cliente = OpenAI(api_key=clave, base_url=base_url)
+                f"Falta {self.VARIABLE_LLAVE}.\n"
+                f"  1. sh setup.sh              (crea el .env)\n"
+                f"  2. abre .env y pon {self.VARIABLE_LLAVE}\n"
+                f".env esta en .gitignore y el hook lo bloquea: no se sube.")
+        try:
+            from openai import OpenAI
+        except ImportError:
+            raise RuntimeError(
+                "Falta el paquete `openai`.\n"
+                "  sh setup.sh        (desde la raiz del repo)\n"
+                "  pip install -r requirements.txt") from None
+        self._cliente = OpenAI(api_key=clave, base_url=base_url or self.BASE_URL,
+                               max_retries=self.MAX_REINTENTOS, timeout=self.TIMEOUT)
         # Semilla fija: la replica contrafactual necesita repetir el mismo
-        # episodio. No todos los backends compatibles la respetan, pero
-        # cuando la respetan esto es lo que hace la corrida reproducible.
-        self.seed = seed
-        self.temperature = temperature
+        # episodio. No todos los backends compatibles la respetan, y algunos
+        # rechazan el parametro, asi que solo se manda si el backend lo acepta.
+        self.seed = seed if self.SOPORTA_SEED else None
+        self.temperature = (temperature if temperature is not None
+                            else self.TEMPERATURA_POR_DEFECTO)
+
+    @classmethod
+    def _modelo_de_entorno(cls) -> str:
+        """La variable especifica del proveedor gana sobre la generica: si no,
+        un `HORMIGUERO_MODELO=gpt-4o-mini` en el .env se le mandaria a DeepSeek
+        y la corrida moriria con un 400 sin explicacion."""
+        for variable in cls.VARIABLES_MODELO:
+            valor = os.environ.get(variable)
+            if valor:
+                return valor
+        return cls.MODELO_POR_DEFECTO
 
     def _tools(self, herramientas: list[ToolSpec]) -> list[dict]:
         return [{"type": "function",

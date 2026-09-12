@@ -177,7 +177,40 @@ def _proveedor_por_nombre(nombre: str, cfg: Config):
         p = ProveedorOpenAICompatible(seed=cfg.semilla)
         return lambda _a: p
 
+    if nombre == "deepseek":
+        from .proveedores.deepseek import ProveedorDeepSeek
+        # Ignora la semilla (DeepSeek no la expone). No es un olvido: ver el
+        # comentario en deepseek.py sobre que se pierde y que no.
+        p = ProveedorDeepSeek(seed=cfg.semilla)
+        return lambda _a: p
+
     raise SystemExit(f"proveedor desconocido: {nombre}")
+
+
+def _proveedor_o_salir(nombre: str, cfg: Config):
+    """Falta la llave es el error mas comun de todos, y por dentro sale como
+    RuntimeError: sin esto el usuario ve treinta lineas de traza y el mensaje
+    util al final. Sale limpio."""
+    try:
+        return _proveedor_por_nombre(nombre, cfg)
+    except RuntimeError as e:
+        raise SystemExit(f"\n{e}\n")
+
+
+PROVEEDORES = ("simulado", "ollama", "openai", "deepseek")
+
+
+def proveedor_por_defecto() -> str:
+    """Lo que diga `HORMIGUERO_PROVEEDOR` en el .env, para que correr con
+    modelo real sea solo poner la llave y nada mas. Un valor mal escrito cae a
+    `simulado` con aviso, en vez de reventar el CLI con un error de argparse
+    que no dice de donde salio ese valor."""
+    from .entorno import cfg as _cfg
+    nombre = (_cfg("HORMIGUERO_PROVEEDOR", "simulado") or "simulado").strip().lower()
+    if nombre not in PROVEEDORES:
+        print(f"  aviso: HORMIGUERO_PROVEEDOR={nombre!r} no es un proveedor; uso 'simulado'")
+        return "simulado"
+    return nombre
 
 
 def main(argv=None):
@@ -185,8 +218,9 @@ def main(argv=None):
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     comun = argparse.ArgumentParser(add_help=False)
-    comun.add_argument("--proveedor", default="simulado",
-                       choices=["simulado", "ollama", "openai"])
+    comun.add_argument("--proveedor", default=proveedor_por_defecto(),
+                       choices=list(PROVEEDORES),
+                       help="por defecto, HORMIGUERO_PROVEEDOR del .env")
     comun.add_argument("--peldano", default=None, choices=["R1", "R2", "R3"],
                        help="por defecto se deriva de la condicion: instruida->R1, emergente->R2")
     comun.add_argument("--logs", default="logs")
@@ -237,10 +271,16 @@ def main(argv=None):
                     help="la clave del episodio dentro de --bloqueo")
     rp.add_argument("--logs", default="logs",
                     help="donde esta el <episodio>.cfg.json del episodio original")
-    rp.add_argument("--proveedor", default="simulado", choices=["simulado", "ollama", "openai"])
+    rp.add_argument("--proveedor", default=proveedor_por_defecto(),
+                    choices=list(PROVEEDORES))
     rp.add_argument("--sin-docker", action="store_true")
 
     a = ap.parse_args(argv)
+
+    # Que quede escrito en la salida con que se corrio: un barrido de horas no
+    # puede terminar sin que se sepa si fue con modelo real o con el guion.
+    if getattr(a, "proveedor", None) and a.cmd in ("uno", "barrido", "repetir"):
+        print(f"  proveedor: {a.proveedor}")
 
     if a.cmd == "levantar":
         from .contenedores import levantar
@@ -290,7 +330,7 @@ def main(argv=None):
 
         runner_cf = ((lambda c, cmd: f"(simulado) salida de '{cmd}' en {c}")
                     if a.sin_docker else None)
-        ruta = correr_episodio(cfg, _proveedor_por_nombre(a.proveedor, cfg),
+        ruta = correr_episodio(cfg, _proveedor_o_salir(a.proveedor, cfg),
                                runner=runner_cf, bloqueados=bloqueados)
         print(f"log contrafactual: {ruta} ({len(bloqueados)} mensajes bloqueados)")
 
@@ -328,7 +368,7 @@ def main(argv=None):
                      peldano=pel, escenario=esc, semilla=a.semilla,
                      episodio=f"ep_{a.condicion}_P{a.n_partes}_N{a.N}{tag}_{a.semilla}",
                      dir_logs=a.logs, dir_shared=f"{a.logs}/_shared", **canal)
-        ruta = correr_episodio(cfg, _proveedor_por_nombre(a.proveedor, cfg), runner=runner)
+        ruta = correr_episodio(cfg, _proveedor_o_salir(a.proveedor, cfg), runner=runner)
         print(f"log: {ruta}")
         return [ruta]
 
@@ -336,7 +376,7 @@ def main(argv=None):
     # (el guion simulado usa las partes de ESE N), asi que se reconstruye por
     # episodio dentro de barrido() en vez de una vez para todo el barrido.
     rutas = barrido(a.N, a.episodios, a.condiciones,
-                    crear_proveedor=lambda cfg: _proveedor_por_nombre(a.proveedor, cfg),
+                    crear_proveedor=lambda cfg: _proveedor_o_salir(a.proveedor, cfg),
                     runner=runner, peldano=a.peldano, dir_logs=a.logs,
                     partes=a.n_partes, canal=canal)
     print(f"{len(rutas)} episodios en {a.logs}/")

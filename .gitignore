@@ -50,9 +50,11 @@ runs/
 *.jsonl
 !DA/ejemplo_*.jsonl
 !src/ejemplos/*.jsonl
+!CS/ejemplos/*.jsonl
 
 # generados por DA/agregar.py
 resultados.csv
+mapa*.html
 lista_de_bloqueo.json
 
 # ---------------------------------------------------------------

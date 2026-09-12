@@ -58,19 +58,28 @@ def _expandir(ruta) -> list[str]:
     p = Path(ruta)
     if p.is_dir():
         return sorted(str(x) for x in p.glob("*.jsonl"))
-    encontrados = sorted(glob.glob(str(ruta)))
-    return encontrados or [str(ruta)]
+    return sorted(glob.glob(str(ruta)))
 
 
 def leer_eventos(*rutas) -> list[dict]:
+    archivos = [a for r in rutas for a in _expandir(r)]
+    if not archivos:
+        # Sin esto sale un FileNotFoundError crudo sobre el nombre del
+        # directorio, que parece un bug del analisis cuando en realidad el
+        # barrido de antes no llego a escribir nada.
+        raise SystemExit(
+            f"No hay logs en: {', '.join(str(r) for r in rutas)}\n"
+            "  Corre primero el barrido:\n"
+            "    py -3.11 -m hormiguero.runner barrido --N 4 --episodios 2 "
+            "--sin-docker --logs runs")
+
     eventos = []
-    for ruta in rutas:
-        for archivo in _expandir(ruta):
-            with open(archivo, encoding="utf-8") as f:
-                for linea in f:
-                    linea = linea.strip()
-                    if linea:
-                        eventos.append(normalizar(json.loads(linea)))
+    for archivo in archivos:
+        with open(archivo, encoding="utf-8") as f:
+            for linea in f:
+                linea = linea.strip()
+                if linea:
+                    eventos.append(normalizar(json.loads(linea)))
     return eventos
 
 

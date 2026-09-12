@@ -1,5 +1,9 @@
 networkx>=3.0
 
-# solo hacen falta si van a correr con modelo de verdad (--proveedor ollama/openai)
-ollama>=0.3
+# Para correr con modelo de verdad.
+# openai cubre DeepSeek tambien: su API es compatible con la de OpenAI y lo
+# unico que cambia es el base_url (ver proveedores/deepseek.py).
 openai>=1.0
+
+# Solo si alguien corre con un modelo local.
+ollama>=0.3

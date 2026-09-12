@@ -1,4 +1,4 @@
-# src — Hormiguero
+# CS — Hormiguero
 
 El sistema completo, conectado. Reemplaza lo que estaba disperso en `CC/`, `EC/` y `DA/`.
 
@@ -8,19 +8,41 @@ arnés (host) → contenedores aislados → canal → logs → mapa de procedenc
 
 ---
 
+## Arrancar
+
+Una sola vez, al clonar, **desde la raíz del repo**:
+
+```sh
+sh setup.sh
+```
+
+Activa el hook que bloquea secretos, instala las dependencias, crea el `.env` y
+comprueba que la llave responde. Lo único que hay que hacer a mano es abrir
+`.env` y pegar la llave:
+
+```
+DEEPSEEK_API_KEY=sk-...
+```
+
+y volver a correr `sh setup.sh` para que confirme que sirve. La llave se saca en
+<https://platform.deepseek.com> → API keys.
+
 ## Correr
 
 ```sh
-pip install -r requirements.txt
-
 # todo el sistema, sin Docker ni LLM ni red
 py -3.11 -m tests.test_todo
 
-# un barrido simulado de punta a punta
+# un barrido de punta a punta
 py -3.11 -m hormiguero.runner barrido --N 1 2 4 8 --episodios 3 --sin-docker --logs runs
-py -3.11 -m hormiguero.grafo.agregar runs --csv resultados.csv
-py -3.11 -m hormiguero.grafo.exportar runs/ep_instruida_P4_N4_000.jsonl --salida mapa.dot
+py -3.11 -m hormiguero.grafo.agregar runs --csv runs/resultados.csv
+py -3.11 -m hormiguero.grafo.mirar runs --salida runs/mapa.html   # la página del mapa
 ```
+
+`mirar` genera **una página autocontenida** (un `.html`, sin red ni librerías)
+con el mapa dibujado por contenedor, las cuatro respuestas arriba y el detalle de
+cada nodo al hacer clic. Es para entender un episodio y para la figura del paper;
+las conclusiones salen del `csv`, no del dibujo.
 
 ### Las tres curvas
 
@@ -51,12 +73,42 @@ el nombre, así que las corridas no se pisan ni se promedian entre sí. **Con
 `--proveedor simulado` este barrido no mide nada** (el guion es fijo y no
 reacciona al canal): necesita modelo de verdad.
 
-Con modelo de verdad, `--proveedor ollama` o `--proveedor openai` y sin `--sin-docker`. Para
-`openai` hace falta la llave:
+### Con qué modelo corre
+
+| Proveedor | Para qué |
+|---|---|
+| `deepseek` | **El de verdad.** `deepseek-flash` vía la API compatible con OpenAI |
+| `simulado` | Guion fijo, sin red ni tokens. Prueba el cableado, **no mide nada** |
+| `openai`, `ollama` | Si alguien quiere comparar con otro modelo |
+
+El default sale de `HORMIGUERO_PROVEEDOR` en el `.env` (que `setup.sh` deja en
+`deepseek`), así que no hay que pasar `--proveedor` en cada comando. El runner
+imprime cuál usó al empezar. Para probar sin gastar tokens:
 
 ```sh
-cp .env.example .env    # dentro de CS/, y poner ahi la llave
+py -3.11 -m hormiguero.runner barrido --N 4 --episodios 2 --sin-docker --proveedor simulado
 ```
+
+Para comprobar la llave sin gastar un barrido entero:
+
+```sh
+py -3.11 -m hormiguero.proveedores.deepseek
+```
+
+**Cuidado con el tamaño del barrido.** `--N 1 2 4 8 --episodios 20` son
+`(1+2+4+8) × 20 = 300` episodios-agente y hasta `max_pasos` llamadas cada uno:
+del orden de 3.000 llamadas. Correr primero con `--episodios 2` para ver que
+todo fluye, y recién después el barrido completo.
+
+Dos cosas que DeepSeek no da y conviene tener presentes:
+
+- **No expone `seed`.** El proveedor no lo manda (mandarlo sería arriesgar un
+  400 a mitad del barrido) y usa `temperature 0`. La corrida no es reproducible
+  bit a bit. La réplica contrafactual sigue siendo válida —bloquea `event_id` y
+  vuelve a correr, no depende de que el modelo repita— pero por eso hacen falta
+  **varios episodios por punto**, no uno.
+- El `.env` se busca en la raíz del repo y en `CS/`. Un `CS/.env` gana, por si
+  alguien quiere probar otra llave sin tocar la del equipo.
 
 ### Docker de verdad
 
@@ -127,7 +179,8 @@ intento con lo que `leer_canal` le devuelve de verdad.
 | `sesion.py` | Un agente: bucle, historial, compactación sincronizada |
 | `runner.py` | Episodios y barridos, ronda robin con semilla |
 | `monitor.py` | Los dos monitores: por agente (línea base) y poblacional (el nuestro) |
-| `grafo/` | El mapa: construcción, las cuatro preguntas, agregación, exportación |
+| `proveedores/` | Los backends. `deepseek.py` es el de verdad; un backend nuevo es una subclase de `openai_compat.py` que redefine seis líneas |
+| `grafo/` | El mapa: construcción, las cuatro preguntas, agregación, exportación, **`mirar.py`** (la página) |
 
 ---
 
@@ -197,7 +250,11 @@ Y los ancestros son una **cota**, no un valor exacto: cota superior es la ventan
 | `lista_de_bloqueo.json` | Mensajes críticos, para repetir el episodio bloqueado (`runner repetir`) |
 | `<episodio>.cfg.json` | Junto a cada log. La `Config` completa del episodio, para reconstruirlo en `repetir` |
 | `monitor.csv` | Vía `python -m hormiguero.monitor`, los dos monitores por episodio |
-| `mapa.dot` | Vía `exportar_dot()`, para la figura principal |
+| `mapa.html` | Vía `grafo.mirar`, la página: el mapa dibujado y las cuatro respuestas. Para leer un episodio |
+| `mapa.dot` | Vía `exportar_dot()`, graphviz, para la figura del paper |
+
+`mapa.html` y los `runs/` están en `.gitignore`: salen de datos de corrida y se
+regeneran con un comando.
 
 ---
 

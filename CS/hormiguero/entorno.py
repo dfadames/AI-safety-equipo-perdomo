@@ -20,29 +20,34 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-_RAIZ = Path(__file__).resolve().parent.parent
+_RAIZ = Path(__file__).resolve().parent.parent       # CS/
+
+# Se busca en CS/.env y, si no, en el .env de la raiz del repo. Asi hay UN solo
+# lugar donde poner la llave (el que crea setup.sh) y no importa desde donde se
+# corra. El de CS/ gana, para poder probar otra llave sin tocar la del equipo.
+_RUTAS_ENV = (_RAIZ / ".env", _RAIZ.parent / ".env")
 _CARGADO = False
 
 
 def cargar_env() -> None:
-    """Lee `.env` y lo mete en os.environ. Lo que ya este en el entorno gana."""
+    """Lee los `.env` y los mete en os.environ. Lo que ya este en el entorno
+    gana: una variable real del shell manda sobre el archivo."""
     global _CARGADO
     if _CARGADO:
         return
     _CARGADO = True
 
-    ruta = _RAIZ / ".env"
-    if not ruta.exists():
-        return
-
-    for linea in ruta.read_text(encoding="utf-8").splitlines():
-        linea = linea.strip()
-        if not linea or linea.startswith("#") or "=" not in linea:
+    for ruta in _RUTAS_ENV:
+        if not ruta.exists():
             continue
-        clave, _, valor = linea.partition("=")
-        clave, valor = clave.strip(), valor.strip().strip("'\"")
-        if valor and clave not in os.environ:   # una variable real del shell manda
-            os.environ[clave] = valor
+        for linea in ruta.read_text(encoding="utf-8").splitlines():
+            linea = linea.strip()
+            if not linea or linea.startswith("#") or "=" not in linea:
+                continue
+            clave, _, valor = linea.partition("=")
+            clave, valor = clave.strip(), valor.strip().strip("'\"")
+            if valor and clave not in os.environ:
+                os.environ[clave] = valor
 
 
 def cfg(nombre, defecto=None, tipo=str):
@@ -65,8 +70,8 @@ def llave(nombre):
     if not valor:
         raise RuntimeError(
             f"\nFalta {nombre}.\n"
-            f"  1. cp .env.example .env   (dentro de CS/)\n"
-            f"  2. abre .env y pon el valor\n"
-            f"  .env esta ignorado por git, asi que no se sube.\n"
+            f"  1. sh setup.sh        (desde la raiz del repo; crea el .env)\n"
+            f"  2. abre .env y pon el valor de {nombre}\n"
+            f"  .env esta ignorado por git y el hook lo bloquea: no se sube.\n"
         )
     return valor
