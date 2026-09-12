@@ -30,6 +30,7 @@ y volver a correr `sh setup.sh` para que confirme que sirve. La llave se saca en
 ## Correr
 
 ```sh
+<<<<<<< HEAD
 # todo el sistema, sin Docker ni LLM ni red
 py -3.11 -m tests.test_todo
 
@@ -43,18 +44,57 @@ py -3.11 -m hormiguero.grafo.mirar runs --salida runs/mapa.html   # la página d
 con el mapa dibujado por contenedor, las cuatro respuestas arriba y el detalle de
 cada nodo al hacer clic. Es para entender un episodio y para la figura del paper;
 las conclusiones salen del `csv`, no del dibujo.
+=======
+pip install -r requirements.txt
+```
+
+### Verificaciones en el sandbox
+
+Todo el sistema, sin Docker, sin LLM y sin red — `--proveedor simulado` (el
+default) y `--sin-docker` reemplazan contenedores y modelo por guiones fijos.
+Sirve para probar que el arnés, el canal y el mapa de procedencia están bien
+antes de gastar tokens o levantar contenedores:
+
+```sh
+python3 -m tests.test_todo
+
+# un barrido simulado de punta a punta
+python3 -m hormiguero.runner barrido --N 1 2 4 8 --episodios 3 --sin-docker --logs runs
+python3 -m hormiguero.grafo.agregar runs --csv resultados.csv
+python3 -m hormiguero.grafo.exportar runs/ep_instruida_P4_N4_000.jsonl --salida mapa.dot
+```
+
+### Experimento con agentes reales
+
+Necesita modelo de verdad (`ollama` u `openai`) y, salvo que se pase
+`--sin-docker`, contenedores de verdad:
+
+```sh
+cp .env.example .env    # dentro de CS/, y poner ahi OLLAMA/OPENAI_API_KEY si aplica
+
+python3 -m hormiguero.runner levantar --n-partes 4
+python3 -m hormiguero.runner auditar --n-partes 4     # confirma que el cluster aisla bien antes de gastar tokens
+python3 -m hormiguero.runner uno --N 4 --proveedor ollama --logs runs
+python3 -m hormiguero.runner bajar
+```
+
+Para `openai` la llave sale de `.env` (`OPENAI_API_KEY`); para `ollama` hace
+falta el daemon corriendo localmente con el modelo ya descargado
+(`ollama pull qwen2.5` o el que se use). Con el cluster de pie, `barrido` y
+`monitor` (abajo) aceptan el mismo `--proveedor`.
+>>>>>>> fba16a35dc90c52bc853d2700ab8d1d5297a33fc
 
 ### Las tres curvas
 
 ```sh
 # 1. brecha de composicion: escape contra tamaño de poblacion
-py -3.11 -m hormiguero.runner barrido --N 1 2 4 8 --episodios 20 --logs runs
+python3 -m hormiguero.runner barrido --N 1 2 4 8 --episodios 20 --logs runs
 
 # 2. dilucion: deteccion del monitor por agente contra N (columna N en el csv)
-py -3.11 -m hormiguero.monitor runs --proveedor ollama --csv monitor.csv
+python3 -m hormiguero.monitor runs --proveedor ollama --csv monitor.csv
 
 # 3. colapso del aviso contra profundidad de descomposicion
-py -3.11 -m hormiguero.runner barrido --N 4 --n-partes 2 3 4 6 --episodios 20 --logs runs
+python3 -m hormiguero.runner barrido --N 4 --n-partes 2 3 4 6 --episodios 20 --logs runs
 ```
 
 ### Barrido de canal (domingo)
@@ -63,14 +103,15 @@ N fijo, se mueven los diales. Cada configuración sale como una fila distinta de
 `resultados_curvas.csv`:
 
 ```sh
-py -3.11 -m hormiguero.runner barrido --N 4 --episodios 20 --logs runs --canal-max-chars 80
-py -3.11 -m hormiguero.runner barrido --N 4 --episodios 20 --logs runs --canal-persistencia efimero --canal-ttl 2
-py -3.11 -m hormiguero.runner barrido --N 4 --episodios 20 --logs runs --canal-direccionamiento punto_a_punto
+python3 -m hormiguero.runner barrido --N 4 --episodios 20 --logs runs --canal-max-chars 80
+python3 -m hormiguero.runner barrido --N 4 --episodios 20 --logs runs --canal-persistencia efimero --canal-ttl 2
+python3 -m hormiguero.runner barrido --N 4 --episodios 20 --logs runs --canal-direccionamiento punto_a_punto
 ```
 
 Los diales quedan grabados en cada evento y el episodio lleva la configuración en
 el nombre, así que las corridas no se pisan ni se promedian entre sí. **Con
 `--proveedor simulado` este barrido no mide nada** (el guion es fijo y no
+<<<<<<< HEAD
 reacciona al canal): necesita modelo de verdad.
 
 ### Con qué modelo corre
@@ -120,6 +161,10 @@ py -3.11 -m hormiguero.runner auditar --n-partes 4    # la tabla de auditoria in
 py -3.11 -m hormiguero.runner uno --N 4 --proveedor ollama
 py -3.11 -m hormiguero.runner bajar
 ```
+=======
+reacciona al canal): necesita modelo de verdad (`--proveedor ollama`/`openai`,
+ver [Experimento con agentes reales](#experimento-con-agentes-reales) arriba).
+>>>>>>> fba16a35dc90c52bc853d2700ab8d1d5297a33fc
 
 Si `docker exec` falla porque el daemon está caído o el contenedor no existe,
 el episodio revienta con una excepción en vez de registrar el error como si
@@ -129,7 +174,7 @@ está escrito todo el proyecto.
 ### El monitor por agente (línea base)
 
 ```sh
-py -3.11 -m hormiguero.monitor runs --proveedor ollama --csv monitor.csv
+python3 -m hormiguero.monitor runs --proveedor ollama --csv monitor.csv
 ```
 
 `--proveedor nulo` (el default) no llama a ningún modelo — sirve para probar el
@@ -143,9 +188,9 @@ Bloquea los mensajes críticos de un episodio y lo repite, para ver si el
 escape seguía siendo posible sin ellos:
 
 ```sh
-py -3.11 -m hormiguero.runner uno --N 4 --logs runs                       # deja runs/ep_..._.cfg.json
-py -3.11 -m hormiguero.grafo.agregar runs --csv resultados.csv            # deja lista_de_bloqueo.json
-py -3.11 -m hormiguero.runner repetir --bloqueo lista_de_bloqueo.json \
+python3 -m hormiguero.runner uno --N 4 --logs runs                       # deja runs/ep_..._.cfg.json
+python3 -m hormiguero.grafo.agregar runs --csv resultados.csv            # deja lista_de_bloqueo.json
+python3 -m hormiguero.runner repetir --bloqueo lista_de_bloqueo.json \
     --episodio ep_instruida_N4_42 --logs runs --proveedor ollama
 ```
 
