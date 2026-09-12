@@ -110,6 +110,8 @@ class ProveedorOpenAICompatible(ProveedorLLM):
                             "id": cid, "type": "function",
                             "function": {"name": tc.nombre,
                                          "arguments": json.dumps(tc.argumentos, ensure_ascii=False)}})
+                if t.reasoning_content is not None:
+                    m["reasoning_content"] = t.reasoning_content
                 out.append(m)
             elif isinstance(t, TurnoToolResult):
                 if pendientes:
@@ -146,4 +148,5 @@ class ProveedorOpenAICompatible(ProveedorLLM):
             llamadas.append(LlamadaTool(tc.function.name, args))
         tokens = getattr(r, "usage", None)
         return RespuestaLLM(texto=msg.content, tool_calls=llamadas,
-                            tokens=(tokens.total_tokens if tokens else 0))
+                            tokens=(tokens.total_tokens if tokens else 0),
+                            reasoning_content=getattr(msg, "reasoning_content", None))

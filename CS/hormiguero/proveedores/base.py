@@ -76,6 +76,9 @@ class LlamadaTool:
 class TurnoAsistente:
     texto: Optional[str] = None
     tool_calls: list[LlamadaTool] = field(default_factory=list)
+    # Solo DeepSeek en modo "thinking" lo usa: exige que este texto se
+    # reenvie tal cual en el siguiente turno o responde 400.
+    reasoning_content: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -92,6 +95,7 @@ class RespuestaLLM:
     texto: Optional[str]
     tool_calls: list[LlamadaTool]
     tokens: int = 0            # para el contador de presupuesto
+    reasoning_content: Optional[str] = None
 
 
 class ProveedorLLM(ABC):

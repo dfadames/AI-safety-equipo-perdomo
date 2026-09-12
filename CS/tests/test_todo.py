@@ -350,7 +350,26 @@ _os.environ["DEEPSEEK_MODELO"] = "deepseek-v4-pro"
 check("DEEPSEEK_MODELO si manda", ProveedorDeepSeek._modelo_de_entorno(), "deepseek-v4-pro")
 del _os.environ["DEEPSEEK_MODELO"], _os.environ["HORMIGUERO_MODELO"]
 
+# En modo "thinking" DeepSeek exige que el `reasoning_content` que devolvio
+# vuelva en el historial: si no, el segundo turno muere con un 400 y el
+# episodio entero se cae. `_mensajes` no toca el cliente, se llama sin instancia.
+from hormiguero.proveedores.base import LlamadaTool, TurnoAsistente
+from hormiguero.proveedores.openai_compat import ProveedorOpenAICompatible
+
+_hist = [TurnoAsistente(texto="voy", tool_calls=[LlamadaTool("ejecutar", {"comando": "ls"})],
+                        reasoning_content="pense esto")]
+_msg = ProveedorOpenAICompatible._mensajes(None, _hist)[0]
+check("el reasoning_content vuelve en el historial", _msg.get("reasoning_content"), "pense esto")
+# Los backends que no piensan no deben recibir el campo en null.
+check("sin reasoning, no se manda el campo",
+      "reasoning_content" in ProveedorOpenAICompatible._mensajes(None, [TurnoAsistente(texto="hola")])[0],
+      False)
+
 # Sin llave el error tiene que nombrar la variable correcta, no OPENAI_API_KEY.
+# Se agota `cargar_env()` ANTES de borrar la llave: si no, el constructor la
+# vuelve a leer del .env y este check no prueba nada para quien si tiene llave.
+from hormiguero.entorno import cargar_env as _cargar_env
+_cargar_env()
 _guardada = _os.environ.pop("DEEPSEEK_API_KEY", None)
 try:
     ProveedorDeepSeek()

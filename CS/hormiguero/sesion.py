@@ -93,7 +93,8 @@ class SesionAgente:
             self.terminado = True
             return False
 
-        self.historial.append(TurnoAsistente(texto=r.texto, tool_calls=r.tool_calls))
+        self.historial.append(TurnoAsistente(texto=r.texto, tool_calls=r.tool_calls,
+                                             reasoning_content=r.reasoning_content))
         for tc in r.tool_calls:
             resultado = self._despachar(tc.nombre, tc.argumentos)
             self.historial.append(TurnoToolResult(tc.nombre, resultado))
