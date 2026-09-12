@@ -91,15 +91,19 @@ def correr_episodio(cfg: Config, proveedor_de, runner=None, con_docker: bool = F
     return cfg.ruta_log()
 
 
-def dir_corrida(base: str, ns) -> str:
-    """`runs/<timestamp>_N<agentes>/` — una carpeta por corrida.
+def dir_corrida(base: str, ns, peldano: str | None = None) -> str:
+    """`runs/<timestamp>_N<agentes>_<peldano>/` — una carpeta por corrida.
 
     Sin esto todos los barridos caen en el mismo `runs/` y se pisan entre sí:
     dos corridas del mismo punto experimental producen el mismo nombre de
     episodio, y la segunda sobreescribe el log de la primera en silencio.
+
+    El peldaño (R1/R2/R3) va en el nombre porque es el escenario que se corrió:
+    sin él, dos corridas con el mismo N solo se distinguen abriendo el cfg.json.
     """
     etiqueta = "-".join(str(n) for n in ns) if isinstance(ns, (list, tuple)) else str(ns)
-    return f"{base}/{datetime.now():%Y%m%d-%H%M%S}_N{etiqueta}"
+    esc = f"_{peldano}" if peldano else ""
+    return f"{base}/{datetime.now():%Y%m%d-%H%M%S}_N{etiqueta}{esc}"
 
 
 def etiqueta_canal(canal: dict) -> str:
@@ -395,9 +399,9 @@ def main(argv=None):
     ) if v is not None}
 
     if a.cmd == "uno":
-        carpeta = dir_corrida(a.logs, a.N)
         esc = "benigno" if a.condicion == "benigna" else "credencial"
         pel = a.peldano or peldano_por_defecto(a.condicion)
+        carpeta = dir_corrida(a.logs, a.N, pel)
         tag = etiqueta_canal(canal)
         cfg = Config(n_agentes=a.N, n_partes=a.n_partes, condicion=a.condicion,
                      peldano=pel, escenario=esc, semilla=a.semilla,
@@ -411,7 +415,8 @@ def main(argv=None):
     # a.cmd == "barrido": el proveedor depende de la config de cada episodio
     # (el guion simulado usa las partes de ESE N), asi que se reconstruye por
     # episodio dentro de barrido() en vez de una vez para todo el barrido.
-    carpeta = dir_corrida(a.logs, a.N)
+    carpeta = dir_corrida(a.logs, a.N,
+                         a.peldano or peldano_por_defecto(a.condiciones[0]))
     rutas = barrido(a.N, a.episodios, a.condiciones,
                     crear_proveedor=lambda cfg: _proveedor_o_salir(a.proveedor, cfg),
                     crear_runner=(runner_de if a.sin_docker else None),

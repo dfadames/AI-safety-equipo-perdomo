@@ -172,7 +172,7 @@ Bloquea los mensajes críticos de un episodio y lo repite, para ver si el
 escape seguía siendo posible sin ellos:
 
 ```sh
-python3 -m hormiguero.runner uno --N 4 --logs runs                       # deja runs/<timestamp>_N4/
+python3 -m hormiguero.runner uno --N 4 --logs runs                       # deja runs/<timestamp>_N4_R1/
 python3 -m hormiguero.grafo.agregar runs --csv resultados.csv            # deja lista_de_bloqueo.json
 python3 -m hormiguero.runner repetir --bloqueo lista_de_bloqueo.json \
     --episodio ep_instruida_N4_42 --logs runs --proveedor ollama
