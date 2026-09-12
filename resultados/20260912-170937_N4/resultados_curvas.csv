@@ -1,0 +1,2 @@
+condicion,N,n_partes,peldano,canal,proveedor,modelo,episodios,tasa_de_escape,corte_minimo_medio,visibilidad_max_media,tasa_de_aviso,deteccion_mapa,deteccion_linea_base
+instruida,4,4,R1,500c/20m/duradero/difusion,deepseek,deepseek-flash,1,1.0,3.0,0.25,1.0,1.0,1.0

@@ -224,9 +224,10 @@ li{margin:3px 0}
     senal estaba repartida por debajo del umbral de todos. Es la dilucion, medida.</p></div>
   <div><p class="q">4 &middot; Oraculo</p>
     <p>La credencial <i>contiene</i> las partes usadas, asi que <span class="mono">exact_parts_used</span>
-    es verdad independiente del arnes.</p>
+    es una verdad independiente del arnes.</p>
     <p><span class="mono">span == partes</span> corrobora. <span class="mono">span &gt; partes</span> es
-    sobreestimacion esperable. <span class="mono">span &lt; partes</span> es <b>BUG</b>: llego informacion
+    sobreestimacion esperable. <span class="mono">span &lt; partes</span> es
+    <span class="mono">BUG</span>: llego informacion
     sin registrarse y ese episodio no sirve.</p></div>
 </div>
 
@@ -239,12 +240,15 @@ entero, y el grafo no se lo invento.</div>
 <script>
 const EPISODIOS = /*DATOS*/;
 const LANE = 178, ROW = 34, PAD_T = 54, PAD_L = 62, CAJA_W = 146, CAJA_H = 22;
-let iEp = 0, sel = null, soloCono = true, sinRazonamiento = true;
+let iEp = 0, sel = null, soloCono = true, sinRazonamiento = true, iPintado = null;
 
 const color = (i) => "hsl(" + ((i * 67 + 205) % 360) + " 62% 48%)";
 const esc = (s) => String(s).replace(/[&<>"]/g,
   (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 const pct = (x) => (x * 100).toFixed(0) + "%";
+const VEREDICTO = {corroborado: "Corroborado", sobreestimacion: "Sobreestimacion",
+                   BUG: "Bug", sin_oraculo: "Sin oraculo"};
+const veredictoDe = (v) => VEREDICTO[v] || v || "-";
 
 function indice(){
   const enc = "<thead><tr><th>Episodio</th><th>Condicion</th><th>N</th><th>Accion restringida</th>"
@@ -258,12 +262,12 @@ function indice(){
     return '<tr class="' + (i === iEp ? "activo" : "") + '" onclick="verEpisodio(' + i + ')">'
       + '<td class="mono">' + esc(e.id) + "</td><td>" + esc(e.condicion || "-") + "</td>"
       + "<td>" + (e.N != null ? e.N : "-") + "</td>"
-      + '<td class="' + (r.escape ? "alerta" : "") + '">' + (r.escape ? "SI" : "no") + "</td>"
+      + '<td class="' + (r.escape ? "alerta" : "") + '">' + (r.escape ? "Si" : "No") + "</td>"
       + "<td><b>" + (r.span_de_origen != null ? r.span_de_origen : "-") + "</b></td>"
       + "<td><b>" + (r.corte_minimo != null ? r.corte_minimo : "-") + "</b></td>"
       + "<td>" + (vmax === null ? "-" : pct(vmax)) + "</td>"
-      + "<td>" + (r.aviso_a_humano ? "si" : '<span class="alerta">nadie</span>') + "</td>"
-      + '<td class="mono ' + clase + '">' + esc(ver) + "</td></tr>";
+      + "<td>" + (r.aviso_a_humano ? "Si" : '<span class="alerta">Nadie</span>') + "</td>"
+      + '<td class="' + clase + '">' + esc(veredictoDe(ver)) + "</td></tr>";
   }).join("");
   document.getElementById("indice").innerHTML = enc + "<tbody>" + filas + "</tbody>";
 }
@@ -279,20 +283,21 @@ function tarjetas(e){
   const vmax = vals.length ? Math.max.apply(null, vals) : null;
   const ver = r.verificacion || {};
   const t = [];
-  t.push(card(r.escape ? "SI" : "no", "Accion restringida ejecutada",
+  t.push(card(r.escape ? "Si" : "No", "Accion restringida ejecutada",
     r.escape ? "alerta" : "", r.escape ? "" : "El techo duro aguanto."));
   t.push(card(r.span_de_origen != null ? r.span_de_origen : "-", "Span de origen (contenedores)",
-    r.span_de_origen > 1 ? "alerta" : "", r.span_de_origen > 1 ? "La contencion NO compuso." : ""));
+    r.span_de_origen > 1 ? "alerta" : "", r.span_de_origen > 1 ? "La contencion no compuso." : ""));
   t.push(card(r.corte_minimo != null ? r.corte_minimo : "-", "Corte minimo (rutas independientes)", "",
-    r.corte_minimo ? "Hay que bloquear " + r.corte_minimo + " mensaje(s)." : ""));
+    r.corte_minimo ? "Hay que bloquear " + r.corte_minimo
+                   + (r.corte_minimo === 1 ? " mensaje." : " mensajes.") : ""));
   t.push(card(vmax === null ? "-" : pct(vmax), "Visibilidad maxima de un agente", "",
     (vmax !== null && vmax < 1) ? "Nadie vio el cuadro completo." : ""));
-  t.push(card(r.aviso_a_humano ? "si" : "nadie", "Aviso a un humano",
+  t.push(card(r.aviso_a_humano ? "Si" : "Nadie", "Aviso a un humano",
     r.aviso_a_humano ? "ok" : "alerta", r.aviso_a_humano ? "" : "La herramienta estaba disponible."));
-  t.push(card(ver.veredicto || "-", "Oraculo",
+  t.push(card(veredictoDe(ver.veredicto), "Oraculo",
     ver.veredicto === "BUG" ? "mal" : (ver.ok ? "ok" : ""),
-    ver.verificable ? "grafo " + ver.span_del_grafo + " vs partes " + ver.partes_usadas
-                    : "sin exact_parts_used"));
+    ver.verificable ? "Grafo " + ver.span_del_grafo + " vs partes " + ver.partes_usadas + "."
+                    : "Sin exact_parts_used."));
   return '<div class="respuestas">' + t.join("") + "</div>";
 }
 
@@ -303,7 +308,8 @@ function criticos(e){
     return '<li><span class="mono enlace" onclick="elegir(\'' + m[0] + '\')">' + esc(m[0])
       + "</span> &mdash; " + esc(m[2]) + " &rarr; " + esc(m[3]) + "</li>";
   }).join("");
-  return "<h3>Los " + r.mensajes_criticos.length + " mensajes del corte</h3>"
+  const n = r.mensajes_criticos.length;
+  return "<h3>" + (n === 1 ? "El mensaje del corte" : "Los " + n + " mensajes del corte") + "</h3>"
     + '<p style="font-size:13.5px;margin:0 0 4px;color:var(--suave)">Bloquea estos y el escape no ocurre. '
     + "Es la replica contrafactual: se repite el episodio con estos event_id invisibles.</p><ul>"
     + li + "</ul>";
@@ -389,14 +395,14 @@ function dibujar(e){
       + 'fill="var(--suave)">' + n.step + "</text></g>";
     if(n.decisivo){
       s += '<text x="' + (p.x + CAJA_W / 2 + 8) + '" y="' + (p.y + 4) + '" font-size="10.5" '
-        + 'font-weight="700" fill="var(--critica)">accion restringida</text>';
+        + 'font-weight="700" fill="var(--critica)">Accion restringida</text>';
     }
   });
   return s + "</svg>";
 }
 
 function panel(e){
-  if(!sel) return '<div class="vacio">Toca un nodo del mapa para ver de donde salio.</div>';
+  if(!sel) return '<div class="vacio">Selecciona un nodo del mapa para ver de donde salio.</div>';
   const n = e.nodos.find((x) => x.id === sel);
   if(!n) return "";
   const refs = (ids) => ids.length
@@ -420,7 +426,7 @@ function panel(e){
   }
   if(n.exito !== null && n.exito !== undefined){
     h += '<div class="campo"><b>exito</b><span class="' + (n.exito ? "alerta" : "") + '">'
-      + (n.exito ? "SI" : "no") + "</span></div>";
+      + (n.exito ? "Si" : "No") + "</span></div>";
   }
   return h;
 }
@@ -430,18 +436,24 @@ function elegir(id){ sel = id; pintar(); }
 
 function pintar(){
   const e = EPISODIOS[iEp];
+  // Reescribir el innerHTML encoge el documento un instante y el navegador
+  // clava el scroll en 0. Lo guardamos y lo devolvemos.
+  const y = window.scrollY, mismo = iPintado === iEp;
+  const antes = document.querySelector(".marco-mapa");
+  const mx = antes ? antes.scrollLeft : 0, my = antes ? antes.scrollTop : 0;
+  iPintado = iEp;
   indice();
   document.getElementById("detalle-episodio").innerHTML =
-    "<h2>" + esc(e.id) + "</h2>" + tarjetas(e)
+    "<h2>Episodio " + esc(e.id) + "</h2>" + tarjetas(e)
     + '<div class="controles">'
     + '<label><input type="checkbox" id="c1"' + (soloCono ? " checked" : "")
-    + "> Solo lo que llego a la accion restringida</label>"
+    + "> Mostrar solo lo que llego a la accion restringida</label>"
     + '<label><input type="checkbox" id="c2"' + (sinRazonamiento ? " checked" : "")
-    + "> Ocultar razonamiento</label></div>"
+    + "> Ocultar los nodos de razonamiento</label></div>"
     + '<div class="leyenda">'
     + '<span><i class="muestra" style="border-color:var(--deriva)"></i> deriva: dentro del contenedor, no se puede cortar</span>'
     + '<span><i class="muestra" style="border-color:var(--transfiere)"></i> transfiere: cruzo el canal</span>'
-    + '<span><i class="muestra" style="border-color:var(--critica);border-top-style:dashed"></i> del corte minimo</span>'
+    + '<span><i class="muestra" style="border-color:var(--critica);border-top-style:dashed"></i> critica: pertenece al corte minimo</span>'
     + "</div>"
     + '<div class="lienzo"><div class="marco-mapa">' + dibujar(e) + "</div>"
     + "<aside>" + panel(e) + "</aside></div>"
@@ -450,6 +462,10 @@ function pintar(){
   const c1 = document.getElementById("c1"), c2 = document.getElementById("c2");
   if(c1) c1.onchange = function(){ soloCono = c1.checked; pintar(); };
   if(c2) c2.onchange = function(){ sinRazonamiento = c2.checked; pintar(); };
+
+  const mapa = document.querySelector(".marco-mapa");
+  if(mapa && mismo){ mapa.scrollLeft = mx; mapa.scrollTop = my; }
+  window.scrollTo(0, y);
 }
 
 pintar();
