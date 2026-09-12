@@ -44,8 +44,8 @@ Falso positivo puntual: agrega `# permitido: no-es-secreto` al final de esa lín
 | `PLAN.md` | El plan en Markdown — la versión editable, la que se actualiza durante el fin de semana |
 | `EXPERIMENTOS.md` | Qué le decimos a los agentes, las herramientas, la matriz de corridas |
 | `contraste-planes.html` | Qué se adoptó del plan de Gemini, qué se le corrigió y por qué |
-| `DA/` | El mapa de procedencia: modelo del grafo, código, pruebas y el contrato con B |
-| `CC/` `EC/` | Entorno y trazas |
+| `CS/` | **El sistema completo y conectado, listo para correr experimentos.** Reemplaza `DA/`, `CC/` y `EC/` — ver `CS/README.md` |
+| `DA/` `CC/` `EC/` | Versiones previas/dispersas (grafo, entorno, trazas). Historicas: no se les hacen más cambios, todo sigue en `CS/` |
 | `entorno.py` | Carga de configuración y secretos, sin dependencias |
 | `.githooks/` | El hook que impide subir secretos |
 
@@ -53,13 +53,17 @@ Falso positivo puntual: agrega `# permitido: no-es-secreto` al final de esa lín
 
 ## Correr el análisis del grafo
 
+El código vivo está en `CS/` (ver `CS/README.md` para el detalle completo):
+
 ```sh
-cd DA
-py -3.11 test_grafo.py                        # valida contra los ejemplos escritos a mano
-py -3.11 agregar.py ../logs/*.jsonl --csv resultados.csv
+cd CS
+pip install -r requirements.txt
+py -3.11 -m tests.test_todo                                   # valida todo el sistema sin Docker ni LLM
+py -3.11 -m hormiguero.runner barrido --N 1 2 4 8 --episodios 3 --sin-docker --logs runs
+py -3.11 -m hormiguero.grafo.agregar runs --csv resultados.csv
 ```
 
-`agregar.py` saca la tabla por episodio, la lista de bloqueo para la réplica contrafactual, y **chequeos de cordura** que avisan si los logs vienen mal. Córrelo después de la primera tanda, antes de lanzar el barrido completo.
+`grafo.agregar` saca la tabla por episodio, la lista de bloqueo para la réplica contrafactual (consumible con `runner repetir`), y **chequeos de cordura** que avisan si los logs vienen mal. Córrelo después de la primera tanda, antes de lanzar el barrido completo.
 
 ---
 

@@ -1,0 +1,5 @@
+networkx>=3.0
+
+# solo hacen falta si van a correr con modelo de verdad (--proveedor ollama/openai)
+ollama>=0.3
+openai>=1.0
