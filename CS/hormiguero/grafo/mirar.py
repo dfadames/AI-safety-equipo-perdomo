@@ -238,6 +238,9 @@ entero, y el grafo no se lo invento.</div>
 
 </div>
 <script>
+// Firefox restaura el scroll cuando termina de maquetar el SVG (segundos
+// despues) y te devuelve al inicio. Lo manejamos nosotros.
+if("scrollRestoration" in history) history.scrollRestoration = "manual";
 const EPISODIOS = /*DATOS*/;
 const LANE = 178, ROW = 34, PAD_T = 54, PAD_L = 62, CAJA_W = 146, CAJA_H = 22;
 let iEp = 0, sel = null, soloCono = true, sinRazonamiento = true, iPintado = null;
@@ -451,9 +454,9 @@ function pintar(){
     + '<label><input type="checkbox" id="c2"' + (sinRazonamiento ? " checked" : "")
     + "> Ocultar los nodos de razonamiento</label></div>"
     + '<div class="leyenda">'
-    + '<span><i class="muestra" style="border-color:var(--deriva)"></i> deriva: dentro del contenedor, no se puede cortar</span>'
-    + '<span><i class="muestra" style="border-color:var(--transfiere)"></i> transfiere: cruzo el canal</span>'
-    + '<span><i class="muestra" style="border-color:var(--critica);border-top-style:dashed"></i> critica: pertenece al corte minimo</span>'
+    + '<span><i class="muestra" style="border-color:var(--deriva)"></i> Deriva: dentro del contenedor, no se puede cortar</span>'
+    + '<span><i class="muestra" style="border-color:var(--transfiere)"></i> Transfiere: cruzo el canal</span>'
+    + '<span><i class="muestra" style="border-color:var(--critica);border-top-style:dashed"></i> Critica: pertenece al corte minimo</span>'
     + "</div>"
     + '<div class="lienzo"><div class="marco-mapa">' + dibujar(e) + "</div>"
     + "<aside>" + panel(e) + "</aside></div>"
