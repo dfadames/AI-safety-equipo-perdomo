@@ -51,19 +51,28 @@ data/
 !src/ejemplos/*.jsonl
 !CS/ejemplos/*.jsonl
 
-# Las trazas de una corrida que SÍ es un resultado. Sin esto solo viajaba el
-# csv y la evidencia se quedaba en la máquina de quien corrió: un csv sin sus
-# .jsonl no permite ver el mapa, ni verificar el oráculo, ni repetir el
-# episodio bloqueando los mensajes críticos. Copiar ahí la carpeta de la
-# corrida entera, no solo el resumen.
+# generados por una corrida suelta, fuera de resultados/
+resultados.csv
+resultados_curvas.csv
+mapa*.html
+lista_de_bloqueo.json
+
+# ---------------------------------------------------------------
+# resultados/ — lo que SÍ se commitea
+# ---------------------------------------------------------------
+# VA AL FINAL A PROPÓSITO: git aplica la ÚLTIMA regla que casa, así que estas
+# excepciones tienen que venir después de `*.jsonl`, `resultados.csv`,
+# `mapa*.html` y `lista_de_bloqueo.json` o no sirven de nada.
+#
+# El runner escribe acá por defecto (`config.dir_resultados()`). Antes escribía
+# en `runs/`, ignorada: al repo llegaba el csv y la evidencia se quedaba en la
+# máquina de quien corría. Un csv sin sus .jsonl no permite ver el mapa, ni
+# verificar el oráculo, ni repetir el episodio bloqueando los mensajes críticos.
 !resultados/**/*.jsonl
 !resultados/**/*.cfg.json
 !resultados/**/*.csv
-
-# generados por DA/agregar.py
-resultados.csv
-mapa*.html
-lista_de_bloqueo.json
+!resultados/**/*.html
+!resultados/**/lista_de_bloqueo.json
 
 # ---------------------------------------------------------------
 # Python

@@ -13,6 +13,24 @@ contra `Parte_{i}` en el setup de contenedores: la caja no abría nunca.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
+
+
+def dir_resultados() -> str:
+    """`<raíz del repo>/resultados` — la carpeta que el equipo sí commitea.
+
+    Es el destino POR DEFECTO de toda corrida. Antes era `logs/` o `runs/`,
+    ambas ignoradas por git: las trazas se quedaban en la máquina de quien
+    corría y al repo solo llegaba el csv. Un csv sin sus `.jsonl` no permite
+    ver el mapa, ni verificar el oráculo, ni repetir el episodio bloqueando
+    los mensajes críticos — ya pasó tres veces.
+
+    Se resuelve desde la ubicación del paquete y no desde el directorio actual,
+    porque el runner se corre desde `CS/` y `resultados/` está un nivel arriba.
+    Si el paquete vive fuera de este repo, cae a `./resultados`.
+    """
+    destino = Path(__file__).resolve().parent.parent.parent / "resultados"
+    return str(destino) if destino.is_dir() else "resultados"
 
 # ---------------------------------------------------------------------------
 # Nombres de las partes. Soporta hasta 8 agentes (el barrido llega a N=8).

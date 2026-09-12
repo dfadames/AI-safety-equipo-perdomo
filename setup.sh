@@ -125,22 +125,56 @@ fi
 echo ""
 if [ "$RC" -eq 0 ]; then
   printf "%sListo.%s Corriendo el experimento con %s agentes...\n" "$VERDE" "$FIN" "$NUM_AGENTES"
-  (cd CS && $PY -m hormiguero.runner uno --N "$NUM_AGENTES" --sin-docker --logs runs) || RC=1
+  echo ""
+
+  # Sin --logs: el runner escribe solo en resultados/<timestamp>_N<n>/, que es
+  # la carpeta que git SÍ acepta. Antes esto iba a runs/, ignorada, y al repo
+  # llegaba el csv sin las trazas que lo respaldan.
+  if (cd CS && $PY -m hormiguero.runner uno --N "$NUM_AGENTES" --sin-docker); then
+
+    # La corrida recién hecha es la carpeta más nueva.
+    CARPETA=$(ls -dt "$ROOT"/resultados/*/ 2>/dev/null | head -1)
+
+    if [ -n "$CARPETA" ]; then
+      echo ""
+      echo "Analizando la corrida..."
+      # Las cuatro preguntas -> csv, y el mapa -> pagina. Encadenado aca para
+      # que nadie tenga que acordarse de correr tres comandos en orden.
+      (cd CS && $PY -m hormiguero.grafo.agregar "$CARPETA" --csv "${CARPETA}resultados.csv") || RC=1
+      (cd CS && $PY -m hormiguero.grafo.mirar "$CARPETA" --salida "${CARPETA}mapa.html") || RC=1
+
+      echo ""
+      printf "%sTodo quedó en:%s %s\n" "$VERDE" "$FIN" "$CARPETA"
+      echo "  las trazas (.jsonl), el csv y mapa.html — ya se pueden commitear."
+      echo ""
+      echo "  Antes de subirlo, revisa la columna 'proveedor' del csv:"
+      echo "    deepseek -> es un resultado"
+      echo "    simulado -> es solo el cableado, el guion siempre abre la bóveda"
+      echo ""
+      echo "  git add resultados/ && git commit -m \"resultados: N=$NUM_AGENTES\""
+    fi
+  else
+    RC=1
+  fi
 else
   echo "Cuando lo de arriba esté resuelto, corre a mano:"
   echo ""
-  echo "    cd CS && python -m hormiguero.runner uno --N $NUM_AGENTES --sin-docker --logs runs"
+  echo "    cd CS && python -m hormiguero.runner uno --N $NUM_AGENTES --sin-docker"
   echo ""
 fi
 
 cat <<'FIN_AYUDA'
-Otros comandos útiles:
 
-    cd CS
-    python -m tests.test_todo                                  # todo, sin red ni tokens
-    python -m hormiguero.runner barrido --N 1 2 4 8 --sin-docker --logs runs
-    python -m hormiguero.grafo.agregar runs --csv runs/resultados.csv
-    python -m hormiguero.grafo.mirar runs --salida runs/mapa.html
+Otros comandos útiles (desde CS/, todos escriben solos en resultados/):
+
+    python -m tests.test_todo                       # todo, sin red ni tokens
+    python -m hormiguero.runner barrido --N 1 2 4 8 --episodios 3 --sin-docker
+    python -m hormiguero.runner uno --N 4 --condicion emergente    # el peldaño R2
+
+Por defecto corre la condición `instruida`, que es el peldaño R1: el prompt le
+dice al agente que comparta su fragmento y reúna las partes. Sirve para que las
+curvas existan, pero NO mide coordinación emergente — para eso, `--condiciones
+emergente` (R2) o `--peldano R3`. En `barrido` la opción es `--condiciones`.
 
 El experimento usa el proveedor de HORMIGUERO_PROVEEDOR (.env). Para no gastar
 tokens mientras se prueba el cableado:  --proveedor simulado

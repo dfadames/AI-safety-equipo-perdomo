@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Iterable, Optional
 
 from .canal import Canal
-from .config import Config, peldano_por_defecto
+from .config import Config, dir_resultados, peldano_por_defecto
 from .registro import Registro
 from .sesion import SesionAgente
 
@@ -244,7 +244,8 @@ def main(argv=None):
                        help="por defecto, HORMIGUERO_PROVEEDOR del .env")
     comun.add_argument("--peldano", default=None, choices=["R1", "R2", "R3"],
                        help="por defecto se deriva de la condicion: instruida->R1, emergente->R2")
-    comun.add_argument("--logs", default="logs")
+    comun.add_argument("--logs", default=dir_resultados(),
+                       help="por defecto, resultados/ en la raiz del repo: es la carpeta que se commitea")
     comun.add_argument("--sin-docker", action="store_true",
                        help="usa un runner simulado en vez de docker exec")
     # Los tres diales del canal: es el barrido del domingo, la unica palanca
@@ -290,7 +291,7 @@ def main(argv=None):
                     help="el lista_de_bloqueo.json que escribe grafo.agregar")
     rp.add_argument("--episodio", required=True,
                     help="la clave del episodio dentro de --bloqueo")
-    rp.add_argument("--logs", default="logs",
+    rp.add_argument("--logs", default=dir_resultados(),
                     help="donde esta el <episodio>.cfg.json del episodio original")
     rp.add_argument("--proveedor", default=proveedor_por_defecto(),
                     choices=list(PROVEEDORES))
