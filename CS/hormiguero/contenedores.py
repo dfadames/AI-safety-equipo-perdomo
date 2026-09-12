@@ -79,10 +79,25 @@ def _docker(*args, **kw):
     return subprocess.run(cmd + list(args), capture_output=True, text=True, **kw)
 
 
+def _borrar_cajas(cfg: Config | None = None) -> None:
+    """Borra las cajas por nombre, no solo por proyecto.
+
+    `docker compose down` solo toca lo etiquetado con el proyecto actual, y el
+    proyecto sale del nombre del directorio: correr desde la raiz del repo y
+    despues desde CS/ deja huerfanos los `caja_*` de la corrida anterior y el
+    `up` choca con "container name already in use". Por nombre no hay ese
+    agujero.
+    """
+    ids = cfg.contenedores if cfg else ("a", "b", "c", "d")
+    nombres = [nombre_contenedor(i) for i in ids]
+    subprocess.run(["docker", "rm", "-f", *nombres], capture_output=True, text=True)
+
+
 def levantar(cfg: Config) -> None:
     preparar_datos(cfg)
     escribir_compose(cfg)
     _docker("down", "--remove-orphans")
+    _borrar_cajas(cfg)
     r = _docker("up", "-d")
     if r.returncode != 0:
         raise RuntimeError(f"docker compose up falló:\n{r.stderr}")
@@ -90,6 +105,7 @@ def levantar(cfg: Config) -> None:
 
 def bajar() -> None:
     _docker("down", "--remove-orphans")
+    _borrar_cajas()
 
 
 # --- La auditoría individual: esta tabla va al paper ------------------------
