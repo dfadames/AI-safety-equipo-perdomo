@@ -326,6 +326,25 @@ grupos = por_episodio(*[rutas[n] for n in (1, 2, 4, 8)], ruta_b)
 filas = [fila(ep, ev)[0] for ep, ev in sorted(grupos.items())]
 check("5 episodios agregados", len(filas), 5)
 
+# Repeticiones con el MISMO nombre de episodio. Con `--semilla` fija, correr
+# tres veces el mismo punto producia `ep_emergente_P4_N4_42` tres veces; como
+# los event_id son deterministas, al fundirse aparecian ciclos y el grafo
+# reventaba. Y si no hubiera reventado, tres repeticiones habrian contado como
+# UNA y la tasa de escape habria salido sobre n=1.
+_dup = tmp / "dup"
+_dup.mkdir(exist_ok=True)
+for i in (1, 2, 3):
+    cfg_d = Config(n_agentes=2, episodio="ep_colision", dir_logs=str(_dup),
+                   dir_shared=str(_dup / "_shared" / f"c{i}"))
+    # mismo nombre de episodio a proposito; el runner real ya no lo permite,
+    # pero los logs que ya existen si lo tienen.
+    ruta = correr(cfg_d)
+    Path(ruta).replace(_dup / f"corrida_{i}.jsonl")
+grupos_dup = por_episodio(str(_dup))
+check("tres corridas con el mismo nombre NO se funden", len(grupos_dup), 3)
+check("y ninguna revienta el grafo",
+      [fila(ep, ev)[0]["N"] for ep, ev in sorted(grupos_dup.items())], [2, 2, 2])
+
 # El aviso a tiempo: `aviso_a_humano` a secas no distingue "un humano pudo
 # haber parado esto" de "a un humano se le informo cuando ya habia pasado".
 # En la corrida real de N=4 el aviso llego 24 pasos DESPUES de la primera
@@ -374,6 +393,32 @@ check("sin otras alertas espurias",
       [a for a in alertas if "--proveedor simulado" not in a], [])
 cur = curvas(filas)
 check("una fila por punto (condicion, N)", len(cur), 5)
+
+# ---------------------------------------------------------------------------
+seccion("EL PLAN - reanudable, no repite lo ya corrido")
+# Si `faltantes` se equivoca, o se pierden corridas que hacian falta, o se
+# gastan cientos de miles de tokens repitiendo lo que ya estaba.
+from collections import Counter as _Counter
+from hormiguero.plan import OBJETIVO, faltantes, hechos
+
+check("sin nada hecho, pide el diseno completo",
+      sum(k for _c, _p, _n, k, _q in faltantes(OBJETIVO, _Counter())),
+      sum(eps for _c, _p, _n, eps, _q in OBJETIVO))
+
+_ya = _Counter({(c, p, n): eps for c, p, n, eps, _q in OBJETIVO})
+check("con todo hecho, no pide nada", faltantes(OBJETIVO, _ya), [])
+
+_parcial = _Counter({("emergente", "R2", 4): 3, ("instruida", "R1", 4): 1})
+_falta = faltantes(OBJETIVO, _parcial)
+check("descuenta lo ya corrido, punto por punto",
+      {(c, p, n): k for c, p, n, k, _q in _falta}.get(("instruida", "R1", 4)), 2)
+check("y saca del plan los puntos completos",
+      any(c == "emergente" and p == "R2" for c, p, _n, _k, _q in _falta), False)
+
+# `hechos` lee los cfg.json, no los nombres de carpeta: el nombre cambio de
+# formato a mitad del proyecto, el cfg no.
+check("cuenta los episodios leyendo los cfg.json",
+      hechos(str(tmp))[("instruida", "R1", 4)] >= 1, True)
 
 # ---------------------------------------------------------------------------
 seccion("EXPORTACION para la figura")

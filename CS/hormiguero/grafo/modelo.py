@@ -65,6 +65,15 @@ def _expandir(ruta) -> list[str]:
     return sorted(glob.glob(str(ruta)))
 
 
+def eventos_por_archivo(*rutas):
+    """[(archivo, eventos)], sin aplanar. Hace falta para distinguir dos
+    corridas DISTINTAS que quedaron con el mismo `episode` — ver
+    `agregar.por_episodio`."""
+    for archivo in [a for r in rutas for a in _expandir(r)]:
+        with open(archivo, encoding="utf-8") as f:
+            yield archivo, [normalizar(json.loads(l)) for l in f if l.strip()]
+
+
 def leer_eventos(*rutas) -> list[dict]:
     archivos = [a for r in rutas for a in _expandir(r)]
     if not archivos:

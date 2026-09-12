@@ -91,7 +91,13 @@ def correr_episodio(cfg: Config, proveedor_de, runner=None, con_docker: bool = F
     return cfg.ruta_log()
 
 
-def dir_corrida(base: str, ns, peldano: str | None = None) -> str:
+def sello() -> str:
+    """Identifica UNA corrida. Va en la carpeta y también en el nombre del
+    episodio: son dos usos del mismo identificador y tienen que coincidir."""
+    return f"{datetime.now():%Y%m%d-%H%M%S}"
+
+
+def dir_corrida(base: str, ns, peldano: str | None = None, marca: str | None = None) -> str:
     """`runs/<timestamp>_N<agentes>_<peldano>/` — una carpeta por corrida.
 
     Sin esto todos los barridos caen en el mismo `runs/` y se pisan entre sí:
@@ -103,7 +109,7 @@ def dir_corrida(base: str, ns, peldano: str | None = None) -> str:
     """
     etiqueta = "-".join(str(n) for n in ns) if isinstance(ns, (list, tuple)) else str(ns)
     esc = f"_{peldano}" if peldano else ""
-    return f"{base}/{datetime.now():%Y%m%d-%H%M%S}_N{etiqueta}{esc}"
+    return f"{base}/{marca or sello()}_N{etiqueta}{esc}"
 
 
 def etiqueta_canal(canal: dict) -> str:
@@ -124,6 +130,7 @@ def etiqueta_canal(canal: dict) -> str:
 
 
 def barrido(ns, episodios, condiciones, crear_proveedor, runner=None, crear_runner=None,
+            marca="",
             peldano=None, escenario="credencial", semilla_base=1000,
             dir_logs="logs", dir_shared=None, verbose=True,
             partes=(4,), canal=None) -> list[str]:
@@ -142,6 +149,9 @@ def barrido(ns, episodios, condiciones, crear_proveedor, runner=None, crear_runn
     # El canal compartido va bajo --logs, no en el cwd: si no, cada barrido
     # ensucia el repo con una carpeta `shared/` suelta.
     dir_shared = dir_shared or f"{dir_logs}/_shared"
+    # Dos barridos del mismo punto producirian episodios con el mismo nombre
+    # y `agregar` los fundiria en uno solo. Ver el comentario en `main`.
+    sufijo = f"_{marca}" if marca else ""
     canal = dict(canal or {})
     tag = etiqueta_canal(canal)
     rutas = []
@@ -154,7 +164,7 @@ def barrido(ns, episodios, condiciones, crear_proveedor, runner=None, crear_runn
                     cfg = Config(
                         n_agentes=n, n_partes=np_, condicion=cond, peldano=pel,
                         escenario=esc, semilla=semilla_base + i,
-                        episodio=f"ep_{cond}_P{np_}_N{n}{tag}_{i:03d}",
+                        episodio=f"ep_{cond}_P{np_}_N{n}{tag}_{i:03d}{sufijo}",
                         dir_logs=dir_logs, dir_shared=dir_shared, **canal,
                     )
                     # La caja emulada depende de la config del episodio (el
@@ -401,11 +411,18 @@ def main(argv=None):
     if a.cmd == "uno":
         esc = "benigno" if a.condicion == "benigna" else "credencial"
         pel = a.peldano or peldano_por_defecto(a.condicion)
-        carpeta = dir_corrida(a.logs, a.N, pel)
+        marca = sello()
+        carpeta = dir_corrida(a.logs, a.N, pel, marca)
         tag = etiqueta_canal(canal)
+        # La marca de la corrida va en el NOMBRE DEL EPISODIO, no solo en la
+        # carpeta. Con `--semilla` fija (el default es 42), repetir el mismo
+        # punto producia tres episodios llamados igual: `grafo.agregar` los
+        # agrupa por `episode`, asi que los tres se fundian en UNO. Y como los
+        # event_id son deterministas, al fundirse aparecian ciclos en el grafo.
+        # Repetir es justo lo que hace falta para tener n>1: no puede romperse.
         cfg = Config(n_agentes=a.N, n_partes=a.n_partes, condicion=a.condicion,
                      peldano=pel, escenario=esc, semilla=a.semilla,
-                     episodio=f"ep_{a.condicion}_P{a.n_partes}_N{a.N}{tag}_{a.semilla}",
+                     episodio=f"ep_{a.condicion}_P{a.n_partes}_N{a.N}{tag}_{a.semilla}_{marca[-6:]}",
                      dir_logs=carpeta, dir_shared=f"{carpeta}/_shared", **canal)
         runner = runner_de(cfg) if a.sin_docker else None
         ruta = correr_episodio(cfg, _proveedor_o_salir(a.proveedor, cfg), runner=runner)
@@ -415,12 +432,13 @@ def main(argv=None):
     # a.cmd == "barrido": el proveedor depende de la config de cada episodio
     # (el guion simulado usa las partes de ESE N), asi que se reconstruye por
     # episodio dentro de barrido() en vez de una vez para todo el barrido.
+    marca = sello()
     carpeta = dir_corrida(a.logs, a.N,
-                         a.peldano or peldano_por_defecto(a.condiciones[0]))
+                          a.peldano or peldano_por_defecto(a.condiciones[0]), marca)
     rutas = barrido(a.N, a.episodios, a.condiciones,
                     crear_proveedor=lambda cfg: _proveedor_o_salir(a.proveedor, cfg),
                     crear_runner=(runner_de if a.sin_docker else None),
-                    peldano=a.peldano, dir_logs=carpeta,
+                    peldano=a.peldano, dir_logs=carpeta, marca=marca[-6:],
                     partes=a.n_partes, canal=canal)
     print(f"{len(rutas)} episodios en {carpeta}/")
     return rutas

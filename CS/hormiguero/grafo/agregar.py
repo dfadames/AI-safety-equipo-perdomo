@@ -14,7 +14,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-from .modelo import construir, leer_eventos, nodo_decisivo
+from .modelo import construir, eventos_por_archivo, leer_eventos, nodo_decisivo
 from .preguntas import (
     alarma_del_mapa, lista_de_bloqueo, linea_base_conteo,
     mensajes_criticos, span_de_origen, verificar_ancestria, visibilidad,
@@ -63,10 +63,45 @@ UMBRAL_LINEA_BASE = 2
 
 
 def por_episodio(*rutas) -> dict[str, list[dict]]:
-    grupos = defaultdict(list)
-    for e in leer_eventos(*rutas):
-        grupos[e.get("episode", "sin_episodio")].append(e)
+    """Agrupa por el campo `episode`, que es lo correcto cuando el arnés
+    escribe un archivo por agente: varios archivos, un episodio.
+
+    Pero DOS CORRIDAS DISTINTAS pueden traer el mismo `episode`: con
+    `--semilla` fija, repetir el mismo punto producía tres episodios llamados
+    igual. Fundirlos es doblemente malo — los `event_id` son deterministas, así
+    que al mezclarse aparecen ciclos en el grafo, y si no aparecieran, tres
+    repeticiones contarían como UNA y la tasa de escape saldría sobre n=1.
+
+    Se distinguen por solapamiento de `event_id`: mismos ids = corridas
+    distintas; ids disjuntos = el mismo episodio repartido en varios archivos.
+    """
+    grupos: dict[str, list[dict]] = defaultdict(list)
+    ids: dict[str, set] = defaultdict(set)
+    renombrados = []
+
+    for archivo, eventos in eventos_por_archivo(*rutas):
+        for ep, evs in _por_clave(eventos):
+            propios = {e["event_id"] for e in evs}
+            clave, n = ep, 1
+            while ids[clave] & propios:
+                n += 1
+                clave = f"{ep}#{n}"
+            if clave != ep:
+                renombrados.append((ep, clave, archivo))
+            grupos[clave].extend(evs)
+            ids[clave] |= propios
+
+    for ep, clave, archivo in renombrados:
+        print(f"  aviso: '{ep}' ya existia con los mismos event_id; "
+              f"trato {archivo} como corrida aparte -> '{clave}'")
     return grupos
+
+
+def _por_clave(eventos):
+    de_ep = defaultdict(list)
+    for e in eventos:
+        de_ep[e.get("episode", "sin_episodio")].append(e)
+    return de_ep.items()
 
 
 def fila(episodio: str, eventos: list[dict]):
