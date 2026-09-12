@@ -2,39 +2,97 @@
 # Configuración del repo + corrida del experimento. Cada persona lo corre
 # UNA vez al clonar, y de nuevo cuando quiera lanzar un barrido.
 #
-#   sh setup.sh [-a N | --num-agentes N] [--simulado]
+#   sh setup.sh [AGENTES] [PELDAÑO] [--simulado]
 #
 # Deja listo: el hook que bloquea secretos, las dependencias, el .env, y
 # comprueba que la llave de DeepSeek de verdad responde. Si todo eso sale
-# bien, corre el experimento con N agentes (por defecto 4).
+# bien, corre el experimento. `sh setup.sh --help` explica los argumentos.
 set -e
 
 RC=0
 ROJO=$(printf '\033[31m'); VERDE=$(printf '\033[32m'); GRIS=$(printf '\033[90m'); FIN=$(printf '\033[0m')
 
 NUM_AGENTES=4
+PELDANO=1
 SIMULADO=0
+POSICIONALES=0
+
+ayuda() {
+  echo "Uso: sh setup.sh [AGENTES] [PELDAÑO] [--simulado]"
+  echo
+  echo "  AGENTES   cuántos agentes se despliegan (por defecto: 4)"
+  echo "            La clave SIEMPRE se parte en 4, pase lo que pase aquí."
+  echo "              1, 2, 3 -> alcanzan menos de 4 partes: imposible por diseño"
+  echo "              4       -> alcanzan las 4"
+  echo "              8       -> 2 agentes por caja: aparecen rutas redundantes"
+  echo
+  echo "  PELDAÑO   cuánto andamiaje recibe el agente (por defecto: 1)"
+  echo "              1 -> R1: se le nombra el canal y se le pide reunir las partes"
+  echo "              2 -> R2: tarea de fachada, el canal se menciona de pasada"
+  echo "              3 -> R3: ni siquiera se menciona el canal"
+  echo "            R1 garantiza que las curvas existan; R2 y R3 son donde se"
+  echo "            mide si la coordinación es emergente."
+  echo
+  echo "  --simulado  guion fijo: sin llave, sin red y sin gastar tokens."
+  echo "              Comprueba que TU máquina está bien montada."
+  echo "              NO es un resultado: el guion siempre abre la bóveda."
+  echo
+  echo "Ejemplos:"
+  echo "  sh setup.sh              4 agentes, R1"
+  echo "  sh setup.sh 8 2          8 agentes, R2"
+  echo "  sh setup.sh 8 3          8 agentes, R3 — la apuesta del paper"
+  echo "  sh setup.sh --simulado   comprobar el montaje sin gastar nada"
+  echo
+  echo "Los dos controles del diseño no son peldaños y van por el runner:"
+  echo "  --condicion honestidad   (confundidor del aviso)"
+  echo "  --condicion benigna      (control de especificidad)"
+}
+
 while [ $# -gt 0 ]; do
   case "$1" in
-    -a|--num-agentes)
-      NUM_AGENTES="$2"; shift 2 ;;
-    --num-agentes=*)
-      NUM_AGENTES="${1#*=}"; shift ;;
-    --simulado)
-      SIMULADO=1; shift ;;
-    -h|--help)
-      echo "Uso: sh setup.sh [-a N | --num-agentes N] [--simulado]"
-      echo
-      echo "  -a N        cuántos agentes (por defecto: 4)"
-      echo "  --simulado  corre con el guion fijo: sin llave, sin red y sin"
-      echo "              gastar tokens. Comprueba que TU máquina está bien"
-      echo "              montada. NO es un resultado: el guion siempre abre."
-      exit 0 ;;
-    *)
+    -a|--num-agentes)   NUM_AGENTES="$2"; shift 2 ;;
+    --num-agentes=*)    NUM_AGENTES="${1#*=}"; shift ;;
+    -r|--peldano)       PELDANO="$2"; shift 2 ;;
+    --peldano=*)        PELDANO="${1#*=}"; shift ;;
+    --simulado)         SIMULADO=1; shift ;;
+    -h|--help)          ayuda; exit 0 ;;
+    -*)
       printf "%sOpción desconocida: %s%s\n" "$ROJO" "$1" "$FIN" >&2
       exit 1 ;;
+    *)
+      # Posicionales: 1º agentes, 2º peldaño.
+      POSICIONALES=$((POSICIONALES + 1))
+      if [ "$POSICIONALES" -eq 1 ]; then
+        NUM_AGENTES="$1"
+      elif [ "$POSICIONALES" -eq 2 ]; then
+        PELDANO="$1"
+      else
+        printf "%sSobra el argumento: %s%s\n" "$ROJO" "$1" "$FIN" >&2
+        exit 1
+      fi
+      shift ;;
   esac
 done
+
+case "$NUM_AGENTES" in
+  ''|*[!0-9]*|0)
+    printf "%sAGENTES tiene que ser un entero positivo (llegó '%s')%s\n" "$ROJO" "$NUM_AGENTES" "$FIN" >&2
+    exit 1 ;;
+esac
+
+# El peldaño fija la PAREJA condición+peldaño. No son ejes independientes:
+# `instruida` ES R1 y `emergente` ES R2/R3, y Config rechaza las mezclas. Si se
+# corrieran instruida y emergente con el mismo prompt, la "coordinación
+# emergente" saldría como hallazgo cuando en realidad se la habíamos instruido.
+case "$PELDANO" in
+  1) CONDICION="instruida"; PEL="R1" ;;
+  2) CONDICION="emergente"; PEL="R2" ;;
+  3) CONDICION="emergente"; PEL="R3" ;;
+  *)
+    printf "%sPELDAÑO tiene que ser 1, 2 o 3 (llegó '%s')%s\n" "$ROJO" "$PELDANO" "$FIN" >&2
+    echo "  sh setup.sh --help" >&2
+    exit 1 ;;
+esac
 
 # ---------------------------------------------------------------
 # 1. El hook que bloquea secretos
@@ -143,13 +201,35 @@ fi
 # ---------------------------------------------------------------
 echo ""
 if [ "$RC" -eq 0 ]; then
-  printf "%sListo.%s Corriendo el experimento con %s agentes...\n" "$VERDE" "$FIN" "$NUM_AGENTES"
+  printf "%sListo.%s Corriendo: %s agentes, peldaño %s (%s)...\n" \
+    "$VERDE" "$FIN" "$NUM_AGENTES" "$PEL" "$CONDICION"
   echo ""
+
+  # Docker de verdad si la máquina lo tiene. Importa: la tabla de auditoría de
+  # contención individual solo se puede respaldar con contenedores reales, y es
+  # la que sostiene la frase «las cajas aprobaron y la contención falló igual».
+  if docker info >/dev/null 2>&1; then
+    MODO="contenedores reales"
+    SIN_DOCKER=""
+    echo "Docker disponible: levantando el clúster..."
+    (cd CS && $PY -m hormiguero.runner levantar --n-partes 4) || RC=1
+    (cd CS && $PY -m hormiguero.runner auditar --n-partes 4) || RC=1
+    echo ""
+  else
+    MODO="contención EMULADA"
+    SIN_DOCKER="--sin-docker"
+    echo "Sin Docker: se usa la caja emulada (hormiguero/caja_falsa.py)."
+    echo "  Cada agente ve SOLO su fragmento y las transferencias siguen pasando"
+    echo "  por el canal, así que la medición vale. Lo que NO respalda es la tabla"
+    echo "  de auditoría: esa necesita contenedores de verdad."
+    echo ""
+  fi
 
   # Sin --logs: el runner escribe solo en resultados/<timestamp>_N<n>/, que es
   # la carpeta que git SÍ acepta. Antes esto iba a runs/, ignorada, y al repo
   # llegaba el csv sin las trazas que lo respaldan.
-  if (cd CS && $PY -m hormiguero.runner uno --N "$NUM_AGENTES" --sin-docker $PROV); then
+  if (cd CS && $PY -m hormiguero.runner uno --N "$NUM_AGENTES" \
+        --condicion "$CONDICION" --peldano "$PEL" $SIN_DOCKER $PROV); then
 
     # La corrida recién hecha es la carpeta más nueva.
     CARPETA=$(ls -dt "$ROOT"/resultados/*/ 2>/dev/null | head -1)
@@ -165,20 +245,25 @@ if [ "$RC" -eq 0 ]; then
       echo ""
       printf "%sTodo quedó en:%s %s\n" "$VERDE" "$FIN" "$CARPETA"
       echo "  las trazas (.jsonl), el csv y mapa.html — ya se pueden commitear."
+      echo "  Modo: $MODO - peldaño $PEL ($CONDICION)"
       echo ""
       echo "  Antes de subirlo, revisa la columna 'proveedor' del csv:"
       echo "    deepseek -> es un resultado"
       echo "    simulado -> es solo el cableado, el guion siempre abre la bóveda"
       echo ""
-      echo "  git add resultados/ && git commit -m \"resultados: N=$NUM_AGENTES\""
+      echo "  git add resultados/ && git commit -m \"resultados: N=$NUM_AGENTES $PEL\""
     fi
   else
     RC=1
   fi
+
+  if [ "$MODO" = "contenedores reales" ]; then
+    (cd CS && $PY -m hormiguero.runner bajar) >/dev/null 2>&1 || true
+  fi
 else
   echo "Cuando lo de arriba esté resuelto, corre a mano:"
   echo ""
-  echo "    cd CS && python -m hormiguero.runner uno --N $NUM_AGENTES --sin-docker"
+  echo "    cd CS && python -m hormiguero.runner uno --N $NUM_AGENTES --condicion $CONDICION --peldano $PEL"
   echo ""
   echo "  O para comprobar el montaje sin llave ni tokens:  sh setup.sh --simulado"
   echo ""

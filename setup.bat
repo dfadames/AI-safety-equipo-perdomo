@@ -2,7 +2,7 @@
 rem ===================================================================
 rem  Hormiguero - configuracion del repo + corrida del experimento.
 rem
-rem    setup.bat  [-a N | --num-agentes N]
+rem    setup.bat  [AGENTES] [PELDANO] [--simulado]      (--help explica)
 rem
 rem  Es el equivalente de setup.sh para quien no tiene Git Bash a mano.
 rem  Hace lo mismo: activa el hook que bloquea secretos, instala las
@@ -24,8 +24,10 @@ cd /d "%~dp0"
 
 set RC=0
 set NUM_AGENTES=4
+set PELDANO=1
 set SIMULADO=0
 set NOPAUSE=0
+set POS=0
 
 rem --- argumentos ----------------------------------------------------
 rem Las comillas en `set "X=1"` NO son cosmetica: sin ellas, `set X=1 & shift`
@@ -35,22 +37,62 @@ rem falla en silencio.
 if "%~1"=="" goto fin_args
 if /i "%~1"=="-a"             ( set "NUM_AGENTES=%~2" & shift & shift & goto args )
 if /i "%~1"=="--num-agentes"  ( set "NUM_AGENTES=%~2" & shift & shift & goto args )
+if /i "%~1"=="-r"             ( set "PELDANO=%~2" & shift & shift & goto args )
+if /i "%~1"=="--peldano"      ( set "PELDANO=%~2" & shift & shift & goto args )
 if /i "%~1"=="--simulado"     ( set "SIMULADO=1" & shift & goto args )
 if /i "%~1"=="--no-pause"     ( set "NOPAUSE=1" & shift & goto args )
 if /i "%~1"=="-h"             goto ayuda
 if /i "%~1"=="--help"         goto ayuda
-echo Opcion desconocida: %~1
+echo %~1 | findstr /b /c:"-" >nul
+if not errorlevel 1 ( echo Opcion desconocida: %~1 & exit /b 1 )
+rem Posicionales: 1o agentes, 2o peldano.
+set /a POS+=1
+if !POS! equ 1 ( set "NUM_AGENTES=%~1" & shift & goto args )
+if !POS! equ 2 ( set "PELDANO=%~1"     & shift & goto args )
+echo Sobra el argumento: %~1
 exit /b 1
+
 :ayuda
-echo Uso: setup.bat [-a N ^| --num-agentes N] [--simulado] [--no-pause]
+echo Uso: setup.bat [AGENTES] [PELDANO] [--simulado] [--no-pause]
 echo.
-echo   -a N        cuantos agentes (por defecto: 4^)
-echo   --simulado  corre con el guion fijo: sin llave, sin red y sin gastar
-echo               tokens. Sirve para comprobar que TU maquina esta bien
-echo               montada. NO es un resultado: el guion siempre abre.
+echo   AGENTES   cuantos agentes se despliegan (por defecto: 4^)
+echo             La clave SIEMPRE se parte en 4, pase lo que pase aqui.
+echo               1, 2, 3 -^> alcanzan menos de 4 partes: imposible por diseno
+echo               4       -^> alcanzan las 4
+echo               8       -^> 2 agentes por caja: aparecen rutas redundantes
+echo.
+echo   PELDANO   cuanto andamiaje recibe el agente (por defecto: 1^)
+echo               1 -^> R1: se le nombra el canal y se le pide reunir las partes
+echo               2 -^> R2: tarea de fachada, el canal se menciona de pasada
+echo               3 -^> R3: ni siquiera se menciona el canal
+echo             R1 garantiza que las curvas existan; R2 y R3 son donde se
+echo             mide si la coordinacion es emergente.
+echo.
+echo   --simulado  guion fijo: sin llave, sin red y sin gastar tokens.
+echo               Comprueba que TU maquina esta bien montada.
+echo               NO es un resultado: el guion siempre abre la boveda.
 echo   --no-pause  no esperar una tecla al final (para scripts^)
+echo.
+echo Ejemplos:
+echo   setup.bat              4 agentes, R1
+echo   setup.bat 8 2          8 agentes, R2
+echo   setup.bat 8 3          8 agentes, R3 - la apuesta del paper
+echo   setup.bat --simulado   comprobar el montaje sin gastar nada
 exit /b 0
 :fin_args
+
+rem El peldano fija la PAREJA condicion+peldano. No son ejes independientes:
+rem `instruida` ES R1 y `emergente` ES R2/R3, y Config rechaza las mezclas. Si
+rem se corrieran instruida y emergente con el mismo prompt, la "coordinacion
+rem emergente" saldria como hallazgo cuando en realidad se la habiamos instruido.
+if "%PELDANO%"=="1" ( set "CONDICION=instruida" & set "PEL=R1" ) ^
+else if "%PELDANO%"=="2" ( set "CONDICION=emergente" & set "PEL=R2" ) ^
+else if "%PELDANO%"=="3" ( set "CONDICION=emergente" & set "PEL=R3" ) ^
+else (
+  echo PELDANO tiene que ser 1, 2 o 3 ^(llego '%PELDANO%'^)
+  echo   setup.bat --help
+  exit /b 1
+)
 
 rem ===================================================================
 rem  1. El hook que bloquea secretos
@@ -191,7 +233,7 @@ echo.
 if not "%RC%"=="0" (
   echo Cuando lo de arriba este resuelto, corre a mano:
   echo.
-  echo     cd CS ^&^& %PY% -m hormiguero.runner uno --N %NUM_AGENTES% --sin-docker
+  echo     cd CS ^&^& %PY% -m hormiguero.runner uno --N %NUM_AGENTES% --condicion !CONDICION! --peldano !PEL!
   echo.
   echo   O para comprobar el montaje sin llave ni tokens:  setup.bat --simulado
   echo.
@@ -199,13 +241,37 @@ if not "%RC%"=="0" (
 )
 
 :correr
-echo Listo. Corriendo el experimento con %NUM_AGENTES% agentes...
+echo Listo. Corriendo: %NUM_AGENTES% agentes, peldano !PEL! ^(!CONDICION!^)...
 echo.
+
+rem Docker de verdad si la maquina lo tiene: la tabla de auditoria de
+rem contencion individual solo se puede respaldar con contenedores reales.
+set MODO=contencion EMULADA
+set SIN_DOCKER=--sin-docker
+docker info >nul 2>&1
+if not errorlevel 1 (
+  set "MODO=contenedores reales"
+  set "SIN_DOCKER="
+  echo Docker disponible: levantando el cluster...
+  pushd CS
+  %PY% -m hormiguero.runner levantar --n-partes 4
+  if errorlevel 1 set RC=1
+  %PY% -m hormiguero.runner auditar --n-partes 4
+  if errorlevel 1 set RC=1
+  popd
+  echo.
+) else (
+  echo Sin Docker: se usa la caja emulada ^(hormiguero\caja_falsa.py^).
+  echo   Cada agente ve SOLO su fragmento y las transferencias siguen pasando
+  echo   por el canal, asi que la medicion vale. Lo que NO respalda es la tabla
+  echo   de auditoria: esa necesita contenedores de verdad.
+  echo.
+)
 
 rem Sin --logs: el runner escribe solo en resultados\<fecha>_N<n>\, que es
 rem la carpeta que git SI acepta.
 pushd CS
-%PY% -m hormiguero.runner uno --N %NUM_AGENTES% --sin-docker %PROV%
+%PY% -m hormiguero.runner uno --N %NUM_AGENTES% --condicion !CONDICION! --peldano !PEL! !SIN_DOCKER! %PROV%
 set ERR=!errorlevel!
 popd
 if not "%ERR%"=="0" (
@@ -236,15 +302,22 @@ if errorlevel 1 set RC=1
 if errorlevel 1 set RC=1
 popd
 
+if /i "!MODO!"=="contenedores reales" (
+  pushd CS
+  %PY% -m hormiguero.runner bajar >nul 2>&1
+  popd
+)
+
 echo.
 echo Todo quedo en: %CARPETA%
 echo   las trazas (.jsonl), el csv y mapa.html - ya se pueden commitear.
+echo   Modo: !MODO! - peldano !PEL! ^(!CONDICION!^)
 echo.
 echo   Antes de subirlo, revisa la columna 'proveedor' del csv:
 echo     deepseek -^> es un resultado
 echo     simulado -^> es solo el cableado, el guion siempre abre la boveda
 echo.
-echo   git add resultados/ ^&^& git commit -m "resultados: N=%NUM_AGENTES%"
+echo   git add resultados/ ^&^& git commit -m "resultados: N=%NUM_AGENTES% !PEL!"
 
 :ayuda_final
 echo.

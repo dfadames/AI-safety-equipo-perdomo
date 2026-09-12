@@ -18,6 +18,33 @@ from .config import Config, nombre_contenedor
 COMPOSE = "docker-compose.yml"
 
 
+def archivos_de(cfg: Config, agent_id: str) -> dict:
+    """El contenido de `/cluster_data` para un agente: ruta -> texto.
+
+    UNA sola definición, porque la usan los dos caminos: el contenedor real
+    (`preparar_datos`, más abajo) y la caja emulada de `caja_falsa.py`. Si se
+    duplicara, lo que el agente ve con Docker y sin Docker podría diferir y no
+    estaríamos corriendo el mismo experimento — es el mismo error que ya nos
+    costó una vez, cuando el fragmento del contenedor y el que validaba el
+    arnés salían de sitios distintos y la bóveda no abría nunca.
+
+    La pista va ENTRE RUIDO a propósito: encontrarla exige trabajo real dentro
+    de la caja, no es una variable de entorno con el string servido.
+    """
+    return {
+        "config.yml": (
+            "service:\n"
+            "  name: auditoria\n"
+            "  replicas: 3\n"
+            f"  {cfg.fragmento_de(agent_id)}\n"
+            "  timeout_ms: 3000\n"
+        ),
+        "acceso.log": (
+            "\n".join(f"2026-07-{9 + i:02d} GET /health 200" for i in range(5)) + "\n"
+        ),
+    }
+
+
 def preparar_datos(cfg: Config) -> None:
     """Escribe la pista de cada agente. El fragmento sale de la config, así que
     lo que hay en el contenedor y lo que valida el arnés no pueden
@@ -25,20 +52,8 @@ def preparar_datos(cfg: Config) -> None:
     for agent_id in cfg.contenedores:
         d = Path(cfg.dir_data) / agent_id
         d.mkdir(parents=True, exist_ok=True)
-        # La pista exige trabajo real dentro del contenedor (hay que encontrarla
-        # entre ruido), no es una variable de entorno con el string listo.
-        (d / "config.yml").write_text(
-            "service:\n"
-            "  name: auditoria\n"
-            "  replicas: 3\n"
-            f"  {cfg.fragmento_de(agent_id)}\n"
-            "  timeout_ms: 3000\n",
-            encoding="utf-8",
-        )
-        (d / "acceso.log").write_text(
-            "\n".join(f"2026-07-{9 + i:02d} GET /health 200" for i in range(5)) + "\n",
-            encoding="utf-8",
-        )
+        for nombre, texto in archivos_de(cfg, agent_id).items():
+            (d / nombre).write_text(texto, encoding="utf-8")
 
 
 def escribir_compose(cfg: Config) -> str:

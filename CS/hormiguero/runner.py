@@ -26,6 +26,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Iterable, Optional
 
+from .caja_falsa import runner_de
 from .canal import Canal
 from .config import Config, dir_resultados, peldano_por_defecto
 from .registro import Registro
@@ -118,7 +119,7 @@ def etiqueta_canal(canal: dict) -> str:
     return ("_" + "-".join(partes)) if partes else ""
 
 
-def barrido(ns, episodios, condiciones, crear_proveedor, runner=None,
+def barrido(ns, episodios, condiciones, crear_proveedor, runner=None, crear_runner=None,
             peldano=None, escenario="credencial", semilla_base=1000,
             dir_logs="logs", dir_shared=None, verbose=True,
             partes=(4,), canal=None) -> list[str]:
@@ -152,7 +153,10 @@ def barrido(ns, episodios, condiciones, crear_proveedor, runner=None,
                         episodio=f"ep_{cond}_P{np_}_N{n}{tag}_{i:03d}",
                         dir_logs=dir_logs, dir_shared=dir_shared, **canal,
                     )
-                    rutas.append(correr_episodio(cfg, crear_proveedor(cfg), runner=runner))
+                    # La caja emulada depende de la config del episodio (el
+                    # fragmento sale de cfg), asi que se construye por episodio.
+                    r = crear_runner(cfg) if crear_runner else runner
+                    rutas.append(correr_episodio(cfg, crear_proveedor(cfg), runner=r))
                     if verbose:
                         print(f"  {cfg.episodio}", flush=True)
     return rutas
@@ -358,8 +362,7 @@ def main(argv=None):
         datos["episodio"] = f"{a.episodio}_contrafactual"
         cfg = Config(**datos)
 
-        runner_cf = ((lambda c, cmd: f"(simulado) salida de '{cmd}' en {c}")
-                    if a.sin_docker else None)
+        runner_cf = runner_de(cfg) if a.sin_docker else None
         ruta = correr_episodio(cfg, _proveedor_o_salir(a.proveedor, cfg),
                                runner=runner_cf, bloqueados=bloqueados)
         print(f"log contrafactual: {ruta} ({len(bloqueados)} mensajes bloqueados)")
@@ -378,7 +381,6 @@ def main(argv=None):
             print("  -> el escape SIGUIO ocurriendo: habia una ruta alternativa sin esos mensajes.")
         return ruta
 
-    runner = (lambda c, cmd: f"(simulado) salida de '{cmd}' en {c}") if a.sin_docker else None
 
     # solo los diales que el usuario tocó; el resto queda en el default de Config
     canal = {k: v for k, v in (
@@ -399,6 +401,7 @@ def main(argv=None):
                      peldano=pel, escenario=esc, semilla=a.semilla,
                      episodio=f"ep_{a.condicion}_P{a.n_partes}_N{a.N}{tag}_{a.semilla}",
                      dir_logs=carpeta, dir_shared=f"{carpeta}/_shared", **canal)
+        runner = runner_de(cfg) if a.sin_docker else None
         ruta = correr_episodio(cfg, _proveedor_o_salir(a.proveedor, cfg), runner=runner)
         print(f"log: {ruta}")
         return [ruta]
@@ -409,7 +412,8 @@ def main(argv=None):
     carpeta = dir_corrida(a.logs, a.N)
     rutas = barrido(a.N, a.episodios, a.condiciones,
                     crear_proveedor=lambda cfg: _proveedor_o_salir(a.proveedor, cfg),
-                    runner=runner, peldano=a.peldano, dir_logs=carpeta,
+                    crear_runner=(runner_de if a.sin_docker else None),
+                    peldano=a.peldano, dir_logs=carpeta,
                     partes=a.n_partes, canal=canal)
     print(f"{len(rutas)} episodios en {carpeta}/")
     return rutas
