@@ -1,0 +1,250 @@
+<title>Arranque Hormiguero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=JetBrains+Mono:wght@400;700&family=Source+Serif+4:opsz,wght@8..60,400&display=swap">
+<style>
+  :root{
+    --ink:#13171C;--ground:#EFF1F2;--surface:#FAFBFB;--surface-2:#E5E8EA;
+    --line:#D2D7DB;--line-soft:#E1E5E8;--muted:#5F6A73;
+    --accent:#0E5C6B;--accent-soft:#DCEAED;--signal:#A93E1C;--signal-soft:#F5E3DB;
+    --ok:#2E6B4F;--ok-soft:#DEEBE4;
+    --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+    --f-prose:"Source Serif 4",Georgia,serif;
+    --f-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#E4E8EA;--ground:#0D1013;--surface:#151A1E;--surface-2:#1D2429;
+      --line:#2A3238;--line-soft:#212930;--muted:#8B959D;
+      --accent:#57B4C4;--accent-soft:#13313A;--signal:#E58057;--signal-soft:#3A2019;
+      --ok:#68AC86;--ok-soft:#17301F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#E4E8EA;--ground:#0D1013;--surface:#151A1E;--surface-2:#1D2429;
+    --line:#2A3238;--line-soft:#212930;--muted:#8B959D;
+    --accent:#57B4C4;--accent-soft:#13313A;--signal:#E58057;--signal-soft:#3A2019;
+    --ok:#68AC86;--ok-soft:#17301F;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--ink);font-family:var(--f-display);
+       font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:0 26px 80px}
+  @media (max-width:640px){.wrap{padding:0 16px 56px}}
+
+  /* --- cabecera --- */
+  header{padding:40px 0 0}
+  .eyebrow{font-family:var(--f-mono);font-size:.72rem;font-weight:700;letter-spacing:.18em;
+           text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+  .thesis{font-weight:800;font-size:clamp(1.55rem,4vw,2.35rem);line-height:1.14;
+          letter-spacing:-.03em;margin:0;max-width:21ch;text-wrap:balance}
+  .thesis em{font-style:normal;color:var(--accent)}
+  .sub{font-family:var(--f-prose);font-size:1.02rem;line-height:1.6;color:var(--muted);
+       margin:16px 0 0;max-width:60ch}
+
+  /* --- bloqueador --- */
+  .blocker{border:2px solid var(--signal);background:var(--signal-soft);
+           padding:22px 26px;margin:32px 0 0;display:grid;grid-template-columns:auto 1fr;gap:20px}
+  @media (max-width:620px){.blocker{grid-template-columns:1fr;gap:12px;padding:18px}}
+  .blocker .mark{font-family:var(--f-mono);font-size:.7rem;font-weight:700;letter-spacing:.14em;
+                 text-transform:uppercase;color:var(--signal);writing-mode:vertical-rl;
+                 transform:rotate(180deg);text-align:center;white-space:nowrap}
+  @media (max-width:620px){.blocker .mark{writing-mode:horizontal-tb;transform:none;text-align:left}}
+  .blocker h2{font-weight:800;font-size:1.3rem;line-height:1.2;letter-spacing:-.02em;margin:0 0 8px;
+              color:var(--signal);text-wrap:balance}
+  .blocker p{font-family:var(--f-prose);font-size:1rem;line-height:1.6;margin:0 0 10px;max-width:62ch}
+  .blocker p:last-child{margin-bottom:0}
+  .blocker b{font-family:var(--f-display);font-weight:700}
+
+  /* --- secciones --- */
+  section{margin-top:52px}
+  h2.sec{font-weight:800;font-size:clamp(1.3rem,3vw,1.7rem);letter-spacing:-.025em;
+         line-height:1.12;margin:0 0 4px}
+  .note{font-family:var(--f-prose);color:var(--muted);font-size:.98rem;margin:0 0 20px;max-width:62ch}
+
+  /* --- tarjetas de persona --- */
+  .people{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  @media (max-width:720px){.people{grid-template-columns:1fr}}
+  .p{background:var(--surface);border:1px solid var(--line);padding:20px 22px;display:flex;flex-direction:column}
+  .p.first{border-color:var(--signal);border-width:2px}
+  .p .top{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .p .letter{font-family:var(--f-mono);font-size:1.05rem;font-weight:700;color:var(--accent);
+             background:var(--accent-soft);width:32px;height:32px;display:grid;place-items:center;border-radius:3px}
+  .p.first .letter{color:var(--signal);background:var(--signal-soft)}
+  .p .role{font-weight:700;font-size:1.05rem;letter-spacing:-.015em}
+  .p .flag{font-family:var(--f-mono);font-size:.62rem;font-weight:700;letter-spacing:.1em;
+           text-transform:uppercase;color:var(--signal);background:var(--signal-soft);
+           padding:3px 7px;border-radius:2px}
+  .p .label{font-family:var(--f-mono);font-size:.64rem;font-weight:700;letter-spacing:.13em;
+            text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+  .p .task{font-family:var(--f-prose);font-size:1rem;line-height:1.58;margin:0 0 16px}
+  .p .task b{font-family:var(--f-display);font-weight:700}
+  .p .task code{font-family:var(--f-mono);font-size:.84em;background:var(--surface-2);padding:1px 5px;border-radius:2px}
+  .p .hand{margin-top:auto;padding-top:13px;border-top:1px solid var(--line-soft);
+           font-size:.88rem;color:var(--muted);line-height:1.5}
+  .p .hand b{color:var(--ink);font-weight:600}
+
+  /* --- compuertas --- */
+  .gates{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+         border:1px solid var(--line)}
+  @media (max-width:760px){.gates{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:420px){.gates{grid-template-columns:1fr}}
+  .g{background:var(--surface);padding:17px 18px}
+  .g .id{font-family:var(--f-mono);font-size:.66rem;font-weight:700;letter-spacing:.13em;
+         color:var(--signal);margin-bottom:7px}
+  .g .time{font-family:var(--f-mono);font-size:1.5rem;font-weight:700;line-height:1;
+           letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .g .day{font-family:var(--f-mono);font-size:.68rem;color:var(--muted);margin-top:3px}
+  .g .what{font-size:.93rem;line-height:1.45;margin-top:11px;font-weight:600;letter-spacing:-.01em}
+  .g .else{font-family:var(--f-prose);font-size:.87rem;line-height:1.48;color:var(--muted);margin-top:6px}
+
+  /* --- reglas --- */
+  .rules{list-style:none;margin:0;padding:0;display:grid;gap:1px;background:var(--line);
+         border:1px solid var(--line)}
+  .rules li{background:var(--surface);padding:14px 20px;display:grid;
+            grid-template-columns:26px 1fr;gap:14px;align-items:baseline}
+  .rules .n{font-family:var(--f-mono);font-size:.78rem;font-weight:700;color:var(--muted)}
+  .rules .t{font-family:var(--f-prose);font-size:1rem;line-height:1.55}
+  .rules .t b{font-family:var(--f-display);font-weight:700}
+
+  /* --- pie --- */
+  .where{background:var(--surface-2);border:1px solid var(--line);padding:20px 24px;margin-top:44px}
+  .where h3{font-weight:700;font-size:1rem;margin:0 0 10px;letter-spacing:-.01em}
+  .where ul{margin:0;padding-left:20px;font-family:var(--f-prose);font-size:.96rem;line-height:1.65}
+  .where li{margin-bottom:5px}
+  .where code{font-family:var(--f-mono);font-size:.84em;background:var(--surface);padding:1px 6px;
+              border-radius:2px;border:1px solid var(--line)}
+  .foot{margin-top:38px;padding-top:16px;border-top:1px solid var(--line);
+        font-family:var(--f-mono);font-size:.72rem;color:var(--muted);line-height:1.9}
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Proyecto Hormiguero · sábado, arranque</p>
+    <h1 class="thesis">Cada caja pasa su auditoría y el sistema <em>pierde igual</em>.</h1>
+    <p class="sub">Porque lo que cruza el borde no es el agente: es la información. Esa frase es el filtro del fin de semana — lo que no la sostenga, se corta sin discutir.</p>
+  </header>
+
+  <div class="blocker">
+    <div class="mark">Leer primero</div>
+    <div>
+      <h2>El código que está en el repo no arranca</h2>
+      <p>El <code>docker-compose.yml</code> pone <b>network_mode: none</b> y al mismo tiempo corre <b>agent.py</b> adentro del contenedor con la clave de API. Sin red, el script no puede llamar al modelo. No es configuración: no levanta.</p>
+      <p><b>La corrección, que además mejora el diseño:</b> el bucle del agente corre <b>en el host</b> y el contenedor solo ejecuta herramientas por <code>docker exec</code>. Así la caja conserva su aislamiento de verdad, y la frase «las cajas aprobaron su auditoría» se sostiene sin asteriscos — que es exactamente lo que hace que el paper signifique algo.</p>
+    </div>
+  </div>
+
+  <section>
+    <h2 class="sec">Tu primera hora</h2>
+    <p class="note">Una tarea cada uno, arrancable en los próximos cinco minutos. Nadie espera a nadie: quien no tenga la entrada real, trabaja contra una falsa.</p>
+
+    <div class="people">
+
+      <div class="p first">
+        <div class="top">
+          <span class="letter">A</span>
+          <span class="role">Entorno</span>
+          <span class="flag">bloquea a todos</span>
+        </div>
+        <div class="label">Ahora mismo</div>
+        <p class="task">Sacar el bucle del contenedor y ponerlo en el host. El contenedor queda con <code>network_mode: none</code> de verdad y solo ejecuta herramientas por <code>docker exec</code>. Después, la auditoría individual: que un <code>curl</code> a una IP señuelo falle, y que eso quede registrado — esa tabla va al paper.</p>
+        <div class="hand">Le entrega a <b>B</b>: un comando que corre un episodio.</div>
+      </div>
+
+      <div class="p">
+        <div class="top">
+          <span class="letter">B</span>
+          <span class="role">Trazas</span>
+        </div>
+        <div class="label">Ahora mismo</div>
+        <p class="task">El bucle, con <b>una línea que cambia todo</b>: los ancestros de una acción son lo que estaba en la ventana de ese paso, no toda la memoria acumulada. Y <code>read_channel</code> lee solo lo nuevo, no el archivo entero. Con la bolsa que crece sin parar, el resultado principal sale siempre 4 y es un artefacto.</p>
+        <div class="hand">Empieza contra un contenedor simulado. Le entrega a <b>C</b>: los archivos de log.</div>
+      </div>
+
+      <div class="p">
+        <div class="top">
+          <span class="letter">C</span>
+          <span class="role">Mapa</span>
+        </div>
+        <div class="label">Ahora mismo</div>
+        <p class="task">El grafo contra un <b>log falso de diez líneas</b> escrito a mano. Dos correcciones al código que ya existe: la visibilidad es lo que el agente <b>vio</b>, no lo que escribió; y el corte mínimo lleva capacidades — 1 en transferencias del canal, enorme en derivaciones internas.</p>
+        <div class="hand">Le entrega a <b>D</b>: los números y las figuras.</div>
+      </div>
+
+      <div class="p">
+        <div class="top">
+          <span class="letter">D</span>
+          <span class="role">Paper</span>
+        </div>
+        <div class="label">Ahora mismo</div>
+        <p class="task">El pre-registro: quince minutos, un archivo corto con las curvas que predecimos y <b>qué resultado nos haría decir que nos equivocamos</b>. Commit y captura del hash. No depende de nadie. Después, abstract e introducción, que tampoco dependen de resultados.</p>
+        <div class="hand">Dueño único del documento. Le entrega a <b>Apart</b>, domingo 16:00.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">Las cuatro compuertas</h2>
+    <p class="note">Hora fija. En cada una se decide seguir o recortar — y se recorta el experimento, nunca el horario ni la escritura.</p>
+    <div class="gates">
+      <div class="g">
+        <div class="id">G1</div>
+        <div class="time">12:00</div>
+        <div class="day">sábado</div>
+        <div class="what">Un episodio corre de punta a punta</div>
+        <div class="else">Aunque los agentes fracasen. Si no corre: menos agentes, menos pasos, pistas triviales.</div>
+      </div>
+      <div class="g">
+        <div class="id">G2</div>
+        <div class="time">14:30</div>
+        <div class="day">sábado</div>
+        <div class="what">La población logra lo que el individuo no</div>
+        <div class="else">Aunque sea una vez. Si no: bajar a 2 partes y pistas casi directas, en ese momento.</div>
+      </div>
+      <div class="g">
+        <div class="id">—</div>
+        <div class="time">19:00</div>
+        <div class="day">sábado</div>
+        <div class="what">Los cuatro eligen la frase del paper</div>
+        <div class="else">Mirando las curvas juntos. Decisión de equipo, no de quien escribe.</div>
+      </div>
+      <div class="g">
+        <div class="id">G3</div>
+        <div class="time">16:00</div>
+        <div class="day">domingo</div>
+        <div class="what">Subir la v1, esté como esté</div>
+        <div class="else">Se puede reemplazar después. Nadie sigue trabajando hasta que el archivo esté cargado.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="sec">Seis reglas que no se rediscuten</h2>
+    <p class="note">Si alguien las reabre, se le señala esta lista.</p>
+    <ol class="rules">
+      <li><span class="n">1</span><span class="t"><b>La procedencia la rastrea el entorno, nunca el agente.</b> Si le preguntamos al agente de dónde sacó un dato, inventa identificadores con total confianza y el mapa queda contaminado.</span></li>
+      <li><span class="n">2</span><span class="t"><b>Los ancestros van acotados a la ventana del paso.</b> Sin esto, el resultado principal se rompe en silencio: no falla, devuelve un número creíble y falso.</span></li>
+      <li><span class="n">3</span><span class="t"><b>Ningún número se escribe antes de medirlo.</b> Reportamos lo que salga, incluso si contradice lo que esperábamos. Para eso está el pre-registro.</span></li>
+      <li><span class="n">4</span><span class="t"><b>Un resultado plano no es un fracaso.</b> Si la población no le gana al individuo, encontramos el ancho de canal bajo el cual la contención sí compone — y eso un laboratorio lo aplica el lunes.</span></li>
+      <li><span class="n">5</span><span class="t"><b>Un solo dueño del paper</b> desde el domingo al mediodía. Los demás entregan figuras y números; nadie más redacta prosa.</span></li>
+      <li><span class="n">6</span><span class="t"><b>El grafo entra al paper solo si le gana</b> a «¿hubo mensajes?» y «¿cuántos mensajes hubo?». Si no le gana, lo decimos y sale.</span></li>
+    </ol>
+  </section>
+
+  <div class="where">
+    <h3>Dónde está el resto</h3>
+    <ul>
+      <li><code>PLAN.md</code> — el plan completo: qué, por qué, cómo, el esquema de registro congelado, el presupuesto de tokens, las contingencias y la estructura de las 8 páginas. <b>La sección 0 tiene las cuatro correcciones al código que ya está en el repo.</b></li>
+      <li><code>contraste-planes.html</code> — qué se adoptó del plan de Gemini, qué se le corrigió y por qué.</li>
+      <li><code>gemini_implementacion.md</code> — el código base. Útil, pero léanlo junto con la sección 0 de <code>PLAN.md</code>.</li>
+    </ul>
+  </div>
+
+  <div class="foot">
+    Hormiguero · AI Incident Response Sprint 2026 · Hub Bogotá<br>
+    Entrega: lunes 14 de septiembre, 6:59 a.m. hora de Colombia
+  </div>
+
+</div>
