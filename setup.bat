@@ -43,6 +43,12 @@ if /i "%~1"=="--simulado"     ( set "SIMULADO=1" & shift & goto args )
 if /i "%~1"=="--no-pause"     ( set "NOPAUSE=1" & shift & goto args )
 if /i "%~1"=="-h"             goto ayuda
 if /i "%~1"=="--help"         goto ayuda
+rem Formas --opcion=VALOR: se parten por el primer "=".
+for /f "tokens=1,* delims==" %%A in ("%~1") do (
+  if /i "%%~A"=="--num-agentes" ( set "NUM_AGENTES=%%~B" & set "HIT=1" )
+  if /i "%%~A"=="--peldano"     ( set "PELDANO=%%~B"     & set "HIT=1" )
+)
+if defined HIT ( set "HIT=" & shift & goto args )
 echo %~1 | findstr /b /c:"-" >nul
 if not errorlevel 1 ( echo Opcion desconocida: %~1 & exit /b 1 )
 rem Posicionales: 1o agentes, 2o peldano.
@@ -78,8 +84,19 @@ echo   setup.bat              4 agentes, R1
 echo   setup.bat 8 2          8 agentes, R2
 echo   setup.bat 8 3          8 agentes, R3 - la apuesta del paper
 echo   setup.bat --simulado   comprobar el montaje sin gastar nada
+echo.
+echo Los dos controles del diseno no son peldanos y van por el runner:
+echo   --condicion honestidad   (confundidor del aviso^)
+echo   --condicion benigna      (control de especificidad^)
 exit /b 0
 :fin_args
+
+echo %NUM_AGENTES%|findstr /r "^[1-9][0-9]*$" >nul
+if errorlevel 1 (
+  echo AGENTES tiene que ser un entero positivo ^(llego '%NUM_AGENTES%'^)
+  echo   setup.bat --help
+  exit /b 1
+)
 
 rem El peldano fija la PAREJA condicion+peldano. No son ejes independientes:
 rem `instruida` ES R1 y `emergente` ES R2/R3, y Config rechaza las mezclas. Si
@@ -200,7 +217,7 @@ if "%SIMULADO%"=="1" (
   echo.
   echo Modo --simulado: guion fijo, sin llave y sin gastar tokens.
   echo   Comprueba que tu maquina esta bien montada. NO es un resultado.
-  goto correr
+  goto rc
 )
 
 set LLAVE=
@@ -229,6 +246,9 @@ if "%LLAVE%"=="" (
 rem ===================================================================
 rem  6. Correr el experimento
 rem ===================================================================
+rem `--simulado` salta la llave, pero NO este chequeo: si pip o el hook
+rem fallaron, la maquina no esta montada y correr igual no dice nada.
+:rc
 echo.
 if not "%RC%"=="0" (
   echo Cuando lo de arriba este resuelto, corre a mano:
@@ -240,7 +260,6 @@ if not "%RC%"=="0" (
   goto ayuda_final
 )
 
-:correr
 echo Listo. Corriendo: %NUM_AGENTES% agentes, peldano !PEL! ^(!CONDICION!^)...
 echo.
 
@@ -253,10 +272,11 @@ if not errorlevel 1 (
   set "MODO=contenedores reales"
   set "SIN_DOCKER="
   echo Docker disponible: levantando el cluster...
+  rem Una caja POR AGENTE: --n-agentes es lo que fija cuantas se levantan.
   pushd CS
-  %PY% -m hormiguero.runner levantar --n-partes 4
+  %PY% -m hormiguero.runner levantar --n-agentes %NUM_AGENTES%
   if errorlevel 1 set RC=1
-  %PY% -m hormiguero.runner auditar --n-partes 4
+  %PY% -m hormiguero.runner auditar --n-agentes %NUM_AGENTES%
   if errorlevel 1 set RC=1
   popd
   echo.
