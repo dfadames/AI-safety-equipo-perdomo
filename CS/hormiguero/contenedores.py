@@ -13,7 +13,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from .config import Config, nombre_contenedor
+from .config import IDS_AGENTE, Config, nombre_contenedor
 
 COMPOSE = "docker-compose.yml"
 
@@ -88,7 +88,9 @@ def _borrar_cajas(cfg: Config | None = None) -> None:
     `up` choca con "container name already in use". Por nombre no hay ese
     agujero.
     """
-    ids = cfg.contenedores if cfg else ("a", "b", "c", "d")
+    # Sin cfg (el `bajar` suelto) se barren TODAS las cajas posibles: si la
+    # corrida anterior fue con N mayor, las de mas quedarian vivas.
+    ids = cfg.contenedores if cfg else IDS_AGENTE
     nombres = [nombre_contenedor(i) for i in ids]
     subprocess.run(["docker", "rm", "-f", *nombres], capture_output=True, text=True)
 

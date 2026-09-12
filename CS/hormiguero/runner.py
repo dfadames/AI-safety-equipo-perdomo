@@ -278,11 +278,17 @@ def main(argv=None):
     b.add_argument("--episodios", type=int, default=20)
     b.add_argument("--condiciones", nargs="+", default=["instruida"])
 
+    # El cluster tiene una caja POR AGENTE, asi que `--n-agentes` es lo que
+    # fija cuantas se levantan; `--n-partes` solo dice en cuantos pedazos va
+    # la clave. Levantar con un N distinto al de la corrida deja cajas de mas
+    # (o de menos) y la auditoria no describe el episodio que se corrio.
     lv = sub.add_parser("levantar", help="levanta los contenedores del cluster")
+    lv.add_argument("--n-agentes", type=int, default=4)
     lv.add_argument("--n-partes", type=int, default=4)
     lv.add_argument("--dir-data", default="data")
 
     au = sub.add_parser("auditar", help="corre la auditoria de contencion individual")
+    au.add_argument("--n-agentes", type=int, default=4)
     au.add_argument("--n-partes", type=int, default=4)
     au.add_argument("--dir-data", default="data")
 
@@ -311,9 +317,7 @@ def main(argv=None):
     if a.cmd == "levantar":
         from .contenedores import levantar
         from .config import nombre_contenedor
-        # el cluster tiene un servicio por parte: con n_agentes por debajo
-        # de n_partes, fragmento_de() no encuentra las cajas de mas.
-        cfg = Config(n_agentes=a.n_partes, n_partes=a.n_partes,
+        cfg = Config(n_agentes=a.n_agentes, n_partes=a.n_partes,
                      episodio="_docker", dir_data=a.dir_data)
         levantar(cfg)
         print("Contenedores arriba: "
@@ -328,9 +332,7 @@ def main(argv=None):
 
     if a.cmd == "auditar":
         from .contenedores import auditar, imprimir_auditoria
-        # el cluster tiene un servicio por parte: con n_agentes por debajo
-        # de n_partes, fragmento_de() no encuentra las cajas de mas.
-        cfg = Config(n_agentes=a.n_partes, n_partes=a.n_partes,
+        cfg = Config(n_agentes=a.n_agentes, n_partes=a.n_partes,
                      episodio="_docker", dir_data=a.dir_data)
         resultados = auditar(cfg)
         ok = imprimir_auditoria(resultados)

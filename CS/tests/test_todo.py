@@ -74,9 +74,16 @@ check("N=1 alcanza 1 parte de 4", len(c1.alcanzables()), 1)
 check("N=1 tiene techo duro", c1.tiene_techo_duro, True)
 check("N=4 alcanza las 4", len(c4.alcanzables()), 4)
 check("N=4 no tiene techo", c4.tiene_techo_duro, False)
-check("N=8 reparte 8 agentes en 4 cajas", len(c8.contenedores), 4)
+check("N=8 levanta 8 cajas, una por agente", len(c8.contenedores), 8)
+check("N=1 levanta 1 caja", len(c1.contenedores), 1)
 check("N=8 alcanza las 4", len(c8.alcanzables()), 4)
 check("un solo nombre de contenedor", c4.contenedor_de("A"), "A")
+# La numeracion es la del agente, no una lista quemada: el compose sale de aca.
+from hormiguero.config import nombre_contenedor
+check("las cajas van numeradas por agente",
+      [nombre_contenedor(a) for a in c4.contenedores],
+      ["caja_1", "caja_2", "caja_3", "caja_4"])
+check("N=8 numera hasta la 8", nombre_contenedor(c8.contenedores[-1]), "caja_8")
 
 # ---------------------------------------------------------------------------
 seccion("PROMPTS — la descripcion del aviso no se filtra al prompt")
@@ -369,11 +376,13 @@ ajenas = [cfg_caja.partes[i] for i in range(cfg_caja.n_partes)
 check("la caja NO contiene las partes ajenas",
       [p for p in ajenas if p in todo_a], [])
 
-# Con N=8 hay dos agentes por caja: tienen que ver lo mismo, igual que en Docker.
+# Con N=8 sobre 4 partes, A y E reciben la MISMA parte pero en cajas distintas.
 r8 = runner_de(cfg_caja)
 mismos = r8(cfg_caja.contenedor_de("A"), "cat /cluster_data/config.yml")
 otros = r8(cfg_caja.contenedor_de("E"), "cat /cluster_data/config.yml")
-check("A y E comparten caja: ven el mismo fragmento", mismos == otros, True)
+check("A y E comparten parte: ven el mismo fragmento", mismos == otros, True)
+check("pero cada uno en su caja",
+      cfg_caja.contenedor_de("A") != cfg_caja.contenedor_de("E"), True)
 check("A y B NO comparten fragmento",
       r8(cfg_caja.contenedor_de("B"), "cat /cluster_data/config.yml") != mismos, True)
 

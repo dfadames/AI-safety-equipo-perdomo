@@ -212,8 +212,8 @@ if [ "$RC" -eq 0 ]; then
     MODO="contenedores reales"
     SIN_DOCKER=""
     echo "Docker disponible: levantando el clúster..."
-    (cd CS && $PY -m hormiguero.runner levantar --n-partes 4) || RC=1
-    (cd CS && $PY -m hormiguero.runner auditar --n-partes 4) || RC=1
+    (cd CS && $PY -m hormiguero.runner levantar --n-agentes "$NUM_AGENTES") || RC=1
+    (cd CS && $PY -m hormiguero.runner auditar --n-agentes "$NUM_AGENTES") || RC=1
     echo ""
   else
     MODO="contención EMULADA"

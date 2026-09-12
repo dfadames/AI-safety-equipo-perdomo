@@ -34,7 +34,7 @@ from __future__ import annotations
 import re
 import shlex
 
-from .config import Config, nombre_contenedor
+from .config import IDS_AGENTE, Config, nombre_contenedor
 from .contenedores import archivos_de
 
 MONTAJE = "/cluster_data"
@@ -349,8 +349,9 @@ class CajaFalsa:
 def runner_de(cfg: Config):
     """Devuelve un `runner(contenedor, comando) -> str` para todo el episodio.
 
-    Una caja por CONTENEDOR, no por agente: con N=8 sobre 4 cajas, dos agentes
-    comparten caja y tienen que ver exactamente lo mismo — igual que con Docker.
+    Una caja por agente, igual que el clúster real. Con N > n_partes dos
+    agentes reciben la misma parte y ven el mismo fragmento, pero cada uno en
+    su propia caja.
     """
     cajas = {}
     for agent_id in cfg.agentes:
@@ -359,7 +360,9 @@ def runner_de(cfg: Config):
             cajas[c] = CajaFalsa(cfg, agent_id)
 
     def runner(contenedor: str, comando: str) -> str:
-        caja = cajas.get(contenedor) or cajas.get(nombre_contenedor(contenedor))
+        caja = cajas.get(contenedor)
+        if caja is None and contenedor in IDS_AGENTE:   # también acepta el id
+            caja = cajas.get(nombre_contenedor(contenedor))
         if caja is None:
             return f"sh: no such container: {contenedor}"
         return caja.ejecutar(comando)

@@ -57,8 +57,14 @@ def agentes(n: int) -> tuple[str, ...]:
 def nombre_contenedor(agent_id: str) -> str:
     """UNA convención, en un solo lugar. Antes había tres distintas
     (`caja_a`, `caja_agente_0`, `caja_{agent_id}`) y con Docker real
-    `docker exec` fallaba."""
-    return f"caja_{agent_id.lower()}"
+    `docker exec` fallaba.
+
+    Numerada por agente: A -> caja_1, B -> caja_2, ... El número sale de la
+    posición en IDS_AGENTE, así que el clúster se numera solo para cualquier
+    N y no hay una lista de nombres que mantener en paralelo."""
+    if agent_id not in IDS_AGENTE:
+        raise ValueError(f"agente desconocido: {agent_id!r} (son {IDS_AGENTE})")
+    return f"caja_{IDS_AGENTE.index(agent_id) + 1}"
 
 
 # ---------------------------------------------------------------------------
@@ -183,18 +189,27 @@ class Config:
 
     @property
     def contenedores(self) -> tuple[str, ...]:
-        """Los servicios del clúster. Uno por parte, siempre."""
-        return agentes(self.n_partes)
+        """Los servicios del clúster: UNO POR AGENTE.
+
+        Antes eran `n_partes` cajas y con N=8 dos agentes compartían una: el
+        aislamiento que afirma el paper se medía sobre 4 cajas mientras corrían
+        8 agentes. Una caja por agente es lo que dice la tabla de auditoría.
+        Las partes siguen siendo `n_partes` y se reparten con módulo, así que
+        el techo duro de N<n_partes no cambia."""
+        return self.agentes
 
     @property
     def n_partes_requeridas(self) -> int:
         return self.n_partes
 
     def contenedor_de(self, agent_id: str) -> str:
-        """A qué servicio está asignado este agente. Con N > n_partes, varios
-        agentes auditan el mismo servicio — de ahí salen las rutas redundantes."""
-        i = self.agentes.index(agent_id)
-        return self.contenedores[i % self.n_partes]
+        """La caja de este agente: la suya, una por agente. Con N > n_partes
+        varios agentes reciben la MISMA parte (ahí siguen saliendo las rutas
+        redundantes que mide la curva de corte mínimo), pero cada uno en su
+        propia caja."""
+        if agent_id not in self.agentes:
+            raise ValueError(f"{agent_id!r} no está entre los {self.n_agentes} agentes")
+        return agent_id
 
     def indice_de_parte(self, agent_id: str) -> int:
         return self.agentes.index(agent_id) % self.n_partes
