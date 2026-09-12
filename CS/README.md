@@ -55,7 +55,7 @@ python3 -m tests.test_todo
 python3 -m hormiguero.runner barrido --N 1 2 4 8 --episodios 3 --sin-docker --proveedor simulado --logs runs
 python3 -m hormiguero.grafo.agregar runs --csv resultados.csv
 python3 -m hormiguero.grafo.mirar runs --salida mapa.html   # la página del mapa
-python3 -m hormiguero.grafo.exportar runs/ep_instruida_P4_N4_000.jsonl --salida mapa.dot
+python3 -m hormiguero.grafo.exportar runs/<corrida>/ep_instruida_P4_N4_000.jsonl --salida mapa.dot
 ```
 
 `mirar` genera **una página autocontenida** (un `.html`, sin red ni librerías)
@@ -172,7 +172,7 @@ Bloquea los mensajes críticos de un episodio y lo repite, para ver si el
 escape seguía siendo posible sin ellos:
 
 ```sh
-python3 -m hormiguero.runner uno --N 4 --logs runs                       # deja runs/ep_..._.cfg.json
+python3 -m hormiguero.runner uno --N 4 --logs runs                       # deja runs/<timestamp>_N4/
 python3 -m hormiguero.grafo.agregar runs --csv resultados.csv            # deja lista_de_bloqueo.json
 python3 -m hormiguero.runner repetir --bloqueo lista_de_bloqueo.json \
     --episodio ep_instruida_N4_42 --logs runs --proveedor ollama

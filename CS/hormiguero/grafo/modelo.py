@@ -57,7 +57,11 @@ def _expandir(ruta) -> list[str]:
     literal."""
     p = Path(ruta)
     if p.is_dir():
-        return sorted(str(x) for x in p.glob("*.jsonl"))
+        # rglob porque los logs viven en `runs/<timestamp>_N<n>/`: `agregar runs`
+        # junta todas las corridas, `agregar runs/<corrida>` solo esa. `_shared`
+        # queda afuera — son los archivos del canal, otro esquema.
+        return sorted(str(x) for x in p.rglob("*.jsonl")
+                      if "_shared" not in x.parts)
     return sorted(glob.glob(str(ruta)))
 
 

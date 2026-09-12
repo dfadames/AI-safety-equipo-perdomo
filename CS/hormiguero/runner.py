@@ -22,6 +22,7 @@ import dataclasses
 import json
 import random
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Iterable, Optional
 
@@ -86,6 +87,17 @@ def correr_episodio(cfg: Config, proveedor_de, runner=None, con_docker: bool = F
 
     _escribir_cfg(cfg)
     return cfg.ruta_log()
+
+
+def dir_corrida(base: str, ns) -> str:
+    """`runs/<timestamp>_N<agentes>/` — una carpeta por corrida.
+
+    Sin esto todos los barridos caen en el mismo `runs/` y se pisan entre sí:
+    dos corridas del mismo punto experimental producen el mismo nombre de
+    episodio, y la segunda sobreescribe el log de la primera en silencio.
+    """
+    etiqueta = "-".join(str(n) for n in ns) if isinstance(ns, (list, tuple)) else str(ns)
+    return f"{base}/{datetime.now():%Y%m%d-%H%M%S}_N{etiqueta}"
 
 
 def etiqueta_canal(canal: dict) -> str:
@@ -319,7 +331,15 @@ def main(argv=None):
                              f"(episodios disponibles: {', '.join(sorted(bloqueo)) or '-'})")
         bloqueados = set(bloqueo[a.episodio])
 
-        ruta_cfg_original = Path(a.logs) / Path(_ruta_cfg(f"{a.episodio}.jsonl")).name
+        nombre_cfg = Path(_ruta_cfg(f"{a.episodio}.jsonl")).name
+        ruta_cfg_original = Path(a.logs) / nombre_cfg
+        if not ruta_cfg_original.exists():
+            # los episodios viven en `runs/<corrida>/`, asi que `--logs runs`
+            # sigue sirviendo: se busca hacia adentro y se toma la mas reciente.
+            candidatos = sorted(Path(a.logs).rglob(nombre_cfg),
+                                key=lambda x: x.stat().st_mtime)
+            if candidatos:
+                ruta_cfg_original = candidatos[-1]
         if not ruta_cfg_original.exists():
             raise SystemExit(
                 f"no encontre {ruta_cfg_original}. Se escribe junto al log de cada "
@@ -361,13 +381,14 @@ def main(argv=None):
     ) if v is not None}
 
     if a.cmd == "uno":
+        carpeta = dir_corrida(a.logs, a.N)
         esc = "benigno" if a.condicion == "benigna" else "credencial"
         pel = a.peldano or peldano_por_defecto(a.condicion)
         tag = etiqueta_canal(canal)
         cfg = Config(n_agentes=a.N, n_partes=a.n_partes, condicion=a.condicion,
                      peldano=pel, escenario=esc, semilla=a.semilla,
                      episodio=f"ep_{a.condicion}_P{a.n_partes}_N{a.N}{tag}_{a.semilla}",
-                     dir_logs=a.logs, dir_shared=f"{a.logs}/_shared", **canal)
+                     dir_logs=carpeta, dir_shared=f"{carpeta}/_shared", **canal)
         ruta = correr_episodio(cfg, _proveedor_o_salir(a.proveedor, cfg), runner=runner)
         print(f"log: {ruta}")
         return [ruta]
@@ -375,11 +396,12 @@ def main(argv=None):
     # a.cmd == "barrido": el proveedor depende de la config de cada episodio
     # (el guion simulado usa las partes de ESE N), asi que se reconstruye por
     # episodio dentro de barrido() en vez de una vez para todo el barrido.
+    carpeta = dir_corrida(a.logs, a.N)
     rutas = barrido(a.N, a.episodios, a.condiciones,
                     crear_proveedor=lambda cfg: _proveedor_o_salir(a.proveedor, cfg),
-                    runner=runner, peldano=a.peldano, dir_logs=a.logs,
+                    runner=runner, peldano=a.peldano, dir_logs=carpeta,
                     partes=a.n_partes, canal=canal)
-    print(f"{len(rutas)} episodios en {a.logs}/")
+    print(f"{len(rutas)} episodios en {carpeta}/")
     return rutas
 
 
