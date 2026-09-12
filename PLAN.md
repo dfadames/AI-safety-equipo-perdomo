@@ -240,9 +240,9 @@ Cuatro compuertas con hora fija. En cada una se decide seguir o recortar, y **se
 
 | Hora | Bloque | Sale de aquí |
 |---|---|---|
-| — | **Congelar el esquema** (§3.4) y escribir a mano un **log falso de 10 líneas** | Si el log falso no se puede escribir a mano, el esquema está mal diseñado |
+| — | **Congelar el esquema** (§3.4) y escribir a mano un **log de ejemplo de 10 líneas** | Si el log de ejemplo no se puede escribir a mano, el esquema está mal diseñado |
 | +15 min | **Pre-registro.** Las tres curvas que predecimos y **qué resultado nos haría decir que nos equivocamos**. Commit y captura del hash | Apéndice del paper, ya hecho |
-| — | **Construir, cada quien contra su entrada falsa** | Nadie espera a nadie |
+| — | **Construir, cada quien contra su entrada de ejemplo** | Nadie espera a nadie |
 | **12:00** | **G1 · un episodio corre de punta a punta** — aunque los agentes fracasen. Si no corre: menos agentes, menos pasos, pistas triviales | Infraestructura de pie |
 | 12:00 | Calibrar hasta el primer escape colectivo. Que la población lo logre *a veces* y que N=1 no lo logre *nunca* | |
 | **14:30** | **G2 · Δc > 0 al menos una vez.** Si no: bajar a 2 partes y pistas casi directas, **en ese momento** | El fenómeno existe |
@@ -267,14 +267,14 @@ Cuatro compuertas con hora fija. En cada una se decide seguir o recortar, y **se
 
 ## 6. Reparto
 
-**La regla que convierte la fila india en trabajo paralelo:** nadie espera la entrada real. Del bloque de esquema sale un **log falso de diez líneas**. C escribe todo el código del grafo contra ese archivo, D escribe con números inventados marcados en rojo, B trabaja contra un contenedor simulado. Cuando llegan los datos reales solo se cambia la entrada.
+**La regla que convierte la fila india en trabajo paralelo:** nadie espera la entrada real. Del bloque de esquema sale un **log de ejemplo de diez líneas**. C escribe todo el código del grafo contra ese archivo, D escribe con números de relleno marcados en rojo, B trabaja contra un contenedor simulado. Cuando llegan los datos reales solo se cambia la entrada.
 
 | | Dueño de | Empieza contra | Le entrega a |
 |---|---|---|---|
 | **A · Entorno** | Contenedores con `network_mode: none`, canal `.jsonl` con `event_id`, auditoría individual, y **el puente `docker exec` desde el host** (§0.1). Al final, el repositorio reproducible | — | **B**: un comando que corre un episodio |
 | **B · Trazas** | Bucle de agentes **en el host**, registro por el esquema del §3.4, **propagación de ancestros acotada a la ventana**, los dos monitores | contenedor simulado | **C**: los archivos de log |
-| **C · Mapa** | El DAG en networkx **con capacidades**, las cuatro preguntas con **la visibilidad corregida** (§0.3), la réplica contrafactual, la validación contra METR | el log falso | **D**: números y figuras |
-| **D · Paper** | Dueño único del documento. Pre-registro primero. La sonda de conocimiento prestado queda como objetivo secundario con permiso de fallar | números inventados | Apart, 16:00 del domingo |
+| **C · Mapa** | El DAG en networkx **con capacidades**, las cuatro preguntas con **la visibilidad corregida** (§0.3), la réplica contrafactual, la validación contra METR | el log de ejemplo | **D**: números y figuras |
+| **D · Paper** | Dueño único del documento. Pre-registro primero. La sonda de conocimiento prestado queda como objetivo secundario con permiso de fallar | números de relleno | Apart, 16:00 del domingo |
 
 **Lo primero que hace cada quien al leer esto:** A rehace el arranque según §0.1 — es lo único que bloquea a todos los demás. B cambia la línea de los ancestros según §0.2. C corrige la visibilidad según §0.3. D hace el pre-registro, que son 15 minutos y no depende de nadie.
 

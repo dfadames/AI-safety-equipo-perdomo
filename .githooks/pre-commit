@@ -1,0 +1,94 @@
+#!/bin/sh
+#
+# Hormiguero — bloquea commits con secretos.
+# Se activa con:  git config core.hooksPath .githooks
+#
+# Para saltarlo en un falso positivo puntual, agregar a esa línea el marcador:
+#     # permitido: no-es-secreto
+# Saltar el hook entero (NO lo hagas sin mirar qué te marcó):
+#     git commit --no-verify
+
+# Ignorar SIGPIPE: si el cliente de git canaliza nuestra salida y la corta
+# (head, less, una GUI), sin esto el hook muere por señal ANTES de su exit 1
+# y el commit pasa igual. Con esto, la escritura falla y el hook sigue vivo.
+trap '' PIPE 2>/dev/null || true
+
+ROJO=$(printf '\033[31m'); AMARILLO=$(printf '\033[33m'); GRIS=$(printf '\033[90m'); FIN=$(printf '\033[0m')
+FALLO=0
+
+aviso() {
+  FALLO=1
+  printf "\n%sCOMMIT BLOQUEADO%s  %s\n" "$ROJO" "$FIN" "$1"
+}
+
+# Archivos en el stage, excluyendo datos sintéticos del experimento
+STAGED=$(git diff --cached --name-only --diff-filter=ACM \
+  | grep -vE '^(data|logs|shared|runs)/' \
+  | grep -vE '(^|/)ejemplo_[^/]*$' \
+  | grep -vE '(^|/)\.env\.example$')
+
+[ -z "$STAGED" ] && exit 0
+
+# ---------------------------------------------------------------
+# 1. Archivos que nunca deben entrar
+# ---------------------------------------------------------------
+PROHIBIDOS=$(printf '%s\n' "$STAGED" | grep -iE \
+  '(^|/)\.env($|\.)|\.pem$|\.key$|\.p12$|\.pfx$|\.jks$|(^|/)id_(rsa|ecdsa|ed25519)|(^|/)\.netrc$|(^|/)\.npmrc$|service-account.*\.json$|client_secret.*\.json$|(^|/)credentials\.json$')
+
+if [ -n "$PROHIBIDOS" ]; then
+  aviso "estás agregando archivos que nunca deben subirse:"
+  printf '%s\n' "$PROHIBIDOS" | sed 's/^/    /'
+  printf "%s    sácalos con:  git reset HEAD <archivo>%s\n" "$GRIS" "$FIN"
+fi
+
+# ---------------------------------------------------------------
+# 2. Llaves reales en el contenido agregado
+# ---------------------------------------------------------------
+# Solo líneas AÑADIDAS, y solo de los archivos que pasaron el filtro.
+AGREGADO=$(git diff --cached -U0 -- $(printf '%s ' $STAGED) 2>/dev/null \
+  | grep '^+' | grep -v '^+++' \
+  | grep -v 'permitido: no-es-secreto')
+
+# OJO: se usa con `grep -E`, asi que las llaves van SIN escapar: {20,} y no \{20,\}.
+# Escapadas se interpretan como llaves literales y el patron no casa nunca.
+PATRONES='sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{30,}|AIza[0-9A-Za-z_-]{35}|xox[baprs]-[A-Za-z0-9-]{10,}|BEGIN [A-Z ]*PRIVATE KEY|glpat-[A-Za-z0-9_-]{20}|dop_v1_[a-f0-9]{64}|hf_[A-Za-z0-9]{30,}'
+
+LLAVES=$(printf '%s\n' "$AGREGADO" | grep -nE "$PATRONES")
+if [ -n "$LLAVES" ]; then
+  aviso "hay algo con forma de llave de API en lo que vas a subir:"
+  printf '%s\n' "$LLAVES" | cut -c1-100 | sed 's/^/    /'
+fi
+
+# ---------------------------------------------------------------
+# 3. Secretos quemados en el código
+# ---------------------------------------------------------------
+# Asignación con comillas y 16+ caracteres, descartando placeholders y
+# las formas correctas de leer una variable de entorno.
+QUEMADOS=$(printf '%s\n' "$AGREGADO" \
+  | grep -iE "(api[_-]?key|secret|token|passwd|password|contrasena|contraseña)[\"' ]*[:=][\"' ]*[A-Za-z0-9/+_-]{16,}" \
+  | grep -viE 'os\.environ|getenv|process\.env|\$\{|<[a-z_]+>|xxx+|your[_-]|tu[_-]clave|example|ejemplo|placeholder|\.\.\.|FAKE|dummy|changeme|REEMPLAZAR')
+
+if [ -n "$QUEMADOS" ]; then
+  aviso "parece que hay un secreto escrito directo en el código:"
+  printf '%s\n' "$QUEMADOS" | cut -c1-100 | sed 's/^/    /'
+  printf "%s    usa os.environ.get(\"NOMBRE\") y pon el valor en .env%s\n" "$GRIS" "$FIN"
+fi
+
+# ---------------------------------------------------------------
+# 4. Aviso (no bloquea): archivos grandes
+# ---------------------------------------------------------------
+for f in $STAGED; do
+  [ -f "$f" ] || continue
+  KB=$(du -k "$f" 2>/dev/null | cut -f1)
+  if [ -n "$KB" ] && [ "$KB" -gt 5000 ]; then
+    printf "%saviso%s  %s pesa %s KB — ¿seguro que va al repo?\n" "$AMARILLO" "$FIN" "$f" "$KB"
+  fi
+done
+
+if [ "$FALLO" -ne 0 ]; then
+  printf "\n%sSi de verdad es un falso positivo:%s agrega  %s# permitido: no-es-secreto%s  al final de esa línea.\n" "$GRIS" "$FIN" "$AMARILLO" "$FIN"
+  printf "%sSi la llave YA se subió: rotarla primero. Borrarla del repo no la des-filtra.%s\n\n" "$GRIS" "$FIN"
+  exit 1
+fi
+
+exit 0

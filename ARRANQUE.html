@@ -284,7 +284,7 @@
           <span class="role">Mapa</span>
         </div>
         <div class="label">Ahora mismo</div>
-        <p class="task">El grafo contra un <b>log falso de diez líneas</b> escrito a mano. Dos correcciones al código que ya existe: la visibilidad es lo que el agente <b>vio</b>, no lo que escribió; y el corte mínimo lleva capacidades — 1 en transferencias del canal, enorme en derivaciones internas.</p>
+        <p class="task">El grafo contra un <b>log de ejemplo de diez líneas</b> escrito a mano. Dos correcciones al código que ya existe: la visibilidad es lo que el agente <b>vio</b>, no lo que escribió; y el corte mínimo lleva capacidades — 1 en transferencias del canal, enorme en derivaciones internas.</p>
         <div class="hand">Le entrega a <b>D</b>: los números y las figuras.</div>
       </div>
 
@@ -524,9 +524,9 @@ visibilidad = len(visto_por[agente] & ancestros) / len(ancestros)</code></pre>
       <table>
         <thead><tr><th>Hora</th><th>Bloque</th><th>Sale de aquí</th></tr></thead>
         <tbody>
-          <tr><td class="m">ahora</td><td>Congelar el esquema y escribir a mano un <b>log falso de 10 líneas</b></td><td>Si no se puede escribir a mano, el esquema está mal diseñado</td></tr>
+          <tr><td class="m">ahora</td><td>Congelar el esquema y escribir a mano un <b>log de ejemplo de 10 líneas</b></td><td>Si no se puede escribir a mano, el esquema está mal diseñado</td></tr>
           <tr><td class="m">+15 min</td><td><b>Pre-registro.</b> Las curvas que predecimos y qué nos haría decir que nos equivocamos</td><td>Apéndice del paper, ya hecho</td></tr>
-          <tr><td class="m">—</td><td>Construir, cada quien contra su entrada falsa</td><td>Nadie espera a nadie</td></tr>
+          <tr><td class="m">—</td><td>Construir, cada quien contra su entrada de ejemplo</td><td>Nadie espera a nadie</td></tr>
           <tr><td class="m">12:00</td><td><b>G1</b> · un episodio corre de punta a punta</td><td>Infraestructura de pie</td></tr>
           <tr><td class="m">12:00</td><td>Calibrar: que la población lo logre <em>a veces</em> y que N=1 no lo logre <em>nunca</em></td><td></td></tr>
           <tr><td class="m">14:30</td><td><b>G2</b> · Δc &gt; 0 al menos una vez</td><td>El fenómeno existe</td></tr>
@@ -557,7 +557,7 @@ visibilidad = len(visto_por[agente] & ancestros) / len(ancestros)</code></pre>
   <div class="ps" id="reparto">
     <h3>Reparto y entregas</h3>
     <div class="callout">
-      <p><b>La regla que convierte la fila india en trabajo paralelo:</b> nadie espera la entrada real. Del bloque de esquema sale un <b>log falso de diez líneas</b>. C escribe todo el código del grafo contra ese archivo, D escribe con números inventados marcados en rojo, B trabaja contra un contenedor simulado. Cuando llegan los datos reales solo se cambia la entrada.</p>
+      <p><b>La regla que convierte la fila india en trabajo paralelo:</b> nadie espera la entrada real. Del bloque de esquema sale un <b>log de ejemplo de diez líneas</b>. C escribe todo el código del grafo contra ese archivo, D escribe con números de relleno marcados en rojo, B trabaja contra un contenedor simulado. Cuando llegan los datos reales solo se cambia la entrada.</p>
     </div>
     <div class="tw">
       <table>
@@ -565,8 +565,8 @@ visibilidad = len(visto_por[agente] & ancestros) / len(ancestros)</code></pre>
         <tbody>
           <tr><td><b>A · Entorno</b></td><td>Contenedores con red desactivada, canal <code>.jsonl</code>, auditoría individual, y el puente <code>docker exec</code> desde el host. Al final, el repositorio reproducible</td><td class="m">—</td><td><b>B</b>: un comando que corre un episodio</td></tr>
           <tr><td><b>B · Trazas</b></td><td>Bucle de agentes en el host, registro por el esquema, propagación de ancestros acotada a la ventana, los dos monitores</td><td class="m">contenedor simulado</td><td><b>C</b>: los archivos de log</td></tr>
-          <tr><td><b>C · Mapa</b></td><td>El DAG con capacidades, las cuatro preguntas con la visibilidad corregida, la réplica contrafactual, la validación contra METR</td><td class="m">el log falso</td><td><b>D</b>: números y figuras</td></tr>
-          <tr><td><b>D · Paper</b></td><td>Dueño único del documento. Pre-registro primero. La sonda de conocimiento prestado queda como objetivo secundario con permiso de fallar</td><td class="m">números inventados</td><td><b>Apart</b>, domingo 16:00</td></tr>
+          <tr><td><b>C · Mapa</b></td><td>El DAG con capacidades, las cuatro preguntas con la visibilidad corregida, la réplica contrafactual, la validación contra METR</td><td class="m">el log de ejemplo</td><td><b>D</b>: números y figuras</td></tr>
+          <tr><td><b>D · Paper</b></td><td>Dueño único del documento. Pre-registro primero. La sonda de conocimiento prestado queda como objetivo secundario con permiso de fallar</td><td class="m">números de relleno</td><td><b>Apart</b>, domingo 16:00</td></tr>
         </tbody>
       </table>
     </div>
