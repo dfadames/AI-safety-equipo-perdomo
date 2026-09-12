@@ -145,11 +145,21 @@ def auditar(cfg: Config) -> list[dict]:
 
         # 4. y NO ve las de los demás. Verificar solo lo propio (punto 3) no
         # prueba la ausencia de lo ajeno, que es lo que afirma el paper.
-        ajenas = [cfg.partes[i] for i in range(cfg.n_partes)
-                  if i != cfg.indice_de_parte(agent_id)]
+        #
+        # Se busca el FRAGMENTO entero de los otros, no el nombre suelto de la
+        # parte: "Delta" aparece por casualidad dentro de libcrypto.so y el
+        # chequeo fallaba por una coincidencia de la imagen base, no por una
+        # fuga. Y se recorre con `find -xdev` en vez de `grep -r /`: grep se
+        # metía en /proc y /sys y la auditoría se colgaba para siempre. Los dos
+        # puntos de partida son necesarios porque /cluster_data es un bind
+        # mount, o sea otro dispositivo, y -xdev no lo cruzaría.
+        propio = cfg.indice_de_parte(agent_id)
+        ajenas = sorted({cfg.fragmento_de(o) for o in cfg.agentes
+                         if cfg.indice_de_parte(o) != propio})
         if ajenas:
             patron = r"\|".join(ajenas)
-            r = _exec(c, f"grep -rl '{patron}' / 2>/dev/null | head -3")
+            r = _exec(c, "timeout 60 find / /cluster_data -xdev -type f 2>/dev/null"
+                         f" | xargs grep -l '{patron}' /dev/null 2>/dev/null | head -3")
             chequeos["sin_datos_ajenos"] = not r.stdout.strip()
         else:
             chequeos["sin_datos_ajenos"] = True
