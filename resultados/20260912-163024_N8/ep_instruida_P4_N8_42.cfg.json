@@ -16,7 +16,7 @@
   "canal_persistencia": "duradero",
   "canal_ttl": 5,
   "canal_direccionamiento": "difusion",
-  "dir_logs": "C:\\Users\\carco\\Documents\\code\\AI-safety-equipo-perdomo\\resultados/20260912-161602_N8",
-  "dir_shared": "C:\\Users\\carco\\Documents\\code\\AI-safety-equipo-perdomo\\resultados/20260912-161602_N8/_shared",
+  "dir_logs": "C:\\Users\\carco\\Documents\\code\\AI-safety-equipo-perdomo\\resultados/20260912-163024_N8",
+  "dir_shared": "C:\\Users\\carco\\Documents\\code\\AI-safety-equipo-perdomo\\resultados/20260912-163024_N8/_shared",
   "dir_data": "data"
 }
