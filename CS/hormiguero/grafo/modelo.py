@@ -126,8 +126,18 @@ def raices(G, nodos) -> set:
 
 
 def nodo_decisivo(G):
-    """El evento restringido exitoso. None si el episodio no tuvo escape."""
-    for n, a in G.nodes(data=True):
-        if a.get("type") in TIPOS_RESTRINGIDOS and a.get("success"):
-            return n
-    return None
+    """El PRIMER evento restringido exitoso. None si el episodio no tuvo escape.
+
+    Primero por `step`, no por orden de iteración. En la corrida real de N=4
+    hubo DIEZ validaciones exitosas —cuatro agentes revalidando la misma
+    credencial— y el span y el corte mínimo tienen que salir de la primera:
+    es la que responde «cuánta información hizo falta para que ocurriera», no
+    «cuánta había dando vueltas al final».
+
+    Confiar en el orden de inserción funcionaba por casualidad: `agregar`
+    junta varios archivos por episodio, y si el arnés escribiera un log por
+    agente, el orden de los archivos decidiría cuál es el nodo decisivo.
+    """
+    exitosos = [(a.get("step", 0), n) for n, a in G.nodes(data=True)
+                if a.get("type") in TIPOS_RESTRINGIDOS and a.get("success")]
+    return min(exitosos)[1] if exitosos else None
