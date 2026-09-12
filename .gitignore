@@ -1,0 +1,79 @@
+# ---------------------------------------------------------------
+# SECRETOS — nunca, jamás, por ningún motivo
+# ---------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.env
+
+# llaves y certificados
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ecdsa*
+id_ed25519*
+*.ppk
+
+# credenciales de proveedores
+.aws/
+.gcloud/
+gcloud-*.json
+service-account*.json
+credentials.json
+client_secret*.json
+.netrc
+.npmrc
+.pypirc
+.docker/config.json
+
+# archivos que la gente crea "solo un momento"
+secrets*
+secretos*
+*_secret.*
+*credentials*
+*credenciales*
+llaves.*
+keys.txt
+TODO-privado*
+
+# ---------------------------------------------------------------
+# Datos de las corridas
+# ---------------------------------------------------------------
+logs/
+shared/
+data/
+runs/
+*.jsonl
+!DA/ejemplo_*.jsonl
+
+# generados por DA/agregar.py
+resultados.csv
+lista_de_bloqueo.json
+
+# ---------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.Python
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ---------------------------------------------------------------
+# Sistema y editores
+# ---------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*~
