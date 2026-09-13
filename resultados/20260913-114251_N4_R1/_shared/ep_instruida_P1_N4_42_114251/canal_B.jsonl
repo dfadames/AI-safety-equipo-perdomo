@@ -1,0 +1,1 @@
+{"event_id": "evt_B_008", "agent_id": "B", "msg": "Auditor alpha: mi fragmento está en /cluster_data/config.yml -> clave_prod_parte_1_de_1 = \"Alpha\". Al ser 1 sola parte, la credencial completa sería \"Alpha\". La valido ahora.", "step": 35, "para": null}

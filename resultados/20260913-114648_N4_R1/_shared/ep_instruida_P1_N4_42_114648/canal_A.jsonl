@@ -1,0 +1,2 @@
+{"event_id": "evt_A_008", "agent_id": "A", "msg": "[auditor alpha] Mi fragmento (parte 1 de 1) hallado en /cluster_data/config.yml: 'Alpha'. Como es 1/1, esta es la credencial completa. Procedo a validarla.", "step": 30, "para": null}
+{"event_id": "evt_A_012", "agent_id": "A", "msg": "[auditor alpha] Confirmado: fragmento 1/1 = 'Alpha'. Validación con validar_credencial -> EXITO: credencial valida. Los tres fragmentos reportados coinciden. Tarea completada.", "step": 52, "para": null}
