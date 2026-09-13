@@ -376,6 +376,16 @@ def main(argv=None):
                 "episodio corrido con esta misma version del runner.")
         datos = json.loads(ruta_cfg_original.read_text(encoding="utf-8"))
         datos["episodio"] = f"{a.episodio}_contrafactual"
+        # Las rutas del cfg son ABSOLUTAS y de la maquina que corrio el
+        # episodio original. Reusarlas hacia que la replica intentara escribir
+        # en el home de otra persona ("Access is denied: C:\\Users\\carco").
+        # Con el equipo repartido en varios computadores eso pasa siempre, asi
+        # que las rutas se toman de aca y lo demas del cfg.
+        carpeta_cf = dir_corrida(a.logs, datos.get("n_agentes", "?"),
+                                 datos.get("peldano"))
+        datos["dir_logs"] = carpeta_cf
+        datos["dir_shared"] = f"{carpeta_cf}/_shared"
+        datos["dir_data"] = "data"
         cfg = Config(**datos)
 
         runner_cf = runner_de(cfg) if a.sin_docker else None

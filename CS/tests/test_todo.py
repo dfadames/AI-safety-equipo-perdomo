@@ -389,6 +389,19 @@ alertas = chequear(filas)
 # csv no tenia con que distinguirlo. Ahora el chequeo lo dice solo.
 check("caza que la corrida es simulada",
       sum(1 for a in alertas if "--proveedor simulado" in a), 1)
+
+# Un episodio interrumpido a los segundos entra como "sin escape" y sesga la
+# tasa hacia abajo. Paso: dos corridas abortadas de N=8 (4k tokens, 5 de 8
+# agentes) bajaron ese punto de 100% a 60%.
+_ev_trunc = [
+    {"event_id": "t1", "episode": "ep_cortado", "condition": "instruida", "step": 1,
+     "agent_id": "A", "type": "ejecutar", "content": "buscando", "ancestors": [],
+     "config": {"n_agentes": 8, "n_partes": 4, "peldano": "R1", "proveedor": "deepseek"}},
+]
+f_tr = fila("ep_cortado", _ev_trunc)[0]
+check("marca el episodio truncado", f_tr["episodio_completo"], False)
+check("y el chequeo lo reporta",
+      sum(1 for a in chequear([f_tr]) if "TRUNCADOS" in a), 1)
 check("sin otras alertas espurias",
       [a for a in alertas if "--proveedor simulado" not in a], [])
 cur = curvas(filas)
@@ -402,23 +415,28 @@ from collections import Counter as _Counter
 from hormiguero.plan import OBJETIVO, faltantes, hechos
 
 check("sin nada hecho, pide el diseno completo",
-      sum(k for _c, _p, _n, k, _q in faltantes(OBJETIVO, _Counter())),
-      sum(eps for _c, _p, _n, eps, _q in OBJETIVO))
+      sum(k for *_c, k, _q in faltantes(OBJETIVO, _Counter())),
+      sum(eps for *_c, eps, _q in OBJETIVO))
 
-_ya = _Counter({(c, p, n): eps for c, p, n, eps, _q in OBJETIVO})
+_ya = _Counter({(c, p, n, pa): eps for c, p, n, pa, eps, _q in OBJETIVO})
 check("con todo hecho, no pide nada", faltantes(OBJETIVO, _ya), [])
 
-_parcial = _Counter({("emergente", "R2", 4): 3, ("instruida", "R1", 4): 1})
+# El punto experimental incluye n_partes: sin eso, los tres episodios de P=4
+# taparian los de P=2 y el barrido de profundidad no se correria nunca.
+_parcial = _Counter({("emergente", "R2", 4, 4): 3, ("instruida", "R1", 4, 4): 1})
 _falta = faltantes(OBJETIVO, _parcial)
+_por_clave = {(c, p, n, pa): k for c, p, n, pa, k, _q in _falta}
 check("descuenta lo ya corrido, punto por punto",
-      {(c, p, n): k for c, p, n, k, _q in _falta}.get(("instruida", "R1", 4)), 2)
+      _por_clave.get(("instruida", "R1", 4, 4)), 2)
+check("no confunde profundidades distintas",
+      _por_clave.get(("instruida", "R1", 4, 2)), 3)
 check("y saca del plan los puntos completos",
-      any(c == "emergente" and p == "R2" for c, p, _n, _k, _q in _falta), False)
+      any(c == "emergente" and p == "R2" for c, p, *_r in _falta), False)
 
 # `hechos` lee los cfg.json, no los nombres de carpeta: el nombre cambio de
 # formato a mitad del proyecto, el cfg no.
 check("cuenta los episodios leyendo los cfg.json",
-      hechos(str(tmp))[("instruida", "R1", 4)] >= 1, True)
+      hechos(str(tmp))[("instruida", "R1", 4, 4)] >= 1, True)
 
 # ---------------------------------------------------------------------------
 seccion("EXPORTACION para la figura")
