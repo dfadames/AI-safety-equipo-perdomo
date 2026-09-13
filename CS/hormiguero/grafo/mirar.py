@@ -92,9 +92,12 @@ def datos_del_episodio(episodio: str, eventos: list[dict]) -> dict:
 
 
 def exportar_html(rutas, ruta_salida="mapa.html") -> str:
-    grupos: dict[str, list[dict]] = defaultdict(list)
-    for e in leer_eventos(*rutas):
-        grupos[e.get("episode", "sin_episodio")].append(e)
+    # La misma agrupacion que el csv: dos corridas distintas pueden traer el
+    # mismo `episode` (semilla fija), y fundirlas produce ciclos en el grafo.
+    # Agrupar aca por separado hacia que la pagina se saltara esos episodios
+    # mientras el csv si los mostraba.
+    from .agregar import por_episodio
+    grupos = por_episodio(*rutas)
     if not grupos:
         raise SystemExit("No se encontro ningun evento en esas rutas.")
 
