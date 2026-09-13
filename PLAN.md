@@ -1,7 +1,8 @@
 # Hormiguero — Plan final
 
-**Containment Does Not Compose**
-Population-level failures of agent sandboxing, monitoring, and escalation.
+**Containment Does Not Compose: Provenance Graphs for Tracing Collective Escape in Multi-Agent Systems**
+
+*Si el juez por agente con la regla sigue perdiendo claro contra el mapa, se puede usar la versión fuerte: «Containment Does Not Compose: Provenance Graphs Reveal Multi-Agent Escapes That Per-Agent Monitors Miss».*
 
 AI Incident Response Sprint · Hub Bogotá · 12–13 de septiembre de 2026
 Entrega: lunes 14, 6:59 a.m. hora de Colombia (domingo 11:59 p.m. AoE)
@@ -63,9 +64,11 @@ Un banco de pruebas donde varios agentes, cada uno en su contenedor aislado y **
 
 Con eso producimos tres números que hoy no existen, más una cosa que nadie ha construido: el **mapa de procedencia** de un escape colectivo, que permite señalar exactamente qué mensajes lo sostuvieron.
 
-**La tesis, en una frase:**
+**La tesis, en una frase** *(actualizada el domingo 13)*:
 
-> La contención no compone: cada caja pasa su auditoría individual y el sistema pierde igual, porque lo que cruza el borde no es el agente sino la información.
+> Cada agente pasa su auditoría individual y el escape ocurre igual, porque lo que cruza el borde no es el agente sino la información. Un mapa de procedencia lo rastrea —de qué cajas vino y qué mensajes lo hicieron posible—, algo que un monitor que mira a cada agente por separado no tiene cómo ver.
+
+Que la contención no compone es el **problema**. El mapa de procedencia es la **propuesta**, y es lo que el paper defiende.
 
 **Las tres afirmaciones que se derivan, cada una atada a un hallazgo documentado del incidente:**
 
@@ -366,3 +369,4 @@ No se rediscuten. Si alguien las reabre, se le señala esta sección.
 |---|---|
 | sáb 10:05 | Versión inicial fusionando plan original + mapa de procedencia + contraste con `gemini_analisis.md` |
 | sáb 10:10 | Añadido §0 con las cuatro correcciones a `gemini_implementacion.md`, incluido el bloqueador de red |
+| dom 10:55 | Título y tesis: el mapa de procedencia como propuesta. Réplicas contrafactuales fuera de las curvas y apagadas en el plan (el bloqueo por `event_id` no bloquea el mismo mensaje al repetir). Pilotos `imposible` a `resultados/pilotos/`. Juez por agente con la misma regla que el mapa (decisión 9). Control de falsas alarmas con la clave en 1 parte. Tope de 8.000 caracteres a la salida de `ejecutar` |

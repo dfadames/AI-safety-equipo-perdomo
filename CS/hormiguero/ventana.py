@@ -32,6 +32,14 @@ NOTIFICAR_HUMANO_DESCRIPCION = (
 )
 
 
+def recortar_salida(texto: str, tope: int) -> str:
+    """La salida de un comando, con tope (ver `Config.max_salida`). El agente
+    se entera de que la recortaron, igual que con el tope del canal."""
+    if texto is None or len(texto) <= tope:
+        return texto
+    return texto[:tope] + f"\n[salida recortada: se muestran {tope} de {len(texto)} caracteres]"
+
+
 class Ventana:
     def __init__(
         self,
@@ -121,7 +129,7 @@ class Ventana:
         se deriva de nada que el agente haya visto. Las siguientes heredan la
         ventana, por si el comando se eligió a partir de algo del canal."""
         ancestros = [] if self._raiz_local is None else self.snapshot()
-        salida = self._runner(self.contenedor, comando)
+        salida = recortar_salida(self._runner(self.contenedor, comando), self.cfg.max_salida)
         evt = self.registro.escribir(
             agent_id=self.agent_id, source_container=self.contenedor,
             type_="ejecutar", content={"cmd": comando, "out": salida},

@@ -53,6 +53,20 @@ def normalizar(e: dict) -> dict:
     return e
 
 
+# Carpetas que NO son episodios del diseño, dentro de una carpeta de resultados:
+#   _shared  -> los archivos del canal, otro esquema.
+#   pilotos  -> corridas con un protocolo que después cambió (los dos `imposible`
+#               de N=2). Se guardan, pero no entran al csv, al plan, al monitor
+#               ni a la página. Para mirarlas: `agregar resultados/pilotos`.
+CARPETAS_IGNORADAS = {"_shared", "pilotos"}
+
+
+def ignorada(archivo: Path, raiz: Path) -> bool:
+    """Si `archivo` cuelga de una carpeta ignorada DEBAJO de `raiz`. Se mira la
+    ruta relativa: pasar `resultados/pilotos` como raíz sí los incluye."""
+    return bool(CARPETAS_IGNORADAS & set(archivo.relative_to(raiz).parts[:-1]))
+
+
 def _expandir(ruta) -> list[str]:
     """Acepta un archivo, un comodín o un DIRECTORIO. Lo último importa: en
     PowerShell los comodines no se expanden solos y `logs/*.jsonl` llega
@@ -60,10 +74,8 @@ def _expandir(ruta) -> list[str]:
     p = Path(ruta)
     if p.is_dir():
         # rglob porque los logs viven en `runs/<timestamp>_N<n>/`: `agregar runs`
-        # junta todas las corridas, `agregar runs/<corrida>` solo esa. `_shared`
-        # queda afuera — son los archivos del canal, otro esquema.
-        return sorted(str(x) for x in p.rglob("*.jsonl")
-                      if "_shared" not in x.parts)
+        # junta todas las corridas, `agregar runs/<corrida>` solo esa.
+        return sorted(str(x) for x in p.rglob("*.jsonl") if not ignorada(x, p))
     return sorted(glob.glob(str(ruta)))
 
 
