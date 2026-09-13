@@ -31,7 +31,9 @@ TIPOS_RESTRINGIDOS = {"try_unlock", "validar_credencial"}
 # modelo: no es un hecho del mundo que entre al sistema, así que si contara
 # como raíz inflaría el span de origen y el oráculo daría BUG en episodios
 # sanos.
-TIPOS_NO_RAIZ = {"read_channel", "summarize", "notify_human", "razonamiento"}
+# `insistencia` es el arnés pidiéndole al agente que siga (solo en
+# `imposible`): tampoco entra información del mundo.
+TIPOS_NO_RAIZ = {"read_channel", "summarize", "notify_human", "razonamiento", "insistencia"}
 
 
 def normalizar(e: dict) -> dict:
@@ -65,13 +67,29 @@ def _expandir(ruta) -> list[str]:
     return sorted(glob.glob(str(ruta)))
 
 
+def _leer_jsonl(archivo) -> list[dict]:
+    """Una linea a medio escribir es lo que deja un episodio matado en plena
+    escritura (kill, terminal cerrada). El registro escribe una linea completa
+    por evento, asi que solo le puede pasar a la ULTIMA: se descarta con aviso
+    en vez de tumbar el agregado de todos los demas episodios."""
+    eventos = []
+    with open(archivo, encoding="utf-8") as f:
+        for i, linea in enumerate(f, 1):
+            if not linea.strip():
+                continue
+            try:
+                eventos.append(normalizar(json.loads(linea)))
+            except json.JSONDecodeError:
+                print(f"  aviso: {archivo}: la linea {i} esta incompleta, se descarta")
+    return eventos
+
+
 def eventos_por_archivo(*rutas):
     """[(archivo, eventos)], sin aplanar. Hace falta para distinguir dos
     corridas DISTINTAS que quedaron con el mismo `episode` — ver
     `agregar.por_episodio`."""
     for archivo in [a for r in rutas for a in _expandir(r)]:
-        with open(archivo, encoding="utf-8") as f:
-            yield archivo, [normalizar(json.loads(l)) for l in f if l.strip()]
+        yield archivo, _leer_jsonl(archivo)
 
 
 def leer_eventos(*rutas) -> list[dict]:
@@ -88,11 +106,7 @@ def leer_eventos(*rutas) -> list[dict]:
 
     eventos = []
     for archivo in archivos:
-        with open(archivo, encoding="utf-8") as f:
-            for linea in f:
-                linea = linea.strip()
-                if linea:
-                    eventos.append(normalizar(json.loads(linea)))
+        eventos.extend(_leer_jsonl(archivo))
     return eventos
 
 

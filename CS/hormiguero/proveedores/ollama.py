@@ -12,7 +12,7 @@ from typing import Optional
 
 from .base import (
     LlamadaTool, ProveedorLLM, RespuestaLLM, ToolSpec,
-    Turno, TurnoAsistente, TurnoSistema, TurnoToolResult,
+    Turno, TurnoAsistente, TurnoSistema, TurnoToolResult, TurnoUsuario,
 )
 
 
@@ -50,6 +50,8 @@ class ProveedorOllama(ProveedorLLM):
                 out.append(m)
             elif isinstance(t, TurnoToolResult):
                 out.append({"role": "tool", "tool_name": t.nombre_tool, "content": t.contenido})
+            elif isinstance(t, TurnoUsuario):
+                out.append({"role": "user", "content": t.texto})
         return out
 
     def llamar(self, historial: list[Turno], herramientas: list[ToolSpec]) -> RespuestaLLM:

@@ -87,7 +87,14 @@ class TurnoToolResult:
     contenido: str
 
 
-Turno = Union[TurnoSistema, TurnoAsistente, TurnoToolResult]
+@dataclass(frozen=True)
+class TurnoUsuario:
+    """Un mensaje del arnés al agente a mitad del episodio. Hoy solo lo usa
+    la insistencia de `imposible` (ver prompts.INSISTENCIA)."""
+    texto: str
+
+
+Turno = Union[TurnoSistema, TurnoAsistente, TurnoToolResult, TurnoUsuario]
 
 
 @dataclass(frozen=True)

@@ -42,9 +42,12 @@ def _ruta_cfg(ruta_log: str) -> str:
     return f"{base}.cfg.json"
 
 
-def _escribir_cfg(cfg: Config) -> None:
+def _escribir_cfg(cfg: Config, **extra) -> None:
+    """`extra` lleva lo que es del episodio corrido y no de la Config
+    (`estado`, `turnos_por_agente`). `repetir` lo descarta al reconstruirla."""
     Path(_ruta_cfg(cfg.ruta_log())).write_text(
-        json.dumps(dataclasses.asdict(cfg), ensure_ascii=False, indent=2), encoding="utf-8")
+        json.dumps({**dataclasses.asdict(cfg), **extra}, ensure_ascii=False, indent=2),
+        encoding="utf-8")
 
 
 def config_del_punto(cfg: Config) -> dict:
@@ -71,6 +74,16 @@ def correr_episodio(cfg: Config, proveedor_de, runner=None, con_docker: bool = F
     lista_de_bloqueo` y el subcomando `repetir`)."""
     random.seed(cfg.semilla)
 
+    # Con Docker (`runner=None`) las pistas viven en `data/<agente>`, montado
+    # en cada caja. El cluster se levanta una vez por N, con la config de quien
+    # lo levanto (n_partes=4, condicion instruida): asi corrieron los P=2/P=3
+    # con pistas de 4 partes, y un `imposible` correria con las 4 partes a la
+    # vista. Se reescriben para ESTE episodio; el montaje es en vivo, asi que
+    # no hace falta recrear las cajas.
+    if runner is None:
+        from .contenedores import preparar_datos
+        preparar_datos(cfg)
+
     registro = Registro(cfg.ruta_log(), cfg.episodio, cfg.semilla, cfg.condicion,
                         config=config_del_punto(cfg))
     canal = Canal(cfg.ruta_shared(), cfg, bloqueados=bloqueados)
@@ -78,16 +91,33 @@ def correr_episodio(cfg: Config, proveedor_de, runner=None, con_docker: bool = F
     sesiones = [SesionAgente(proveedor_de(a), registro, canal, cfg, a, runner=runner)
                 for a in cfg.agentes]
 
-    # ronda robin hasta que todos terminen o se acabe el presupuesto de pasos
-    for _ronda in range(cfg.max_pasos):
-        vivos = False
-        for s in sesiones:
-            if s.paso():
-                vivos = True
-        if not vivos:
-            break
-
-    _escribir_cfg(cfg)
+    # El cfg se escribe AL EMPEZAR, no al final. Antes solo se escribia al
+    # terminar, y un episodio cortado (Ctrl+C, una terminal cerrada) dejaba un
+    # .jsonl sin cfg: el plan no lo contaba, `repetir` no lo podia repetir y
+    # el agregado lo metia como "sin escape". El log ya se escribe evento a
+    # evento; con esto el episodio queda identificado desde el primer paso.
+    #
+    # `estado` dice como termino: "completo", "interrumpido" (Ctrl+C) o
+    # "error: ...". Si el proceso muere sin poder escribir nada (kill), queda
+    # "en_curso", que el plan y el agregado tratan igual que interrumpido.
+    _escribir_cfg(cfg, estado="en_curso")
+    estado = "interrumpido"
+    try:
+        # ronda robin hasta que todos terminen o se acabe el presupuesto de pasos
+        for _ronda in range(cfg.max_pasos):
+            vivos = False
+            for s in sesiones:
+                if s.paso():
+                    vivos = True
+            if not vivos:
+                break
+        estado = "completo"
+    except Exception as e:
+        estado = f"error: {type(e).__name__}"
+        raise
+    finally:
+        _escribir_cfg(cfg, estado=estado,
+                      turnos_por_agente={s.agent_id: s.turnos for s in sesiones})
     return cfg.ruta_log()
 
 
@@ -283,6 +313,10 @@ def main(argv=None):
     u.add_argument("--n-partes", type=int, default=4)
     u.add_argument("--condicion", default="instruida")
     u.add_argument("--semilla", type=int, default=42)
+    # Solo `imposible`: los controles corrieron con 10 turnos y cambiarles el
+    # tope los vuelve incomparables con lo ya corrido.
+    u.add_argument("--max-pasos", type=int, default=None,
+                   help="turnos por agente; solo con --condicion imposible (por defecto 30)")
 
     b = sub.add_parser("barrido", parents=[comun])
     b.add_argument("--N", type=int, nargs="+", default=[1, 2, 4, 8])
@@ -386,7 +420,7 @@ def main(argv=None):
         datos["dir_logs"] = carpeta_cf
         datos["dir_shared"] = f"{carpeta_cf}/_shared"
         datos["dir_data"] = "data"
-        cfg = Config(**datos)
+        cfg = Config.desde_dict(datos)
 
         runner_cf = runner_de(cfg) if a.sin_docker else None
         ruta = correr_episodio(cfg, _proveedor_o_salir(a.proveedor, cfg),
@@ -430,10 +464,18 @@ def main(argv=None):
         # agrupa por `episode`, asi que los tres se fundian en UNO. Y como los
         # event_id son deterministas, al fundirse aparecian ciclos en el grafo.
         # Repetir es justo lo que hace falta para tener n>1: no puede romperse.
-        cfg = Config(n_agentes=a.N, n_partes=a.n_partes, condicion=a.condicion,
-                     peldano=pel, escenario=esc, semilla=a.semilla,
-                     episodio=f"ep_{a.condicion}_P{a.n_partes}_N{a.N}{tag}_{a.semilla}_{marca[-6:]}",
-                     dir_logs=carpeta, dir_shared=f"{carpeta}/_shared", **canal)
+        if a.max_pasos is not None and a.condicion != "imposible":
+            raise SystemExit("--max-pasos solo aplica a --condicion imposible: los controles "
+                             "corrieron con 10 turnos y cambiarlo los vuelve incomparables.")
+        # Una combinacion invalida (p. ej. `imposible` con N=2) es un error de
+        # uso, no un bug: sale con el mensaje, sin traza de Python.
+        try:
+            cfg = Config(n_agentes=a.N, n_partes=a.n_partes, condicion=a.condicion,
+                         peldano=pel, escenario=esc, semilla=a.semilla, max_pasos=a.max_pasos,
+                         episodio=f"ep_{a.condicion}_P{a.n_partes}_N{a.N}{tag}_{a.semilla}_{marca[-6:]}",
+                         dir_logs=carpeta, dir_shared=f"{carpeta}/_shared", **canal)
+        except ValueError as e:
+            raise SystemExit(f"\n  {e}\n")
         runner = runner_de(cfg) if a.sin_docker else None
         ruta = correr_episodio(cfg, _proveedor_o_salir(a.proveedor, cfg), runner=runner)
         print(f"log: {ruta}")

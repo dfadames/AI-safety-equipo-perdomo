@@ -11,16 +11,32 @@ config y no se pasa suelto.
 from __future__ import annotations
 
 import json
+import re
 from typing import Optional
 
 from .canal import Canal
 from .config import Config
-from .prompts import prompt_sistema
+from .prompts import INSISTENCIA, prompt_sistema
 from .proveedores.base import (
     HERRAMIENTAS, ProveedorLLM, Turno, TurnoAsistente, TurnoSistema, TurnoToolResult,
+    TurnoUsuario,
 )
 from .registro import Registro
 from .ventana import Ventana
+
+# Cuantas veces seguidas se empuja a un agente de `imposible` que no avanza
+# (se rinde, o solo duerme / relee el canal vacio) antes de dejarlo terminar.
+# Sin este tope, un agente estancado quemaba los 30 turnos en `sleep` y cada
+# turno es una llamada al modelo: casi todo el costo del episodio se iba en
+# nada. Se lo insiste unas pocas veces y, si sigue sin producir, se detiene.
+MAX_SIN_AVANCE = 3
+
+# El resumen de contexto se mantiene PLANO y acotado. Antes cada compactacion
+# reincrustaba el resumen anterior ("summarize: Resumen de: summarize: ...")
+# y el texto crecia sin fin: el episodio N=2 gasto 287k tokens, casi todo en
+# ese relleno anidado que se reenvia en cada llamada.
+PREFIJO_RESUMEN = "Resumen de lo anterior: "
+MAX_RESUMEN = 800
 
 
 class SesionAgente:
@@ -36,6 +52,7 @@ class SesionAgente:
                                resumen_fn=self._resumir_y_podar)
         self.terminado = False
         self.turnos = 0   # turnos del modelo: es lo que cuesta tokens
+        self._sin_avance = 0   # turnos seguidos sin producir nada (solo `imposible`)
 
     # -- compactación sincronizada -----------------------------------------
 
@@ -48,11 +65,19 @@ class SesionAgente:
         textos = []
         for t in a_comprimir:
             if isinstance(t, TurnoToolResult):
-                textos.append(f"{t.nombre_tool}: {t.contenido[:120]}")
+                # Un resumen previo entra PLANO, sin el prefijo ni la etiqueta
+                # `summarize:`: reincrustarlos era lo que encadenaba el texto.
+                if t.nombre_tool == "summarize":
+                    c = t.contenido
+                    textos.append(c[len(PREFIJO_RESUMEN):] if c.startswith(PREFIJO_RESUMEN) else c)
+                else:
+                    textos.append(f"{t.nombre_tool}: {t.contenido[:120]}")
             elif isinstance(t, TurnoAsistente) and t.texto:
                 textos.append(t.texto[:120])
-        resumen = "Resumen de lo anterior: " + " | ".join(textos) if textos else \
+        resumen = PREFIJO_RESUMEN + " | ".join(textos) if textos else \
                   f"Resumen de {n} pasos anteriores."
+        if len(resumen) > MAX_RESUMEN:
+            resumen = resumen[:MAX_RESUMEN] + " […]"
         self.historial = [sistema, TurnoToolResult("summarize", resumen)] + quedan
         return resumen
 
@@ -88,16 +113,57 @@ class SesionAgente:
         self.registro.sumar_tokens(r.tokens)
         self._registrar_razonamiento(r.texto)
 
+        # Un turno que NO se rinde y NO es solo `sleep`/canal vacio cuenta como
+        # avance. En las demas condiciones no se mide esto: rendirse termina el
+        # episodio (como antes) y un turno ocioso simplemente gasta su turno.
         if not r.tool_calls:
-            self.historial.append(TurnoAsistente(texto=r.texto))
+            self.historial.append(TurnoAsistente(texto=r.texto,
+                                                 reasoning_content=r.reasoning_content))
+            if self.cfg.es_imposible:
+                return self._sin_progreso()
             self.terminado = True
             return False
 
         self.historial.append(TurnoAsistente(texto=r.texto, tool_calls=r.tool_calls,
                                              reasoning_content=r.reasoning_content))
+        avance = False
         for tc in r.tool_calls:
             resultado = self._despachar(tc.nombre, tc.argumentos)
             self.historial.append(TurnoToolResult(tc.nombre, resultado))
+            if self._es_avance(tc.nombre, tc.argumentos, resultado):
+                avance = True
+
+        if self.cfg.es_imposible and not avance:
+            return self._sin_progreso()
+        self._sin_avance = 0
+        return True
+
+    @staticmethod
+    def _es_avance(nombre: str, args: dict, resultado: str) -> bool:
+        """Un `sleep` no hace nada (los agentes actuan por turnos, esperar no
+        adelanta a nadie) y releer el canal vacio tampoco: no cuentan como
+        avance. Lo demas si."""
+        if nombre == "ejecutar":
+            return re.match(r"\s*sleep\b", args.get("comando", "")) is None
+        if nombre == "leer_canal":
+            return bool(resultado) and resultado != "Sin mensajes nuevos."
+        return True   # escribir_canal, validar_credencial, notificar_humano
+
+    def _sin_progreso(self) -> bool:
+        """Solo `imposible`: el agente se rindio o no hizo nada util este turno.
+        Se lo empuja a seguir (INSISTENCIA, que queda en el log como hoja suelta
+        del grafo, igual que `razonamiento`, sin alterar la procedencia). Tras
+        MAX_SIN_AVANCE empujones sin producir, se lo deja terminar en vez de
+        quemar el resto del presupuesto."""
+        self._sin_avance += 1
+        if self._sin_avance > MAX_SIN_AVANCE or self.turnos >= self.cfg.max_pasos:
+            self.terminado = True
+            return False
+        self.registro.escribir(
+            agent_id=self.agent_id, source_container=self.ventana.contenedor,
+            type_="insistencia", content=INSISTENCIA, ancestors=[],
+        )
+        self.historial.append(TurnoUsuario(INSISTENCIA))
         return True
 
     def _despachar(self, nombre: str, args: dict) -> str:

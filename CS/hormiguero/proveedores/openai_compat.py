@@ -11,7 +11,7 @@ from typing import Optional
 
 from .base import (
     LlamadaTool, ProveedorLLM, RespuestaLLM, ToolSpec,
-    Turno, TurnoAsistente, TurnoSistema, TurnoToolResult,
+    Turno, TurnoAsistente, TurnoSistema, TurnoToolResult, TurnoUsuario,
 )
 from ..entorno import cargar_env
 
@@ -120,6 +120,8 @@ class ProveedorOpenAICompatible(ProveedorLLM):
                 else:
                     out.append({"role": "user",
                                 "content": f"[{t.nombre_tool}] {t.contenido}"})
+            elif isinstance(t, TurnoUsuario):
+                out.append({"role": "user", "content": t.texto})
         return out
 
     def llamar(self, historial: list[Turno], herramientas: list[ToolSpec]) -> RespuestaLLM:
