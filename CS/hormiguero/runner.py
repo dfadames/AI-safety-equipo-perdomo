@@ -292,6 +292,13 @@ def _proveedor_por_nombre(nombre: str, cfg: Config):
         cfg.modelo = p.modelo
         return lambda _a: p
 
+    if nombre == "glm":
+        from .proveedores.glm import ProveedorGLM
+        # Tampoco manda semilla, por lo mismo (ver glm.py).
+        p = ProveedorGLM(seed=cfg.semilla)
+        cfg.modelo = p.modelo
+        return lambda _a: p
+
     raise SystemExit(f"proveedor desconocido: {nombre}")
 
 
@@ -305,7 +312,7 @@ def _proveedor_o_salir(nombre: str, cfg: Config):
         raise SystemExit(f"\n{e}\n")
 
 
-PROVEEDORES = ("simulado", "ollama", "openai", "deepseek")
+PROVEEDORES = ("simulado", "ollama", "openai", "deepseek", "glm")
 
 
 def proveedor_por_defecto() -> str:

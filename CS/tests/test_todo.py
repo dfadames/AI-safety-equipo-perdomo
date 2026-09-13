@@ -479,6 +479,14 @@ check("los episodios de v1 no cuentan para el plan de v2",
 check("pero siguen ahi si se piden",
       hechos(str(_dir_real), "v1")[("instruida", "R1", 4, 4)], 1)
 
+# Ni un episodio corrido con OTRO modelo llena el punto: cada modelo tiene los
+# suyos. Sin esto, cambiar de modelo no correria ni un episodio — el plan diria
+# que el diseno ya esta completo.
+check("un episodio de otro modelo no llena el punto",
+      hechos(str(_dir_real), proveedor="glm")[("instruida", "R1", 4, 4)], 0)
+check("y el del modelo que corre, si",
+      hechos(str(_dir_real), proveedor="deepseek")[("instruida", "R1", 4, 4)], 1)
+
 # ---------------------------------------------------------------------------
 seccion("EXPORTACION para la figura")
 dot = exportar_dot(G, tmp / "mapa.dot")

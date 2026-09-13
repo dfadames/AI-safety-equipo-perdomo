@@ -110,9 +110,10 @@ OPCIONALES = [
 ]
 
 
-def hechos(raiz: str, version_tarea: str = VERSION_TAREA) -> Counter:
-    """Cuenta los episodios que YA existen de ESTA version de la tarea, por
-    punto experimental.
+def hechos(raiz: str, version_tarea: str = VERSION_TAREA,
+           proveedor: str | None = None) -> Counter:
+    """Cuenta los episodios que YA existen de ESTA version de la tarea y de ESTE
+    modelo, por punto experimental.
 
     Se leen los `.cfg.json`, no los nombres de carpeta: el nombre puede tener
     el peldano o no segun la version que lo escribio, pero el cfg siempre trae
@@ -145,6 +146,11 @@ def hechos(raiz: str, version_tarea: str = VERSION_TAREA) -> Counter:
         # cfg viejos no traen el campo y son v1.
         if d.get("version_tarea", "v1") != version_tarea:
             continue
+        # Ni uno corrido con OTRO modelo: la brecha se mide por modelo, y las
+        # curvas ya los separan. Sin esto, cambiar de modelo no correria ni un
+        # episodio: el plan diria que los puntos ya estan completos.
+        if proveedor and proveedor != "simulado" and d.get("proveedor") != proveedor:
+            continue
         # Un episodio que no termino (Ctrl+C, un error, un kill) no cuenta como
         # hecho: se vuelve a correr. Los cfg de antes de este campo no lo
         # traen, y esos si terminaron: antes el cfg solo se escribia al final.
@@ -173,7 +179,7 @@ def _docker_disponible() -> bool:
         return False
 
 
-def imprimir_plan(pend, ya: Counter, con_docker: bool) -> int:
+def imprimir_plan(pend, ya: Counter, con_docker: bool, proveedor: str = "") -> int:
     from .runner import PROVEEDORES  # noqa: F401  (solo para fallar temprano si el paquete esta roto)
 
     print("\n  El plan\n")
@@ -198,6 +204,9 @@ def imprimir_plan(pend, ya: Counter, con_docker: bool) -> int:
     print(f"    {total_eps} episodios, ~{total_tok/1000:.0f}k tokens en total")
     print(f"    Tarea: {VERSION_TAREA} - credencial exacta y fragmentos sorteados por episodio. "
           "Los episodios de v1 no cuentan para estos puntos.")
+    if proveedor:
+        print(f"    Modelo: {proveedor} - los episodios corridos con otro modelo tampoco "
+              "cuentan: cada modelo tiene sus propios puntos.")
     print(f"    Contencion: {'contenedores reales' if con_docker else 'EMULADA (sin Docker)'}\n")
     return total_eps
 
@@ -340,18 +349,25 @@ def main(argv=None):
                     help="cuantos por punto (por defecto, lo que dice el diseno)")
     ap.add_argument("--solo", type=int, default=None,
                     help="correr solo los primeros N casos de la lista")
+    ap.add_argument("--proveedor", default=None,
+                    help="con que modelo correr; por defecto, HORMIGUERO_PROVEEDOR del .env")
+    ap.add_argument("--juez", default=None,
+                    help="proveedor del juez por agente; por defecto, el mismo de los agentes")
     ap.add_argument("--logs", default=None, help="por defecto, resultados/")
     a = ap.parse_args(argv)
 
+    from .runner import proveedor_por_defecto
+
     raiz = a.logs or dir_resultados()
-    ya = hechos(raiz)
+    proveedor = "simulado" if a.simulado else (a.proveedor or proveedor_por_defecto())
+    ya = hechos(raiz, proveedor=proveedor)
     objetivo = OBJETIVO + (OPCIONALES if a.con_imposible else [])
     pend = faltantes(objetivo, ya, a.episodios)
     if a.solo:
         pend = pend[:a.solo]
 
     con_docker = (not a.simulado) and _docker_disponible()
-    total = imprimir_plan(pend, ya, con_docker)
+    total = imprimir_plan(pend, ya, con_docker, proveedor)
     # Las replicas y el monitor corren sobre los logs que YA existen, asi que
     # el plan no se detiene solo porque no falten episodios nuevos.
     if a.replicas:
@@ -376,7 +392,6 @@ def main(argv=None):
         raiz = str(copia)
         print(f"  Ensayo sobre una copia, no sobre resultados/:\n    {raiz}\n")
 
-    proveedor = "simulado" if a.simulado else None
     sin_docker = not con_docker
 
     # Docker se levanta por TAMANO de poblacion, no por episodio: con N=8 hacen
@@ -451,7 +466,10 @@ def main(argv=None):
     if not a.sin_monitor:
         print("\n  Linea base: monitor por agente (un juez LLM por traza, con la regla)")
         # En ensayo va `nulo`: prueba el cableado del monitor sin gastar tokens.
-        correr_monitor(raiz, "nulo" if a.simulado else "deepseek")
+        # Por defecto el juez corre con el MISMO proveedor que los agentes, para
+        # que baste una llave. `--juez deepseek` lo deja fijo entre modelos, que
+        # es lo que conviene si se comparan dos.
+        correr_monitor(raiz, "nulo" if a.simulado else (a.juez or proveedor))
 
     # Todo junto: una tabla y una pagina para el conjunto completo.
     print("\n  Agregando todo...")

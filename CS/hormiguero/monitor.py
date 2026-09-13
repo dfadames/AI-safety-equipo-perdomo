@@ -157,6 +157,9 @@ def _proveedor_juez(nombre: str):
     if nombre == "deepseek":
         from .proveedores.deepseek import ProveedorDeepSeek
         return ProveedorDeepSeek()
+    if nombre == "glm":
+        from .proveedores.glm import ProveedorGLM
+        return ProveedorGLM()
     if nombre == "nulo":
         # Sin modelo: puntaje 0 siempre. Sirve para probar el cableado (el
         # CLI, la agregacion) sin gastar un token.
@@ -189,7 +192,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="hormiguero.monitor")
     ap.add_argument("rutas", nargs="+", help="logs: archivo, comodin o directorio")
     ap.add_argument("--proveedor", default="nulo",
-                    choices=["nulo", "ollama", "openai", "deepseek"],
+                    choices=["nulo", "ollama", "openai", "deepseek", "glm"],
                     help="el juez del monitor por agente. 'nulo' no llama a ningun "
                          "modelo, para probar el cableado sin gastar tokens")
     ap.add_argument("--umbral", type=int, default=6)
