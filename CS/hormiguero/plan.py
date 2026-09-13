@@ -216,7 +216,7 @@ def main(argv=None):
     agregar_main([raiz, "--csv", str(Path(raiz) / "resumen.csv")])
     try:
         print("  " + exportar_html([raiz], str(Path(raiz) / "mapa.html")))
-    except SystemExit as e:
+    except (SystemExit, Exception) as e:
         print(f"  (sin mapa: {e})")
 
     print(f"\n  Todo en {raiz}")

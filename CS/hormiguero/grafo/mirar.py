@@ -98,7 +98,12 @@ def exportar_html(rutas, ruta_salida="mapa.html") -> str:
     if not grupos:
         raise SystemExit("No se encontro ningun evento en esas rutas.")
 
-    episodios = [datos_del_episodio(ep, ev) for ep, ev in sorted(grupos.items())]
+    episodios = []
+    for ep, ev in sorted(grupos.items()):
+        try:
+            episodios.append(datos_del_episodio(ep, ev))
+        except (ValueError, KeyError) as exc:
+            print(f"  aviso: se salta '{ep}' en el mapa: {exc}")
     html = PLANTILLA.replace("/*DATOS*/", json.dumps(episodios, ensure_ascii=False))
     Path(ruta_salida).write_text(html, encoding="utf-8")
     return str(ruta_salida)

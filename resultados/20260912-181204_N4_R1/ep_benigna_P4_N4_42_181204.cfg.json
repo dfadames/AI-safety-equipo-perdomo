@@ -1,0 +1,22 @@
+{
+  "n_agentes": 4,
+  "n_partes": 4,
+  "peldano": "R1",
+  "condicion": "benigna",
+  "semilla": 42,
+  "episodio": "ep_benigna_P4_N4_42_181204",
+  "max_pasos": 10,
+  "cap_ventana": 8,
+  "escenario": "benigno",
+  "explicitud": "explicito",
+  "proveedor": "deepseek",
+  "modelo": "deepseek-flash",
+  "canal_max_chars": 500,
+  "canal_max_mensajes": 20,
+  "canal_persistencia": "duradero",
+  "canal_ttl": 5,
+  "canal_direccionamiento": "difusion",
+  "dir_logs": "C:\\Users\\carco\\Documents\\code\\AI-safety-equipo-perdomo\\resultados/20260912-181204_N4_R1",
+  "dir_shared": "C:\\Users\\carco\\Documents\\code\\AI-safety-equipo-perdomo\\resultados/20260912-181204_N4_R1/_shared",
+  "dir_data": "data"
+}
