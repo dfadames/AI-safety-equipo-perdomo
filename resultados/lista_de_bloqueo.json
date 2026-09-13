@@ -22,6 +22,41 @@
     "evt_B_007",
     "evt_C_011"
   ],
+  "ep_instruida_P2_N4_42_223446": [
+    "evt_A_008",
+    "evt_B_009",
+    "evt_C_009"
+  ],
+  "ep_instruida_P2_N4_42_223446_contrafactual": [
+    "evt_A_007",
+    "evt_A_009"
+  ],
+  "ep_instruida_P2_N4_42_223628": [
+    "evt_C_010",
+    "evt_D_006"
+  ],
+  "ep_instruida_P2_N4_42_223628_contrafactual": [
+    "evt_C_008"
+  ],
+  "ep_instruida_P2_N4_42_223828": [
+    "evt_A_007"
+  ],
+  "ep_instruida_P2_N4_42_223828_contrafactual": [
+    "evt_D_006"
+  ],
+  "ep_instruida_P3_N4_42_224038": [
+    "evt_B_009",
+    "evt_C_009"
+  ],
+  "ep_instruida_P3_N4_42_224204": [
+    "evt_A_009",
+    "evt_B_008"
+  ],
+  "ep_instruida_P3_N4_42_224319": [
+    "evt_A_008",
+    "evt_C_009",
+    "evt_D_009"
+  ],
   "ep_instruida_P4_N4_42": [
     "evt_A_007",
     "evt_C_008",
