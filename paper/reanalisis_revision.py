@@ -12,7 +12,8 @@ from hormiguero.grafo.agregar import por_episodio, es_replica, conducta
 from hormiguero.grafo.modelo import construir, nodo_decisivo, raices, TIPOS_RESTRINGIDOS, contenedor
 from hormiguero.grafo.preguntas import span_de_origen, mensajes_criticos
 
-RAIZ = Path("..") / "resultados"
+# The paper's 37 episodes (task v1) were moved out of resultados/ when the v2 batch started.
+RAIZ = Path("..") / "resultados_v1"
 eps = {k: v for k, v in por_episodio(str(RAIZ)).items() if not es_replica(k)}
 print(f"\nepisodes (non-replica): {len(eps)}")
 

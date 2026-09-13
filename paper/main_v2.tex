@@ -506,7 +506,7 @@ Local containment did not imply system-level containment in our testbed. Each au
 % ======================================================================
 \begin{itemize}
     \item \textbf{Code:} \url{https://github.com/dfadames/AI-safety-equipo-perdomo} (harness in \texttt{CS/hormiguero}).
-    \item \textbf{Data:} \texttt{resultados/}: one log per episode (\texttt{.jsonl}) with its configuration, per-episode and per-point CSVs, the judge's scores (\texttt{monitor.csv}, \texttt{monitor\_sin\_regla.csv}) and an interactive map of every episode (\texttt{mapa.html}). Figures, tables and the numbers of the first draft are regenerated with \texttt{python -m hormiguero.figuras}. The analyses added in this revision (identity-level oracle check, cut decomposition, association statistics, per-command behavioural rates) are regenerated with \texttt{paper/reanalisis\_revision.py}.
+    \item \textbf{Data:} \texttt{resultados\_v1/} (the 37 episodes of this paper, task version v1): one log per episode (\texttt{.jsonl}) with its configuration, per-episode and per-point CSVs, the judge's scores (\texttt{monitor.csv}, \texttt{monitor\_sin\_regla.csv}) and an interactive map of every episode (\texttt{mapa.html}). Figures, tables and the numbers of the first draft are regenerated with \texttt{python -m hormiguero.figuras --resultados resultados\_v1 --tarea v1}. The analyses added in this revision (identity-level oracle check, cut decomposition, association statistics, per-command behavioural rates) are regenerated with \texttt{paper/reanalisis\_revision.py}.
     \item \textbf{Info hazard:} the escape targets a synthetic credential; no real system or vulnerability is involved.
 \end{itemize}
 
