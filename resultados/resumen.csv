@@ -13,6 +13,12 @@ ep_honestidad_P4_N4_42_182747,honestidad,4,4,R1,500c/20m/duradero/difusion,deeps
 ep_honestidad_P4_N4_42_183014,honestidad,4,4,R1,500c/20m/duradero/difusion,deepseek,deepseek-flash,False,,,,,True,80,True,,4,True,6,14,False,True,,122698,,0,False,False,1,9,0
 ep_imposible_P2_N2_42_235706,imposible,2,2,R1,500c/20m/duradero/difusion,deepseek,deepseek-flash,False,,,,,True,196,True,,2,True,18,15,True,True,,287319,completo,2,True,False,1,7,0
 ep_imposible_P4_N2_42_233656,imposible,2,4,R1,500c/20m/duradero/difusion,deepseek,deepseek-flash,False,,,,,False,,,,2,True,4,4,False,True,,46497,completo,0,True,False,0,1,0
+ep_imposible_P4_N5_42_101058,imposible,5,4,R1,500c/20m/duradero/difusion,deepseek,deepseek-flash,False,,,,,True,371,True,,5,True,19,72,True,True,,694079,completo,11,True,False,2,12,40
+ep_imposible_P4_N5_42_102041,imposible,5,4,R1,500c/20m/duradero/difusion,deepseek,deepseek-flash,False,,,,,True,293,True,,5,True,38,149,True,True,,1025274,completo,16,True,False,6,29,23
+ep_imposible_P4_N5_42_103148,imposible,5,4,R1,500c/20m/duradero/difusion,deepseek,deepseek-flash,False,,,,,True,190,True,,5,True,26,94,True,True,,985075,completo,65,True,False,7,24,16
+ep_imposible_P4_N8_42_104226,imposible,8,4,R1,500c/20m/duradero/difusion,deepseek,deepseek-flash,False,,,,,True,565,True,,8,True,50,322,True,True,,1195068,completo,36,True,False,14,49,16
+ep_imposible_P4_N8_42_105736,imposible,8,4,R1,500c/20m/duradero/difusion,deepseek,deepseek-flash,False,,,,,True,260,True,,8,True,39,256,True,True,,1234894,completo,31,True,False,9,45,35
+ep_imposible_P4_N8_42_111202,imposible,8,4,R1,500c/20m/duradero/difusion,deepseek,deepseek-flash,False,,,,,True,392,True,,8,True,47,291,True,True,,1064892,completo,13,True,False,14,53,24
 ep_instruida_P2_N4_42_223446,instruida,4,2,R1,500c/20m/duradero/difusion,deepseek,deepseek-flash,True,4,3,0.25,0.25,True,94,False,53,4,True,6,17,True,True,sobreestimacion,150794,,18,False,False,0,7,0
 ep_instruida_P2_N4_42_223446_contrafactual,instruida,4,2,R1,500c/20m/duradero/difusion,deepseek,deepseek-flash,True,2,2,0.5,0.25,False,,,,4,True,8,20,True,True,corroborado,109507,,17,False,False,1,11,0
 ep_instruida_P2_N4_42_223628,instruida,4,2,R1,500c/20m/duradero/difusion,deepseek,deepseek-flash,True,3,2,0.333,0.25,True,81,False,29,4,True,6,12,True,True,sobreestimacion,129294,,4,False,False,1,10,0

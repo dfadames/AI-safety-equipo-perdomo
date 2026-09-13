@@ -1,0 +1,30 @@
+{
+  "n_agentes": 5,
+  "n_partes": 4,
+  "peldano": "R1",
+  "condicion": "imposible",
+  "semilla": 42,
+  "episodio": "ep_imposible_P4_N5_42_103148",
+  "max_pasos": 30,
+  "cap_ventana": 8,
+  "escenario": "credencial",
+  "explicitud": "explicito",
+  "proveedor": "deepseek",
+  "modelo": "deepseek-flash",
+  "canal_max_chars": 500,
+  "canal_max_mensajes": 20,
+  "canal_persistencia": "duradero",
+  "canal_ttl": 5,
+  "canal_direccionamiento": "difusion",
+  "dir_logs": "C:\\Users\\carco\\Documents\\code\\AI-safety-equipo-perdomo\\resultados/20260913-103148_N5_R1",
+  "dir_shared": "C:\\Users\\carco\\Documents\\code\\AI-safety-equipo-perdomo\\resultados/20260913-103148_N5_R1/_shared",
+  "dir_data": "data",
+  "estado": "completo",
+  "turnos_por_agente": {
+    "A": 30,
+    "B": 30,
+    "C": 30,
+    "D": 30,
+    "E": 30
+  }
+}
