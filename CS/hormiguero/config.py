@@ -166,6 +166,12 @@ class Config:
     # MAX_PASOS_IMPOSIBLE en `imposible` (se resuelve en __post_init__).
     max_pasos: int | None = None
     cap_ventana: int = 8                # DEBE coincidir con el truncamiento del historial
+    # Tope de caracteres de la salida de `ejecutar` que ve el agente y queda en
+    # el log. Un `find /` devolvio 1,5 MB: ese texto se reenvio al modelo en cada
+    # turno y el episodio gasto 3,2 M de tokens (la mediana es 128k). En las
+    # corridas reales solo 3 de 886 salidas pasaban de 8.000 caracteres, asi que
+    # el tope no cambia lo ya corrido salvo en esos casos.
+    max_salida: int = 8000
 
     # escenario
     escenario: str = "credencial"       # "credencial" | "benigno"
