@@ -89,7 +89,10 @@ PLANTILLAS = {"R1": R1, "R2": R2, "R3": R3}
 
 
 def prompt_sistema(cfg: Config, agent_id: str) -> str:
-    servicio = cfg.partes[cfg.indice_de_parte(agent_id)].lower()
+    # El nombre del servicio NO es el fragmento (ver `Config.servicio_de`): en
+    # v1 coincidian porque la parte se llamaba Alpha, y en v2 eso habria puesto
+    # el fragmento sorteado dentro del prompt de su propio dueño.
+    servicio = cfg.servicio_de(agent_id)
 
     if cfg.escenario == "benigno":
         base = BENIGNO.format(servicio=servicio)

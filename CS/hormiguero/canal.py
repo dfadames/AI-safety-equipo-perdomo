@@ -21,18 +21,30 @@ import threading
 from pathlib import Path
 from typing import Iterable, Optional
 
-from .config import Config
+from .config import Config, normalizar_credencial
 
 
 class Canal:
-    def __init__(self, carpeta, cfg: Config, bloqueados: Optional[Iterable[str]] = None):
+    def __init__(self, carpeta, cfg: Config, bloqueados: Optional[Iterable[str]] = None,
+                 bloqueo_contenido: Optional[dict] = None):
         self.carpeta = Path(carpeta)
         self.carpeta.mkdir(parents=True, exist_ok=True)
         self.cfg = cfg
         # La replica contrafactual: los event_id de `lista_de_bloqueo.json`.
         # Bloquear un mensaje aca es simular que la transferencia nunca llego
         # al lector — el escritor sigue publicando, el lector nunca lo ve.
+        #
+        # Por event_id ya no sirve: los ids son posicionales (`evt_A_008` es el
+        # octavo evento de A) y al repetir con un modelo no determinista caen en
+        # otro evento. En 2 de las 3 replicas del 12-sep no se bloqueo ningun
+        # mensaje. Se conserva para releer bloqueos viejos y nada mas.
         self._bloqueados = set(bloqueados or ())
+        # Lo que si sirve: remitente -> fragmentos. Se retiene el mensaje de ESE
+        # agente que lleve ESE contenido, le toque el event_id que le toque.
+        self._por_contenido = {a: set(f) for a, f in (bloqueo_contenido or {}).items() if f}
+        # Los event_id que no se entregaron. Si al final esto queda vacio, la
+        # replica no bloqueo nada y no dice nada: es el chequeo que faltaba.
+        self.retenidos: set[str] = set()
         self._agentes = list(cfg.agentes)
         for a in self._agentes:
             self._archivo(a).write_text("", encoding="utf-8")
@@ -44,6 +56,16 @@ class Canal:
 
     def _archivo(self, agent_id: str) -> Path:
         return self.carpeta / f"canal_{agent_id}.jsonl"
+
+    def _retener(self, d: dict) -> bool:
+        """El bloqueo por CONTENIDO: este remitente no puede entregar este
+        fragmento. Se compara sobre el texto normalizado, asi que partirlo con
+        guiones o espacios tampoco lo pasa."""
+        fragmentos = self._por_contenido.get(d.get("agent_id"))
+        if not fragmentos:
+            return False
+        texto = normalizar_credencial(d.get("msg", ""))
+        return any(f in texto for f in fragmentos)
 
     # -- escritura ---------------------------------------------------------
 
@@ -94,9 +116,10 @@ class Canal:
                     continue
                 d = json.loads(linea)
 
-                # réplica contrafactual: este mensaje esta en la lista de
-                # bloqueo, se descarta como si nunca hubiera llegado
-                if d["event_id"] in self._bloqueados:
+                # réplica contrafactual: este mensaje esta bloqueado, se
+                # descarta como si nunca hubiera llegado
+                if d["event_id"] in self._bloqueados or self._retener(d):
+                    self.retenidos.add(d["event_id"])
                     continue
 
                 # persistencia: en modo efímero, los mensajes viejos caducan

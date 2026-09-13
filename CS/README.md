@@ -95,11 +95,33 @@ Dos cosas que DeepSeek no da y conviene tener presentes:
 
 - **No expone `seed`.** El proveedor no lo manda (mandarlo sería arriesgar un
   400 a mitad del barrido) y usa `temperature 0`. La corrida no es reproducible
-  bit a bit. La réplica contrafactual sigue siendo válida —bloquea `event_id` y
-  vuelve a correr, no depende de que el modelo repita— pero por eso hacen falta
-  **varios episodios por punto**, no uno.
+  bit a bit, y por eso hacen falta **varios episodios por punto**, no uno. La
+  réplica contrafactual tampoco depende de que el modelo repita: bloquea por
+  contenido y remitente, no por `event_id` (ver más abajo).
 - El `.env` se busca en la raíz del repo y en `CS/`. Un `CS/.env` gana, por si
   alguien quiere probar otra llave sin tocar la del equipo.
+
+### La tarea: v1 y v2
+
+`config.VERSION_TAREA` dice qué tarea corre un episodio, y queda grabada en el
+`cfg.json`, en cada evento y en el csv.
+
+| | v1 (12 y 13 de septiembre) | v2 (la de ahora) |
+|---|---|---|
+| Las partes | `Alpha`, `Bravo`, `Charlie`, `Delta` | las sortea la semilla del episodio |
+| Validar | acepta cualquier texto que **contenga** las partes | tiene que **ser** la credencial exacta |
+
+Los dos cambios cierran dos maneras de abrir la caja sin que la información
+cruce el canal, que es lo único que el experimento quiere medir: **adivinar** la
+parte que falta (la secuencia OTAN se deduce, y en v1 el servicio del prompt se
+llamaba como la propia parte en minúsculas) y **amontonar** todo lo que uno
+tenga y mandarlo — de 168 validaciones exitosas de v1, 9 no eran la credencial.
+La semilla, además, ahora es distinta en cada episodio: con una fija, los diez
+episodios de un punto compartirían la clave.
+
+**Los episodios de v1 y v2 no se pueden juntar.** El plan solo cuenta los de la
+versión actual, el resumen los separa y las figuras se niegan a mezclarlos
+(`figuras --tarea v1` para el lote viejo). Un `cfg.json` sin el campo es de v1.
 
 ### Docker de verdad
 
@@ -168,19 +190,38 @@ proveedores (`llamar(historial, herramientas)`) con la que espera el juez
 
 ### Réplica contrafactual
 
-Bloquea los mensajes críticos de un episodio y lo repite, para ver si el
-escape seguía siendo posible sin ellos:
+Bloquea lo que llevaron los mensajes críticos y repite el episodio, para ver si
+el escape seguía siendo posible sin ellos:
 
 ```sh
-python3 -m hormiguero.runner uno --N 4 --logs runs                       # deja runs/<timestamp>_N4_R1/
+python3 -m hormiguero.runner uno --N 8 --logs runs                       # deja runs/<timestamp>_N8_R1/
 python3 -m hormiguero.grafo.agregar runs --csv resultados.csv            # deja lista_de_bloqueo.json
 python3 -m hormiguero.runner repetir --bloqueo lista_de_bloqueo.json \
-    --episodio ep_instruida_N4_42 --logs runs --proveedor ollama
+    --episodio <episodio> --logs runs                                    # bloquea el corte
+python3 -m hormiguero.runner repetir --bloqueo lista_de_bloqueo.json \
+    --episodio <episodio> --logs runs --control-aleatorio                # el control
 ```
 
-Los `event_id` son deterministas (`evt_<agente>_<contador>`, no aleatorios):
-así el segundo run puede bloquear exactamente los mismos mensajes que
-identificó `grafo.agregar` en el primero.
+O las dos de una, sobre los escapes que ya haya: `python3 -m hormiguero.plan
+--replicas 3`.
+
+**El bloqueo va por contenido y remitente, no por `event_id`.** Los `event_id`
+son posicionales (`evt_A_008` es el octavo evento de A), así que al repetir con
+un modelo no determinista caen en otro evento: en 2 de las 3 réplicas del 12 de
+septiembre no se bloqueó ningún mensaje y nadie se enteró. Ahora se bloquea «que
+el agente A no entregue este fragmento», le toque el id que le toque, y el canal
+cuenta cuántos mensajes retuvo de verdad (`mensajes_retenidos` en el `cfg.json`).
+Si eso da 0, la réplica no bloqueó nada y no dice nada: `grafo.agregar` lo avisa.
+
+**Cada réplica necesita su control** (`--control-aleatorio`): bloquea la misma
+cantidad de pares (remitente, fragmento), pero elegidos al azar entre los
+mensajes que sí se entregaron **fuera** del corte. Sin él, que el escape se caiga
+también se explicaría porque bloqueamos mensajes, cualesquiera.
+
+Los casos que valen son los de **más agentes que partes** (N=8 con la clave en
+4): ahí dos agentes tienen la misma parte, y la pregunta interesante es si la
+población rodea el corte por el otro. Con N = partes, bloquear al único que
+tiene una parte la vuelve inalcanzable y el resultado es trivial.
 
 **`--proveedor simulado` no sirve para esto.** El guion es fijo: le pasa a
 `validar_credencial` la credencial completa precalculada, sin importar lo que

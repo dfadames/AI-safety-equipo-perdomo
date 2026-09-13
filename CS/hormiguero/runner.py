@@ -21,6 +21,7 @@ import argparse
 import dataclasses
 import json
 import random
+import secrets
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -56,6 +57,9 @@ def config_del_punto(cfg: Config) -> dict:
     return {
         "n_agentes": cfg.n_agentes, "n_partes": cfg.n_partes,
         "peldano": cfg.peldano, "explicitud": cfg.explicitud,
+        # Sin esto, los episodios del validador viejo y los del nuevo caen en la
+        # misma fila del csv y se promedian entre si: son tareas distintas.
+        "version_tarea": cfg.version_tarea,
         "proveedor": cfg.proveedor, "modelo": cfg.modelo,
         "canal_max_chars": cfg.canal_max_chars,
         "canal_max_mensajes": cfg.canal_max_mensajes,
@@ -66,12 +70,16 @@ def config_del_punto(cfg: Config) -> dict:
 
 
 def correr_episodio(cfg: Config, proveedor_de, runner=None, con_docker: bool = False,
-                    bloqueados: Optional[Iterable[str]] = None) -> str:
+                    bloqueados: Optional[Iterable[str]] = None,
+                    bloqueo_contenido: Optional[dict] = None) -> str:
     """`proveedor_de(agent_id) -> ProveedorLLM`. Devuelve la ruta del log.
 
-    `bloqueados`: event_id de mensajes del canal a descartar como si nunca
-    hubieran llegado — la réplica contrafactual (ver `grafo.preguntas.
-    lista_de_bloqueo` y el subcomando `repetir`)."""
+    Las dos formas de la réplica contrafactual (subcomando `repetir`):
+      `bloqueados`         event_id a descartar. Es la vieja, y no sirve con un
+                           modelo no determinista: los ids son posicionales.
+      `bloqueo_contenido`  {remitente: [fragmentos]} — ese agente no puede
+                           entregar ese contenido, le toque el event_id que le
+                           toque. Es la que sí repite el bloqueo."""
     random.seed(cfg.semilla)
 
     # Con Docker (`runner=None`) las pistas viven en `data/<agente>`, montado
@@ -86,7 +94,8 @@ def correr_episodio(cfg: Config, proveedor_de, runner=None, con_docker: bool = F
 
     registro = Registro(cfg.ruta_log(), cfg.episodio, cfg.semilla, cfg.condicion,
                         config=config_del_punto(cfg))
-    canal = Canal(cfg.ruta_shared(), cfg, bloqueados=bloqueados)
+    canal = Canal(cfg.ruta_shared(), cfg, bloqueados=bloqueados,
+                  bloqueo_contenido=bloqueo_contenido)
 
     sesiones = [SesionAgente(proveedor_de(a), registro, canal, cfg, a, runner=runner)
                 for a in cfg.agentes]
@@ -116,8 +125,12 @@ def correr_episodio(cfg: Config, proveedor_de, runner=None, con_docker: bool = F
         estado = f"error: {type(e).__name__}"
         raise
     finally:
+        # `mensajes_retenidos` es el chequeo de la replica contrafactual: si
+        # queda en 0 con un bloqueo puesto, no se bloqueo nada y la replica no
+        # dice nada. Eso es lo que paso en 2 de las 3 replicas del 12-sep.
         _escribir_cfg(cfg, estado=estado,
-                      turnos_por_agente={s.agent_id: s.turnos for s in sesiones})
+                      turnos_por_agente={s.agent_id: s.turnos for s in sesiones},
+                      mensajes_retenidos=len(canal.retenidos))
     return cfg.ruta_log()
 
 
@@ -206,6 +219,30 @@ def barrido(ns, episodios, condiciones, crear_proveedor, runner=None, crear_runn
     return rutas
 
 
+def pares_a_bloquear(entrada: dict, control: bool = False) -> dict:
+    """{remitente: [fragmentos]} que el canal no va a entregar, sacado de la
+    entrada del `lista_de_bloqueo.json` (ver `grafo.agregar.
+    especificacion_de_bloqueo`).
+
+    Del corte minimo, o —para la replica de CONTROL— la misma cantidad de pares
+    (remitente, fragmento) elegida al azar entre los mensajes que NO estaban en
+    el corte. Sin ese control, que el escape se caiga al bloquear el corte
+    tambien se explicaria porque bloqueamos mensajes, cualesquiera."""
+    def pares(clave):
+        return [(p["remitente"], f) for p in entrada.get(clave) or []
+                for f in p.get("fragmentos") or []]
+
+    elegidos = pares("corte")
+    if control:
+        fuera = pares("fuera_del_corte")
+        elegidos = (random.Random().sample(fuera, min(len(elegidos), len(fuera)))
+                    if fuera else [])
+    out: dict[str, list[str]] = {}
+    for agente, fragmento in elegidos:
+        out.setdefault(agente, []).append(fragmento)
+    return out
+
+
 # --- CLI --------------------------------------------------------------------
 
 def _proveedor_por_nombre(nombre: str, cfg: Config):
@@ -220,7 +257,9 @@ def _proveedor_por_nombre(nombre: str, cfg: Config):
         # completa: si este N tiene techo duro, el intento falla solo. Si
         # armaramos la credencial completa a mano estariamos falseando el
         # techo, que es justo lo que hace que la brecha signifique algo.
-        credencial = " ".join(sorted(cfg.alcanzables()))
+        # En orden y pegadas: el validador v2 exige la credencial exacta.
+        alcanzables = cfg.alcanzables()
+        credencial = "".join(p for p in cfg.partes if p in alcanzables)
 
         def hacer(agent_id):
             ultimo = agent_id == cfg.agentes[-1]
@@ -312,7 +351,11 @@ def main(argv=None):
     u.add_argument("--N", type=int, default=4)
     u.add_argument("--n-partes", type=int, default=4)
     u.add_argument("--condicion", default="instruida")
-    u.add_argument("--semilla", type=int, default=42)
+    # En v2 la semilla ademas SORTEA los fragmentos del episodio: con 42 fija,
+    # los diez episodios de un punto compartirian la misma clave y el sorteo no
+    # seria tal. Por eso el default es una distinta por episodio.
+    u.add_argument("--semilla", type=int, default=None,
+                   help="por defecto, una distinta por episodio")
     # Solo `imposible`: los controles corrieron con 10 turnos y cambiarles el
     # tope los vuelve incomparables con lo ya corrido.
     u.add_argument("--max-pasos", type=int, default=None,
@@ -349,6 +392,10 @@ def main(argv=None):
                     help="el lista_de_bloqueo.json que escribe grafo.agregar")
     rp.add_argument("--episodio", required=True,
                     help="la clave del episodio dentro de --bloqueo")
+    rp.add_argument("--control-aleatorio", action="store_true",
+                    help="la replica de CONTROL: bloquea la misma cantidad de mensajes, "
+                         "pero elegidos al azar FUERA del corte. Sin esta, que el escape "
+                         "se caiga no distingue el corte de bloquear cualquier cosa")
     rp.add_argument("--logs", default=dir_resultados(),
                     help="donde esta el <episodio>.cfg.json del episodio original")
     rp.add_argument("--proveedor", default=proveedor_por_defecto(),
@@ -393,7 +440,23 @@ def main(argv=None):
         if a.episodio not in bloqueo:
             raise SystemExit(f"'{a.episodio}' no esta en {a.bloqueo} "
                              f"(episodios disponibles: {', '.join(sorted(bloqueo)) or '-'})")
-        bloqueados = set(bloqueo[a.episodio])
+        entrada = bloqueo[a.episodio]
+        # Formato viejo: una lista de event_id. Se sigue leyendo, para poder
+        # repetir un bloqueo ya escrito, pero con el aviso de por que no sirve.
+        if isinstance(entrada, list):
+            bloqueados, por_contenido = set(entrada), {}
+            print("  AVISO: bloqueo por event_id. Los ids son posicionales, asi que al "
+                  "repetir con un modelo no determinista caen en otro evento.")
+        else:
+            bloqueados = set()
+            por_contenido = pares_a_bloquear(entrada, control=a.control_aleatorio)
+            if not por_contenido:
+                raise SystemExit(
+                    f"no hay nada que bloquear en '{a.episodio}'"
+                    + (": ningun mensaje fuera del corte llevaba un fragmento, asi que "
+                       "no se puede armar el control." if a.control_aleatorio
+                       else ": el corte no llevaba fragmentos."))
+        sufijo = "_contrafactual_control" if a.control_aleatorio else "_contrafactual"
 
         nombre_cfg = Path(_ruta_cfg(f"{a.episodio}.jsonl")).name
         ruta_cfg_original = Path(a.logs) / nombre_cfg
@@ -409,7 +472,9 @@ def main(argv=None):
                 f"no encontre {ruta_cfg_original}. Se escribe junto al log de cada "
                 "episodio corrido con esta misma version del runner.")
         datos = json.loads(ruta_cfg_original.read_text(encoding="utf-8"))
-        datos["episodio"] = f"{a.episodio}_contrafactual"
+        # Con la marca al final, repetir dos veces el mismo episodio no produce
+        # dos logs con el mismo nombre.
+        datos["episodio"] = f"{a.episodio}{sufijo}_{sello()[-6:]}"
         # Las rutas del cfg son ABSOLUTAS y de la maquina que corrio el
         # episodio original. Reusarlas hacia que la replica intentara escribir
         # en el home de otra persona ("Access is denied: C:\\Users\\carco").
@@ -423,9 +488,20 @@ def main(argv=None):
         cfg = Config.desde_dict(datos)
 
         runner_cf = runner_de(cfg) if a.sin_docker else None
-        ruta = correr_episodio(cfg, _proveedor_o_salir(a.proveedor, cfg),
-                               runner=runner_cf, bloqueados=bloqueados)
-        print(f"log contrafactual: {ruta} ({len(bloqueados)} mensajes bloqueados)")
+        ruta = correr_episodio(cfg, _proveedor_o_salir(a.proveedor, cfg), runner=runner_cf,
+                               bloqueados=bloqueados, bloqueo_contenido=por_contenido)
+        # Cuantos mensajes se retuvieron DE VERDAD. Con el bloqueo por event_id
+        # esto daba 0 y nadie se enteraba: la replica figuraba como hecha sin
+        # haber bloqueado nada.
+        retenidos = json.loads(
+            Path(_ruta_cfg(ruta)).read_text(encoding="utf-8")).get("mensajes_retenidos", 0)
+        cuantos = sum(len(v) for v in por_contenido.values()) or len(bloqueados)
+        tipo = "control" if a.control_aleatorio else "corte"
+        print(f"log contrafactual ({tipo}): {ruta} "
+              f"- {cuantos} bloqueados, {retenidos} mensajes retenidos")
+        if not retenidos:
+            print("  -> OJO: no se retuvo NINGUN mensaje. Esta replica no bloqueo nada, "
+                  "asi que no dice nada.")
 
         from .grafo import cargar, nodo_decisivo
         G = cargar(ruta)
@@ -469,10 +545,11 @@ def main(argv=None):
                              "corrieron con 10 turnos y cambiarlo los vuelve incomparables.")
         # Una combinacion invalida (p. ej. `imposible` con N=2) es un error de
         # uso, no un bug: sale con el mensaje, sin traza de Python.
+        semilla = a.semilla if a.semilla is not None else secrets.randbelow(1_000_000)
         try:
             cfg = Config(n_agentes=a.N, n_partes=a.n_partes, condicion=a.condicion,
-                         peldano=pel, escenario=esc, semilla=a.semilla, max_pasos=a.max_pasos,
-                         episodio=f"ep_{a.condicion}_P{a.n_partes}_N{a.N}{tag}_{a.semilla}_{marca[-6:]}",
+                         peldano=pel, escenario=esc, semilla=semilla, max_pasos=a.max_pasos,
+                         episodio=f"ep_{a.condicion}_P{a.n_partes}_N{a.N}{tag}_{semilla}_{marca[-6:]}",
                          dir_logs=carpeta, dir_shared=f"{carpeta}/_shared", **canal)
         except ValueError as e:
             raise SystemExit(f"\n  {e}\n")

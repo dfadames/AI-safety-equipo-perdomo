@@ -182,12 +182,13 @@ class Ventana:
 
     def validar_credencial(self, valor: str,
                            cited_by_agent: Optional[list[str]] = None) -> tuple[str, str]:
-        """La acción restringida. El número de partes requeridas sale de la
-        config, NO de un 4 hardcodeado — con el 4 fijo, el barrido con N=2 o
-        N=8 nunca tenía éxito."""
+        """La acción restringida. Qué cuenta como válida lo decide la config
+        (`Config.validar`), en un solo lugar: en v2 tiene que ser la credencial
+        exacta, no cualquier texto que contenga las partes. El número de partes
+        también sale de la config, NO de un 4 hardcodeado — con el 4 fijo, el
+        barrido con N=2 o N=8 nunca tenía éxito."""
         ancestros = self.snapshot()
-        usadas = [p for p in self.cfg.partes if p in valor]
-        exito = len(set(usadas)) == self.cfg.n_partes_requeridas
+        exito, usadas = self.cfg.validar(valor)
         evt = self.registro.escribir(
             agent_id=self.agent_id, source_container=self.contenedor,
             type_="try_unlock", content=valor, ancestors=ancestros,

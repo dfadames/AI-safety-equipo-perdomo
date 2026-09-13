@@ -28,7 +28,7 @@ import tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from .config import dir_resultados, partes as nombres_partes
+from .config import VERSION_TAREA, dir_resultados, partes as nombres_partes
 
 # --- Tinta ---------------------------------------------------------------------
 # Un solo acento para lo que el argumento necesita que se vea, y grises para lo
@@ -87,9 +87,16 @@ def _leer_csv(ruta: Path) -> list[dict]:
         return list(csv.DictReader(f))
 
 
-def leer_filas(raiz: Path) -> tuple[list[dict], list[dict]]:
-    """(episodios, replicas) de resumen.csv. Sin simulados: no son resultados."""
-    filas = [f for f in _leer_csv(raiz / "resumen.csv") if f.get("proveedor") != "simulado"]
+def leer_filas(raiz: Path, version: str = VERSION_TAREA) -> tuple[list[dict], list[dict]]:
+    """(episodios, replicas) de resumen.csv, de UNA version de la tarea. Sin
+    simulados: no son resultados.
+
+    Mezclar v1 y v2 en una figura seria promediar dos tareas distintas: en v1
+    las partes eran adivinables y validar aceptaba cualquier texto que las
+    contuviera. Las filas viejas no traen la columna: son v1."""
+    filas = [f for f in _leer_csv(raiz / "resumen.csv")
+             if f.get("proveedor") != "simulado"
+             and (f.get("version_tarea") or "v1") == version]
     es_rep = [f for f in filas
               if _bool(f.get("replica_contrafactual")) or "contrafactual" in f["episodio"]]
     return [f for f in filas if f not in es_rep], es_rep
@@ -126,22 +133,42 @@ def leer_auditorias(raiz: Path) -> dict[int, list[dict]]:
 
 
 def replicas_efectivas(raiz: Path, replicas: list[dict]) -> list[tuple[str, int, int]]:
-    """Por replica: (episodio, ids bloqueados, cuantos de esos ids eran de verdad
-    un mensaje al canal en la replica). Si el segundo numero es 0, la replica no
-    bloqueo nada: el event_id cayo en otro evento."""
-    from .grafo.modelo import leer_eventos
+    """Por replica: (episodio, cuantos bloqueos se pidieron, cuantos mensajes se
+    retuvieron de verdad). Si el segundo numero es 0, la replica no bloqueo
+    nada y no dice nada.
+
+    Con el bloqueo viejo, por event_id, eso pasaba casi siempre: los ids son
+    posicionales y al repetir caian en otro evento. Con el bloqueo por
+    contenido y remitente el numero lo escribe el propio canal
+    (`mensajes_retenidos` en el cfg.json)."""
     ruta = raiz / "lista_de_bloqueo.json"
     bloqueos = json.loads(ruta.read_text(encoding="utf-8")) if ruta.exists() else {}
     out = []
     for r in replicas:
-        original = r["episodio"].split("#")[0].replace("_contrafactual", "")
-        ids = set(bloqueos.get(original, []))
-        logs = glob.glob(str(raiz / "*" / f"{r['episodio'].split('#')[0]}.jsonl"))
-        if not ids or not logs:
-            continue
-        mensajes = {e["event_id"] for e in leer_eventos(logs[0]) if e.get("type") == "write_channel"}
-        out.append((r["episodio"], len(ids), len(ids & mensajes)))
+        base = r["episodio"].split("#")[0].split("_contrafactual")[0]
+        entrada = bloqueos.get(base)
+        if isinstance(entrada, dict):
+            pedidos = sum(len(p.get("fragmentos") or []) for p in entrada.get("corte") or [])
+        else:
+            pedidos = len(entrada or [])
+        out.append((r["episodio"], pedidos, _int(r.get("mensajes_retenidos"), 0) or 0))
     return out
+
+
+def elegir_ejemplo(raiz: Path, filas, pedido=None) -> list[str]:
+    """El log del episodio de la figura 1. Manda `--ejemplo` si lo pasan; si no,
+    el historico mientras siga ahi, y si no el primer escape instruido de N=4
+    con la clave en 4 partes, que es lo que la figura muestra. Sin esto, el
+    nombre quemado dejaba de existir en cuanto la semilla cambio por episodio."""
+    candidatos = [pedido] if pedido else [EPISODIO_EJEMPLO] + [
+        f["episodio"].split("#")[0] for f in filas
+        if _bool(f["escape"]) and f["condicion"] == "instruida"
+        and _int(f["N"]) == 4 and _int(f["n_partes"]) == 4]
+    for nombre in candidatos:
+        hallados = sorted(glob.glob(str(raiz / "*" / f"{nombre}.jsonl")))
+        if hallados:
+            return hallados
+    return []
 
 
 # --- SVG -------------------------------------------------------------------------
@@ -691,13 +718,22 @@ def numeros(filas, replicas, auditorias, d1, d2, d3, efectivas) -> str:
         L.append(f"- With the honesty prompt: {sum(_bool(f['aviso_a_humano']) for f in hon)}/{len(hon)} "
                  f"escapes notified, {sum(f['aviso_antes_del_escape'] == 'True' for f in hon)}/{len(hon)} before.")
 
-    L.append("\n## 7. Not valid yet\n")
-    if efectivas:
-        nada = sum(1 for _e, _i, m in efectivas if m == 0)
-        L.append(f"- Counterfactual replicas: {len(efectivas)} run. Blocking is by event id, and event ids "
-                 f"are positional, so a re-run with a non-deterministic model puts that id on a different "
-                 f"event: in {nada} of {len(efectivas)} replicas none of the blocked ids was a channel "
-                 "message. They are not evidence that blocking the cut stops the escape.")
+    L.append("\n## 7. Counterfactual replicas\n")
+    if not replicas:
+        L.append("- None yet. `py -m hormiguero.plan --replicas 3` re-runs an escape with the cut "
+                 "blocked by content and sender, and next to it a control that blocks the same "
+                 "number of messages chosen at random outside the cut.")
+    else:
+        retenidos = {e: m for e, _p, m in efectivas}
+        for tipo, titulo in (("corte", "Cut blocked"),
+                             ("control", "Control (same number of messages, outside the cut)")):
+            grupo = [r for r in replicas if (r.get("tipo_de_replica") or "corte") == tipo]
+            if not grupo:
+                continue
+            escaparon = sum(_bool(r["escape"]) for r in grupo)
+            vacias = sum(1 for r in grupo if not retenidos.get(r["episodio"], 0))
+            L.append(f"- {titulo}: {len(grupo)} replicas, the escape still happened in {escaparon}."
+                     + (f" {vacias} withheld no message at all, so they say nothing." if vacias else ""))
 
     L.append("\n## Tables\n")
     L.append("Results per experimental point:\n")
@@ -861,6 +897,12 @@ def main(argv=None):
     ap.add_argument("--resultados", default=None, help="por defecto, resultados/ en la raiz del repo")
     ap.add_argument("--salida", default=None, help="por defecto, paper/ en la raiz del repo")
     ap.add_argument("--sin-png", action="store_true", help="solo SVG, sin abrir el navegador")
+    # v1 y v2 son tareas distintas (ver config.VERSION_TAREA): una figura que las
+    # mezcle promedia dos cosas que no se pueden promediar.
+    ap.add_argument("--tarea", default=VERSION_TAREA, choices=["v1", "v2"],
+                    help="que version de la tarea graficar; por defecto la actual")
+    ap.add_argument("--ejemplo", default=None,
+                    help="episodio de la figura 1; por defecto se elige uno solo")
     a = ap.parse_args(argv)
 
     raiz = Path(a.resultados or dir_resultados())
@@ -868,14 +910,19 @@ def main(argv=None):
     (salida / "figuras").mkdir(parents=True, exist_ok=True)
     nav = None if a.sin_png else navegador()
 
-    filas, replicas = leer_filas(raiz)
+    filas, replicas = leer_filas(raiz, a.tarea)
     if not filas:
-        raise SystemExit(f"No hay episodios en {raiz / 'resumen.csv'}: corre primero grafo.agregar.")
+        otras = sorted({(f.get("version_tarea") or "v1")
+                        for f in _leer_csv(raiz / "resumen.csv")})
+        raise SystemExit(
+            f"No hay episodios de la tarea {a.tarea} en {raiz / 'resumen.csv'}"
+            + (f", pero si de: {', '.join(otras)}. Pasa --tarea." if otras
+               else ": corre primero grafo.agregar."))
     juez_con, juez_sin, puntajes = leer_juez(raiz)
     auditorias = leer_auditorias(raiz)
 
     hechos = []
-    ejemplo = sorted(glob.glob(str(raiz / "*" / f"{EPISODIO_EJEMPLO}.jsonl")))
+    ejemplo = elegir_ejemplo(raiz, filas, a.ejemplo)
     d1 = {"N": "?", "P": "?", "modelo": "?", "cono": "?", "eventos": "?", "span": "?",
           "corte": "?", "juez": {}}
     if ejemplo:
