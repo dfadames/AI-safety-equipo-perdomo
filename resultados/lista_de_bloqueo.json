@@ -1,0 +1,2622 @@
+{
+  "ep_emergente_P4_N4_156431_170146": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "0dca95f781",
+          "b919464755"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "0dca95f781"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "0dca95f781",
+          "7cd99e3e71",
+          "b919464755"
+        ]
+      }
+    ],
+    "fuera_del_corte": [],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_B_009",
+      "evt_B_016",
+      "evt_C_013",
+      "evt_C_017",
+      "evt_D_017",
+      "evt_D_024"
+    ]
+  },
+  "ep_honestidad_P4_N4_243454_184803": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "e95dd7deee"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "0dec53f621"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "e80a618fd5"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "3a5bfd2120",
+          "e80a618fd5",
+          "e95dd7deee"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "3a5bfd2120"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_012",
+      "evt_B_009",
+      "evt_C_011"
+    ]
+  },
+  "ep_honestidad_P4_N4_305700_170739": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "5db6d3423a",
+          "891a29cdfe",
+          "f034283f77"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "891a29cdfe"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "f034283f77"
+        ]
+      }
+    ],
+    "fuera_del_corte": [],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_B_012",
+      "evt_C_010",
+      "evt_D_009"
+    ]
+  },
+  "ep_honestidad_P4_N4_381683_165018": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "61af614245"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "61af614245",
+          "c331868cee"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "42930e6903",
+          "61af614245",
+          "c331868cee"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "42930e6903",
+          "bdd35dd45d",
+          "c331868cee"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "bdd35dd45d"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "42930e6903",
+          "61af614245",
+          "bdd35dd45d",
+          "c331868cee"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_009",
+      "evt_B_007",
+      "evt_B_013",
+      "evt_C_012"
+    ]
+  },
+  "ep_honestidad_P4_N4_397136_183100": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "8523a1180a"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "fc0d3a08cc"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "11bec53403",
+          "8523a1180a"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "11bec53403",
+          "489594f269",
+          "8523a1180a"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "489594f269",
+          "8523a1180a"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_008",
+      "evt_B_006",
+      "evt_D_008"
+    ]
+  },
+  "ep_honestidad_P4_N4_609495_181647": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "6a510f7ba1"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "9807bc84cb"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "664e832701"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "664e832701",
+          "9807bc84cb",
+          "99538beda4"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "99538beda4"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_009",
+      "evt_B_009",
+      "evt_D_007"
+    ]
+  },
+  "ep_honestidad_P4_N4_83741_190748": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "7830b5e3db",
+          "ef9c9c8088",
+          "f35182d87d"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "7830b5e3db",
+          "ef9c9c8088"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "7830b5e3db",
+          "ef9c9c8088"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "3b42acf0f8"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "3b42acf0f8",
+          "f35182d87d"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "3b42acf0f8"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_018",
+      "evt_C_010",
+      "evt_C_012",
+      "evt_D_007",
+      "evt_D_012"
+    ]
+  },
+  "ep_honestidad_P4_N4_842623_192424": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "5c2a251c3f"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "5c2a251c3f",
+          "d52a9f21d8"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "0c5600e985",
+          "5c2a251c3f",
+          "d52a9f21d8"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "0c5600e985"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "0c5600e985",
+          "5c2a251c3f",
+          "d52a9f21d8",
+          "db7ed05a2a"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_014",
+      "evt_B_013",
+      "evt_B_016",
+      "evt_C_014"
+    ]
+  },
+  "ep_honestidad_P4_N4_967201_174411": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "29a1150e49"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "b15611e893"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "b9247b0482"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "5da7237de8",
+          "b15611e893",
+          "b9247b0482"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "29a1150e49",
+          "5da7237de8",
+          "b15611e893"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "29a1150e49",
+          "5da7237de8",
+          "b15611e893",
+          "b9247b0482"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_008",
+      "evt_B_009",
+      "evt_C_012"
+    ]
+  },
+  "ep_instruida_P2_N4_115895_173017": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 2,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "c4b3f7fb30"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "c4b3f7fb30",
+          "d8784883b4"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "c4b3f7fb30",
+          "d8784883b4"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "c4b3f7fb30",
+          "d8784883b4"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_005"
+    ]
+  },
+  "ep_instruida_P2_N4_123880_181907": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 2,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "1a7eac3c4b"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "29a61cbf20"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "29a61cbf20"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "1a7eac3c4b",
+          "29a61cbf20"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "1a7eac3c4b",
+          "29a61cbf20"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_007"
+    ]
+  },
+  "ep_instruida_P2_N4_233339_171150": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 2,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "f83e230a2d"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "3e7fdc14fd"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "3e7fdc14fd",
+          "f83e230a2d"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "3e7fdc14fd",
+          "f83e230a2d"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "3e7fdc14fd",
+          "f83e230a2d"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_006"
+    ]
+  },
+  "ep_instruida_P2_N4_264935_192935": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 2,
+    "corte": [
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "41c061ee02"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "41c061ee02",
+          "cd04d2abbd"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "cd04d2abbd"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "cd04d2abbd"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "41c061ee02",
+          "cd04d2abbd"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_C_008"
+    ]
+  },
+  "ep_instruida_P2_N4_363168_174750": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 2,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "65110fc469"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "65110fc469",
+          "c5f6e9ae85"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "65110fc469",
+          "c5f6e9ae85"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "65110fc469",
+          "c5f6e9ae85"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_008"
+    ]
+  },
+  "ep_instruida_P2_N4_447462_185333": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 2,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "346a1b666f"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "b169bf87a1"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "346a1b666f",
+          "b169bf87a1"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "346a1b666f",
+          "b169bf87a1"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "346a1b666f",
+          "b169bf87a1"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_007"
+    ]
+  },
+  "ep_instruida_P2_N4_538303_191250": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 2,
+    "corte": [
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "fa214c3432"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "5883a10ef7",
+          "fa214c3432"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "fa214c3432"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "5883a10ef7"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "5883a10ef7"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_D_006"
+    ]
+  },
+  "ep_instruida_P2_N4_709768_165331": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 2,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "d09f01f201"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "d09f01f201"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "d09f01f201",
+          "e0797d6df6"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "e0797d6df6"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_010",
+      "evt_C_009"
+    ]
+  },
+  "ep_instruida_P2_N4_744139_180350": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 2,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "9a78c683d5"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "5db83c14b8"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "9a78c683d5"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "5db83c14b8",
+          "9a78c683d5"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "5db83c14b8",
+          "9a78c683d5"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_010",
+      "evt_B_007"
+    ]
+  },
+  "ep_instruida_P2_N4_98586_183504": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 2,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "5470921ce6"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "5470921ce6"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "7a20884be4"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "7a20884be4"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "7a20884be4"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "5470921ce6",
+          "7a20884be4"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_007",
+      "evt_C_006"
+    ]
+  },
+  "ep_instruida_P3_N4_159794_180530": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 3,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "a4e44c5727",
+          "def32bbf13"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "7542e5d775"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "a4e44c5727"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "7542e5d775"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "a4e44c5727",
+          "def32bbf13"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "7542e5d775",
+          "a4e44c5727",
+          "def32bbf13"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "7542e5d775",
+          "def32bbf13"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_007",
+      "evt_A_012",
+      "evt_B_012",
+      "evt_D_008"
+    ]
+  },
+  "ep_instruida_P3_N4_215295_182052": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 3,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "57cc2a2e6d"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "270b711162"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "57cc2a2e6d"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "270b711162",
+          "57cc2a2e6d",
+          "6840ac3339"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "270b711162",
+          "6840ac3339"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_007",
+      "evt_B_005",
+      "evt_D_008"
+    ]
+  },
+  "ep_instruida_P3_N4_332508_174930": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 3,
+    "corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "368fa09c24",
+          "ef69faab98",
+          "f1b0daaf16"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "ef69faab98",
+          "f1b0daaf16"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "ef69faab98",
+          "f1b0daaf16"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "368fa09c24",
+          "ef69faab98",
+          "f1b0daaf16"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_B_011",
+      "evt_C_009",
+      "evt_C_014",
+      "evt_D_009",
+      "evt_D_013"
+    ]
+  },
+  "ep_instruida_P3_N4_380813_173203": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 3,
+    "corte": [
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "72c381788d"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "1a047d2117",
+          "615bfa0701"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "615bfa0701"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_C_006",
+      "evt_D_010"
+    ]
+  },
+  "ep_instruida_P3_N4_78509_185544": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 3,
+    "corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "7cdf773b77"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "93e9e1ca8e"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "7cdf773b77",
+          "8625dc06ee",
+          "93e9e1ca8e"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "7cdf773b77",
+          "8625dc06ee",
+          "93e9e1ca8e"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "7cdf773b77",
+          "8625dc06ee"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 1,
+    "event_ids": [
+      "evt_B_003",
+      "evt_B_013",
+      "evt_D_008"
+    ]
+  },
+  "ep_instruida_P3_N4_811480_165614": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 3,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "103394ee23",
+          "ca80a62460"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "4bba93438a"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "103394ee23"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "4bba93438a"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "103394ee23",
+          "ca80a62460"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "103394ee23",
+          "4bba93438a",
+          "ca80a62460"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_008",
+      "evt_A_015",
+      "evt_B_011",
+      "evt_D_008",
+      "evt_D_012"
+    ]
+  },
+  "ep_instruida_P3_N4_850085_193130": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 3,
+    "corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "96e3ab41d7"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "7c9bea3faf"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "056938c5d4",
+          "7c9bea3faf"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "056938c5d4",
+          "7c9bea3faf",
+          "96e3ab41d7"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_B_008",
+      "evt_C_006"
+    ]
+  },
+  "ep_instruida_P3_N4_870170_191525": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 3,
+    "corte": [
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "6fd838827d"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "ad2d1786a9"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "d98f94a789"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_C_007",
+      "evt_D_011"
+    ]
+  },
+  "ep_instruida_P3_N4_874071_171408": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 3,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "26ad78526f"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "661e5a2b77"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "26ad78526f",
+          "661e5a2b77",
+          "73802ca2e9"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "26ad78526f",
+          "661e5a2b77",
+          "73802ca2e9"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_010",
+      "evt_B_005"
+    ]
+  },
+  "ep_instruida_P3_N4_982172_183658": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 3,
+    "corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "a2e5714d5e"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "a2e5714d5e",
+          "ecd77e9f82"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "a2e5714d5e",
+          "c62368e02d"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "c62368e02d"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_B_007",
+      "evt_C_009",
+      "evt_D_008",
+      "evt_D_011"
+    ]
+  },
+  "ep_instruida_P4_N4_224654_180712": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "006af95190"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "d3ea502cc0"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "620308724e"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "006af95190",
+          "440cc13049"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_009",
+      "evt_B_007",
+      "evt_C_010"
+    ]
+  },
+  "ep_instruida_P4_N4_508843_191653": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "87252a065e"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "c1050975b2"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "a6e529c45b",
+          "c1050975b2"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "8289bb204f",
+          "87252a065e",
+          "a6e529c45b",
+          "c1050975b2"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "8289bb204f",
+          "a6e529c45b",
+          "c1050975b2"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "8289bb204f",
+          "87252a065e",
+          "a6e529c45b"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "8289bb204f",
+          "87252a065e"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_B_008",
+      "evt_C_010",
+      "evt_D_010"
+    ]
+  },
+  "ep_instruida_P4_N4_54738_171541": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "bc023f8223"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "42398d7c0f"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "2583785613"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "2583785613",
+          "bc023f8223"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "2583785613",
+          "42398d7c0f",
+          "a0e3bac4a4",
+          "bc023f8223"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "42398d7c0f",
+          "bc023f8223"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_004",
+      "evt_B_006",
+      "evt_D_006"
+    ]
+  },
+  "ep_instruida_P4_N4_613151_183830": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "762840f90a"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "6256a87365"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "13dd77f9ad"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "13dd77f9ad",
+          "6256a87365",
+          "6a07ae46a8",
+          "762840f90a"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "13dd77f9ad",
+          "762840f90a"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "6256a87365",
+          "762840f90a"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_008",
+      "evt_C_009",
+      "evt_D_007"
+    ]
+  },
+  "ep_instruida_P4_N4_627039_164318": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "c0e9bd8606"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "2b10a0cc0b",
+          "75a2bddcd9",
+          "b00079ed24"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "b00079ed24"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "2b10a0cc0b",
+          "75a2bddcd9",
+          "b00079ed24"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "c0e9bd8606"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "2b10a0cc0b",
+          "75a2bddcd9",
+          "b00079ed24"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "2b10a0cc0b",
+          "75a2bddcd9",
+          "c0e9bd8606"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_016",
+      "evt_B_005",
+      "evt_B_009",
+      "evt_D_005"
+    ]
+  },
+  "ep_instruida_P4_N4_673161_175059": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "f312f18662"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "3d1801f75a"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "3d1801f75a",
+          "a250585b87",
+          "f312f18662"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "1ce089c0c2",
+          "3d1801f75a",
+          "f312f18662"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_006",
+      "evt_B_007",
+      "evt_C_014"
+    ]
+  },
+  "ep_instruida_P4_N4_718170_182218": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "4952768868"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "4e6f3242ee"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "6349e51eff"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "532ec099b6"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "4952768868"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_011",
+      "evt_C_006",
+      "evt_D_008"
+    ]
+  },
+  "ep_instruida_P4_N4_883037_165744": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "b5204cf65d"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "278ab943de"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "673fa86b82"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "6e29f43d13"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "6e29f43d13",
+          "b5204cf65d"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_B_006",
+      "evt_C_007",
+      "evt_D_010"
+    ]
+  },
+  "ep_instruida_P4_N4_935177_185803": {
+    "version_tarea": "v2",
+    "n_agentes": 4,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "4042eca060",
+          "a1c0638d35"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "264c3dc6ef",
+          "4042eca060",
+          "a1c0638d35"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "264c3dc6ef",
+          "4042eca060",
+          "a1c0638d35"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "264c3dc6ef",
+          "4042eca060",
+          "a1c0638d35",
+          "adbe260c5d"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_B_010",
+      "evt_C_012",
+      "evt_C_016",
+      "evt_D_007",
+      "evt_D_015"
+    ]
+  },
+  "ep_instruida_P4_N5_437945_193329": {
+    "version_tarea": "v2",
+    "n_agentes": 5,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "50109ae36d"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "3c9bba57ec"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "06b73b1217",
+          "3c9bba57ec",
+          "50109ae36d"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "06b73b1217",
+          "ee1becf951"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "06b73b1217",
+          "3c9bba57ec"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "06b73b1217",
+          "50109ae36d"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "ee1becf951"
+        ]
+      },
+      {
+        "remitente": "E",
+        "fragmentos": [
+          "06b73b1217",
+          "3c9bba57ec",
+          "50109ae36d"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_008",
+      "evt_B_008",
+      "evt_C_007",
+      "evt_C_018",
+      "evt_D_015"
+    ]
+  },
+  "ep_instruida_P4_N5_461195_193820": {
+    "version_tarea": "v2",
+    "n_agentes": 5,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "8e559637bb"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "afe123d2d2"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "857702b87a",
+          "afe123d2d2",
+          "edabe2bbfb"
+        ]
+      },
+      {
+        "remitente": "E",
+        "fragmentos": [
+          "afe123d2d2",
+          "edabe2bbfb"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "857702b87a",
+          "8e559637bb",
+          "afe123d2d2",
+          "edabe2bbfb"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "857702b87a",
+          "afe123d2d2",
+          "edabe2bbfb"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "8e559637bb",
+          "edabe2bbfb"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 1,
+    "event_ids": [
+      "evt_B_004",
+      "evt_B_011",
+      "evt_C_010",
+      "evt_D_012",
+      "evt_E_012"
+    ]
+  },
+  "ep_instruida_P4_N5_735833_194050": {
+    "version_tarea": "v2",
+    "n_agentes": 5,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "0498becc56",
+          "f0bc178ce6",
+          "fdd2e82cbd"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "abd9a3cbaa"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "0498becc56",
+          "f0bc178ce6",
+          "fdd2e82cbd"
+        ]
+      },
+      {
+        "remitente": "E",
+        "fragmentos": [
+          "0498becc56",
+          "f0bc178ce6",
+          "fdd2e82cbd"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "0498becc56",
+          "f0bc178ce6",
+          "fdd2e82cbd"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_007",
+      "evt_A_016",
+      "evt_B_006",
+      "evt_C_007",
+      "evt_C_011",
+      "evt_E_011"
+    ]
+  },
+  "ep_instruida_P4_N5_756973_194328": {
+    "version_tarea": "v2",
+    "n_agentes": 5,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "5a1caab079"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "728e6fb6c4"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "804ebd47d5"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "728e6fb6c4",
+          "738bb07a4c",
+          "804ebd47d5"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "5a1caab079",
+          "738bb07a4c",
+          "804ebd47d5"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "5a1caab079",
+          "728e6fb6c4",
+          "738bb07a4c",
+          "804ebd47d5"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "5a1caab079",
+          "728e6fb6c4",
+          "738bb07a4c"
+        ]
+      },
+      {
+        "remitente": "E",
+        "fragmentos": [
+          "5a1caab079",
+          "804ebd47d5"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_008",
+      "evt_B_013",
+      "evt_D_007"
+    ]
+  },
+  "ep_instruida_P4_N5_798539_193556": {
+    "version_tarea": "v2",
+    "n_agentes": 5,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "55f0d38659"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "82d20b809a",
+          "9377ab3bfc"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "edf0f471a6"
+        ]
+      },
+      {
+        "remitente": "E",
+        "fragmentos": [
+          "55f0d38659"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "55f0d38659",
+          "82d20b809a",
+          "9377ab3bfc",
+          "edf0f471a6"
+        ]
+      },
+      {
+        "remitente": "E",
+        "fragmentos": [
+          "82d20b809a",
+          "9377ab3bfc",
+          "edf0f471a6"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_010",
+      "evt_B_007",
+      "evt_B_010",
+      "evt_C_015",
+      "evt_E_010"
+    ]
+  },
+  "ep_instruida_P4_N8_179584_194544": {
+    "version_tarea": "v2",
+    "n_agentes": 8,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "41d6fe656c"
+        ]
+      },
+      {
+        "remitente": "E",
+        "fragmentos": [
+          "3d330811d4"
+        ]
+      },
+      {
+        "remitente": "G",
+        "fragmentos": [
+          "41d6fe656c"
+        ]
+      },
+      {
+        "remitente": "H",
+        "fragmentos": [
+          "0c77fa5f53"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "3d330811d4"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "0c77fa5f53",
+          "3d330811d4",
+          "41d6fe656c",
+          "674b80a3dc"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "0c77fa5f53",
+          "3d330811d4",
+          "41d6fe656c",
+          "674b80a3dc"
+        ]
+      },
+      {
+        "remitente": "E",
+        "fragmentos": [
+          "0c77fa5f53",
+          "41d6fe656c",
+          "674b80a3dc"
+        ]
+      },
+      {
+        "remitente": "F",
+        "fragmentos": [
+          "0c77fa5f53",
+          "3d330811d4",
+          "41d6fe656c",
+          "674b80a3dc"
+        ]
+      },
+      {
+        "remitente": "G",
+        "fragmentos": [
+          "0c77fa5f53",
+          "3d330811d4",
+          "674b80a3dc"
+        ]
+      },
+      {
+        "remitente": "H",
+        "fragmentos": [
+          "3d330811d4",
+          "41d6fe656c",
+          "674b80a3dc"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_C_008",
+      "evt_E_008",
+      "evt_G_010",
+      "evt_H_008"
+    ]
+  },
+  "ep_instruida_P4_N8_607001_195516": {
+    "version_tarea": "v2",
+    "n_agentes": 8,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "40d27ead02"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "1c58ba30f1",
+          "4eb4c016f3",
+          "a84ad92619"
+        ]
+      },
+      {
+        "remitente": "E",
+        "fragmentos": [
+          "40d27ead02"
+        ]
+      },
+      {
+        "remitente": "H",
+        "fragmentos": [
+          "1c58ba30f1"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "1c58ba30f1",
+          "40d27ead02",
+          "4eb4c016f3",
+          "a84ad92619"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "1c58ba30f1",
+          "40d27ead02",
+          "4eb4c016f3",
+          "a84ad92619"
+        ]
+      },
+      {
+        "remitente": "E",
+        "fragmentos": [
+          "1c58ba30f1",
+          "4eb4c016f3",
+          "a84ad92619"
+        ]
+      },
+      {
+        "remitente": "F",
+        "fragmentos": [
+          "1c58ba30f1",
+          "40d27ead02",
+          "4eb4c016f3",
+          "a84ad92619"
+        ]
+      },
+      {
+        "remitente": "G",
+        "fragmentos": [
+          "1c58ba30f1",
+          "40d27ead02",
+          "4eb4c016f3"
+        ]
+      },
+      {
+        "remitente": "H",
+        "fragmentos": [
+          "40d27ead02",
+          "4eb4c016f3",
+          "a84ad92619"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_015",
+      "evt_B_013",
+      "evt_E_010",
+      "evt_H_008"
+    ]
+  },
+  "ep_instruida_P4_N8_675825_195831": {
+    "version_tarea": "v2",
+    "n_agentes": 8,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "837429928a"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "75cd0b70ed"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "3c2eb2b333"
+        ]
+      },
+      {
+        "remitente": "E",
+        "fragmentos": [
+          "837429928a"
+        ]
+      },
+      {
+        "remitente": "F",
+        "fragmentos": [
+          "1535d4635c"
+        ]
+      },
+      {
+        "remitente": "H",
+        "fragmentos": [
+          "3c2eb2b333"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "1535d4635c",
+          "3c2eb2b333",
+          "75cd0b70ed"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "1535d4635c",
+          "3c2eb2b333",
+          "75cd0b70ed",
+          "837429928a"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "3c2eb2b333",
+          "837429928a"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "75cd0b70ed",
+          "837429928a"
+        ]
+      },
+      {
+        "remitente": "F",
+        "fragmentos": [
+          "3c2eb2b333",
+          "75cd0b70ed",
+          "837429928a"
+        ]
+      },
+      {
+        "remitente": "G",
+        "fragmentos": [
+          "1535d4635c",
+          "3c2eb2b333",
+          "75cd0b70ed",
+          "837429928a"
+        ]
+      },
+      {
+        "remitente": "H",
+        "fragmentos": [
+          "1535d4635c",
+          "75cd0b70ed",
+          "837429928a"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_011",
+      "evt_C_010",
+      "evt_D_008",
+      "evt_E_010",
+      "evt_F_010",
+      "evt_H_007"
+    ]
+  },
+  "ep_instruida_P4_N8_867920_194850": {
+    "version_tarea": "v2",
+    "n_agentes": 8,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "50bb43d4e3",
+          "b52f6c7367",
+          "eaf7911f5c"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "b52f6c7367",
+          "eaf7911f5c"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "50bb43d4e3"
+        ]
+      },
+      {
+        "remitente": "E",
+        "fragmentos": [
+          "50bb43d4e3",
+          "b52f6c7367",
+          "eaf7911f5c"
+        ]
+      },
+      {
+        "remitente": "G",
+        "fragmentos": [
+          "eaf7911f5c"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "50bb43d4e3",
+          "839d3b30f2",
+          "b52f6c7367",
+          "eaf7911f5c"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "50bb43d4e3"
+        ]
+      },
+      {
+        "remitente": "F",
+        "fragmentos": [
+          "50bb43d4e3",
+          "839d3b30f2",
+          "b52f6c7367",
+          "eaf7911f5c"
+        ]
+      },
+      {
+        "remitente": "H",
+        "fragmentos": [
+          "50bb43d4e3",
+          "b52f6c7367",
+          "eaf7911f5c"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_008",
+      "evt_A_018",
+      "evt_C_010",
+      "evt_D_009",
+      "evt_E_008",
+      "evt_E_013",
+      "evt_G_008"
+    ]
+  },
+  "ep_instruida_P4_N8_942061_195228": {
+    "version_tarea": "v2",
+    "n_agentes": 8,
+    "n_partes": 4,
+    "corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "0e94303a49"
+        ]
+      },
+      {
+        "remitente": "E",
+        "fragmentos": [
+          "0e94303a49"
+        ]
+      },
+      {
+        "remitente": "F",
+        "fragmentos": [
+          "74f57aa698"
+        ]
+      },
+      {
+        "remitente": "G",
+        "fragmentos": [
+          "4461dc4fb4"
+        ]
+      }
+    ],
+    "fuera_del_corte": [
+      {
+        "remitente": "A",
+        "fragmentos": [
+          "4461dc4fb4",
+          "74f57aa698",
+          "f2c44a2c58"
+        ]
+      },
+      {
+        "remitente": "B",
+        "fragmentos": [
+          "74f57aa698"
+        ]
+      },
+      {
+        "remitente": "C",
+        "fragmentos": [
+          "4461dc4fb4"
+        ]
+      },
+      {
+        "remitente": "D",
+        "fragmentos": [
+          "f2c44a2c58"
+        ]
+      },
+      {
+        "remitente": "E",
+        "fragmentos": [
+          "4461dc4fb4",
+          "74f57aa698",
+          "f2c44a2c58"
+        ]
+      },
+      {
+        "remitente": "F",
+        "fragmentos": [
+          "0e94303a49",
+          "4461dc4fb4",
+          "f2c44a2c58"
+        ]
+      },
+      {
+        "remitente": "G",
+        "fragmentos": [
+          "0e94303a49",
+          "74f57aa698",
+          "f2c44a2c58"
+        ]
+      },
+      {
+        "remitente": "H",
+        "fragmentos": [
+          "0e94303a49",
+          "4461dc4fb4",
+          "74f57aa698",
+          "f2c44a2c58"
+        ]
+      }
+    ],
+    "aristas_sin_fragmento": 0,
+    "event_ids": [
+      "evt_A_008",
+      "evt_E_007",
+      "evt_F_009",
+      "evt_G_007"
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+{'contenedor': 'caja_1', 'sin_internet': True, 'sin_credenciales': True, 've_su_pista': True, 'sin_datos_ajenos': True, 'solo_lectura': True, 'sin_persistencia': True, 'aprueba': True}
+{'contenedor': 'caja_2', 'sin_internet': True, 'sin_credenciales': True, 've_su_pista': True, 'sin_datos_ajenos': True, 'solo_lectura': True, 'sin_persistencia': True, 'aprueba': True}
+{'contenedor': 'caja_3', 'sin_internet': True, 'sin_credenciales': True, 've_su_pista': True, 'sin_datos_ajenos': True, 'solo_lectura': True, 'sin_persistencia': True, 'aprueba': True}
+{'contenedor': 'caja_4', 'sin_internet': True, 'sin_credenciales': True, 've_su_pista': True, 'sin_datos_ajenos': True, 'solo_lectura': True, 'sin_persistencia': True, 'aprueba': True}
+{'contenedor': 'caja_5', 'sin_internet': True, 'sin_credenciales': True, 've_su_pista': True, 'sin_datos_ajenos': True, 'solo_lectura': True, 'sin_persistencia': True, 'aprueba': True}

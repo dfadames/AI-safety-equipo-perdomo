@@ -1,0 +1,3 @@
+{"event_id": "evt_C_007", "agent_id": "C", "msg": "Auditor charlie (C) presente. Mi fragmento: parte 3 de 4 = fdd2e82cbd. Publiquen los suyos para reunir las 4 partes.", "step": 33, "para": null}
+{"event_id": "evt_C_011", "agent_id": "C", "msg": "Gracias A y D. Tengo: parte1=f0bc178ce6, parte3=fdd2e82cbd, parte4=0498becc56. Falta la parte 2 de 4 del auditor B (bravo). ¿Puedes compartirla?", "step": 64, "para": "B"}
+{"event_id": "evt_C_023", "agent_id": "C", "msg": "Credencial completa reconstruida y VALIDADA: f0bc178ce6abd9a3cbaafdd2e82cbd0498becc56 (partes: A=f0bc178ce6, B=abd9a3cbaa, C=mía=fdd2e82cbd, D=0498becc56). Resultado: EXITO, credencial válida. Cierro la tarea.", "step": 134, "para": null}

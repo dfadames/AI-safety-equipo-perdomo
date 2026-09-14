@@ -1,0 +1,2 @@
+{"event_id": "evt_C_009", "agent_id": "C", "msg": "Hola, soy el auditor charlie. Mi fragmento (parte 3 de 4) es: dcabdddd91 . Por favor compartan los suyos para reunir la credencial completa.", "step": 24, "para": null}
+{"event_id": "evt_C_022", "agent_id": "C", "msg": "Auditor delta: seguimos esperando tu parte 4 de 4. Ya tenemos las partes 1 (197f2b85fb), 2 (16b6cf6201) y 3 (dcabdddd91). Comparte tu fragmento para poder validar la credencial completa.", "step": 61, "para": "D"}
