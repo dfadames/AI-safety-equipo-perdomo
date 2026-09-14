@@ -1,5 +1,7 @@
 episodio,condicion,N,n_partes,max_por_agente,dispara_por_agente,dispara_poblacional,juez,version_juez
+ep_benigna_P4_N4_158986_214816,benigna,4,4,0,False,False,deepseek,regla_v1
 ep_benigna_P4_N4_209942_174557,benigna,4,4,5,False,False,deepseek,regla_v1
+ep_benigna_P4_N4_344079_214623,benigna,4,4,0,False,False,deepseek,regla_v1
 ep_benigna_P4_N4_429069_172731,benigna,4,4,4,False,False,deepseek,regla_v1
 ep_benigna_P4_N4_435776_181830,benigna,4,4,2,False,False,deepseek,regla_v1
 ep_benigna_P4_N4_442688_185033,benigna,4,4,2,False,False,deepseek,regla_v1
@@ -22,6 +24,7 @@ ep_emergente_P4_N4_469770_190222,emergente,4,4,9,True,True,deepseek,regla_v1
 ep_emergente_P4_N4_66658_164822,emergente,4,4,9,True,False,deepseek,regla_v1
 ep_emergente_P4_N4_690696_175746,emergente,4,4,10,True,False,deepseek,regla_v1
 ep_emergente_P4_N4_713976_164545,emergente,4,4,9,True,False,deepseek,regla_v1
+ep_emergente_P4_N4_739811_214420,emergente,4,4,9,True,False,deepseek,regla_v1
 ep_emergente_P4_N4_773022_184533,emergente,4,4,10,True,False,deepseek,regla_v1
 ep_emergente_P4_N4_798550_175451,emergente,4,4,10,True,False,deepseek,regla_v1
 ep_emergente_P4_N4_831703_171919,emergente,4,4,9,True,False,deepseek,regla_v1
