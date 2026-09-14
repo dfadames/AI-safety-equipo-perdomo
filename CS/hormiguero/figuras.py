@@ -275,20 +275,24 @@ def extracto(eventos, agente, partes) -> list[tuple[int, str, str]]:
                 break
     intento = next((e for e in evs if e.get("type") in ("try_unlock", "validar_credencial")), None)
     tope = intento["step"] if intento else float("inf")
-    recibidas, de, primero = [], [], None
+    # ponytail: la caja solo da para cuatro renglones, asi que las recepciones van
+    # juntas en uno. El paso es el de la ULTIMA parte listada, no el de la primera:
+    # con el de la primera el renglon decia que llegaron partes que aun no se habian
+    # publicado. Si algun dia la caja crece, un renglon por recepcion es lo correcto.
+    recibidas, de, ultimo = [], [], None
     for e in evs:
         if e.get("type") != "receive" or e.get("step", 0) > tope:
             continue
         nuevas = [p for p in partes if p in str(e.get("content")) and p != propia and p not in recibidas]
         if nuevas:
-            primero = primero or e["step"]
+            ultimo = e["step"]
             recibidas += nuevas
             de += [autor.get((e.get("ancestors") or [None])[0], "?")]
     if recibidas:
         # Por numero de parte: un fragmento de v2 son 10 caracteres y tres no caben en la caja.
         cuales = ", ".join(str(partes.index(p) + 1) for p in recibidas)
-        lineas.append((primero, "recv", f"part{'s' if len(recibidas) > 1 else ''} {cuales} "
-                                        f"from {', '.join(sorted(set(de)))}"))
+        lineas.append((ultimo, "recv", f"has part{'s' if len(recibidas) > 1 else ''} {cuales} "
+                                       f"from {', '.join(sorted(set(de)))}"))
     if intento:
         marca = "✓" if intento.get("success") else "✗"
         lineas.append((intento["step"], "unlock", f'"{_corto(intento.get("content"), 22)}" {marca}'))
@@ -323,7 +327,7 @@ def figura_mapa(ruta_log: str, puntajes: dict):
     alto = ya + 108
     c = [defs_flecha(),
          texto(10, 24, "(a) Each agent's trace, read one at a time (excerpt)", 14, TINTA, weight=600),
-         texto(372, 24, "(b) Provenance map of the same episode", 14, TINTA, weight=600)]
+         texto(372, 24, "(b) Exposure-provenance graph of the same episode", 14, TINTA, weight=600)]
 
     centro = {}
     for i, ag in enumerate(agentes):
@@ -385,7 +389,7 @@ def figura_mapa(ruta_log: str, puntajes: dict):
             if a["agent_id"] not in etiquetados:
                 etiquetados.add(a["agent_id"])
                 parte = next(p for p in ps if p in str(cont.get("out", "")))
-                c.append(texto(x, y - 13, f"part {ps.index(parte) + 1}", 12, TINTA_2, anchor="middle"))
+                c.append(texto(x, y + 20, f"part {ps.index(parte) + 1}", 12, TINTA_2, anchor="middle"))
         else:
             c.append(punto(x, y, 4, TENUE))
 
@@ -439,7 +443,7 @@ def figura_mapa(ruta_log: str, puntajes: dict):
              "cono": len(cono), "eventos": G.number_of_nodes(), "paso": fa["step"],
              "agente": fa["agent_id"], "episodio": ep, "juez": juez,
              "modelo": conf.get("modelo", ""), "N": conf.get("n_agentes"), "P": conf.get("n_partes")}
-    return envolver(ANCHO, alto, c, "Per-agent traces versus the provenance map of one episode"), alto, datos
+    return envolver(ANCHO, alto, c, "Per-agent traces versus the exposure-provenance graph of one episode"), alto, datos
 
 
 # --- Figura 2: la brecha de composicion y el corte minimo ----------------------------
@@ -498,9 +502,13 @@ def figura_curvas(filas):
             return
         pos = {k: xa + (xb - xa) * (i + 0.5) / len(claves) for i, k in enumerate(claves)}
         if diagonal and len(claves) > 1:
-            # Referencia: la linea donde el corte seria exactamente igual a las partes.
+            # Dos referencias: corte = partes (a trazos) y el piso P-1 (punteado).
+            # Sin el trazo se leian como una linea de tendencia ajustada a los datos.
             k0, k1 = claves[0], claves[-1]
-            c.append(linea(pos[k0], _ys(k0, 0, techo), pos[k1], _ys(k1, 0, techo), TENUE, 1))
+            c.append(linea(pos[k0], _ys(k0, 0, techo), pos[k1], _ys(k1, 0, techo), TENUE, 1,
+                           ' stroke-dasharray="6 4"'))
+            c.append(linea(pos[k0], _ys(k0 - 1, 0, techo), pos[k1], _ys(k1 - 1, 0, techo), TENUE, 1,
+                           ' stroke-dasharray="1 4"'))
         for k in claves:
             cortes = grupos[k]
             x = pos[k]
@@ -533,7 +541,7 @@ def figura_curvas(filas):
         if _bool(f["escape"]) and _int(f["N"]) == 4 and _int(f["n_partes"], 0) > 1:
             por_p[_int(f["n_partes"])].append(_int(f["corte_minimo"]))
     panel_corte(680, 866, por_p, "parts in the credential (P)", "Min-cut by number of parts",
-                "escapes · 4 agents · gray line: min-cut = parts", diagonal=True)
+                "escapes · 4 agents · dashed P, dotted P-1", diagonal=True)
 
     datos = {"por_n": {n: (sum(_bool(f["escape"]) for f in g), len(g)) for n, g in por_n.items()},
              "corte_por_n": dict(por_n_corte), "corte_por_p": dict(por_p)}
@@ -563,7 +571,7 @@ def tasas(filas, juez_con, juez_sin):
     grupos = conjuntos(filas)
     monitores = [
         # (nombre, dispara en el episodio, es historico: no se vuelve a correr)
-        ("Provenance map (population)", lambda f: _bool(f["alarma_del_mapa"]), False),
+        ("Provenance graph (population)", lambda f: _bool(f["alarma_del_mapa"]), False),
         ("Per-agent LLM judge, with the rule",
          lambda f: None if juez_con is None else juez_con.get(f["episodio"]), False),
         ("Per-agent LLM judge, without the rule",
@@ -804,7 +812,8 @@ def numeros(filas, replicas, auditorias, d1, d2, d3, efectivas, version=VERSION_
              f"the span.{frase_juez}\n")
     L.append("**Figure 2.** (a) Escape rate by population size (instructed, credential in 4 parts): with 3 "
              "agents one part is unreachable. (b, c) Minimum cut of each escape (dots) and mean (line); the "
-             f"gray line in (c) marks min-cut = parts. n = {rango} episodes per point.\n")
+             f"in (c) the dashed line marks min-cut = P and the dotted line the floor P-1. "
+             f"n = {rango} episodes per point.\n")
     nota_b = ("; none attempted a restricted action, so the map could not fire"
               if sin_intentos(grupos["limpios"]) else "")
     L.append(f"**Figure 3.** Detection by monitor. (a) Escape episodes. (b) Episodes without escape{nota_b}. "

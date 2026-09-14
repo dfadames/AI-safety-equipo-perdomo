@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2026.4.15)  13 SEP 2026 18:06
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2026.4.15)  14 SEP 2026 01:01
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -472,27 +472,46 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 )
 \Hy@SectionHShift=\skip124
 )
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption.sty
+Package: caption 2023/03/12 v3.6j Customizing captions (AR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption3.sty
+Package: caption3 2023/03/12 v2.4 caption3 kernel (AR)
+\caption@tempdima=\dimen184
+\captionmargin=\dimen185
+\caption@leftmargin=\dimen186
+\caption@rightmargin=\dimen187
+\caption@width=\dimen188
+\caption@indent=\dimen189
+\caption@parindent=\dimen190
+\caption@hangindent=\dimen191
+Package caption Info: Standard document class detected.
+)
+\c@caption@flags=\count303
+\c@continuedfloat=\count304
+Package caption Info: hyperref package is loaded.
+)
 (out-build/main.aux)
 \openout1 = `main.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 31.
-LaTeX Font Info:    ... okay on input line 31.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -530,16 +549,16 @@ LaTeX Font Info:    ... okay on input line 31.
 
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count303
-\scratchdimen=\dimen184
+\scratchcounter=\count305
+\scratchdimen=\dimen192
 \scratchbox=\box61
-\nofMPsegments=\count304
-\nofMParguments=\count305
+\nofMPsegments=\count306
+\nofMParguments=\count307
 \everyMPshowfont=\toks27
-\MPscratchCnt=\count306
-\MPscratchDim=\dimen185
-\MPnumerator=\count307
-\makeMPintoPDFobject=\count308
+\MPscratchCnt=\count308
+\MPscratchDim=\dimen193
+\MPnumerator=\count309
+\makeMPintoPDFobject=\count310
 \everyMPtoPDFconversion=\toks28
 ) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
@@ -550,93 +569,103 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package hyperref Info: Link coloring OFF on input line 31.
+Package hyperref Info: Link coloring OFF on input line 36.
 
 (out-build/main.out) (out-build/main.out)
 \@outlinefile=\write3
 \openout3 = `main.out'.
 
-LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 3
-6.
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: End \AtBeginDocument code.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 4
+1.
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2022/07/10 v2.5l Standard LaTeX font definitions
 ) [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texlive/texmf-di
-st/fonts/enc/dvips/cm-super/cm-super-t1.enc}] [2] [3] [4] [5] [6]
-<figuras/f1_mapa.pdf, id=149, 677.65169pt x 427.5975pt>
+st/fonts/enc/dvips/cm-super/cm-super-t1.enc}] [2] [3] [4]
+
+pdfTeX warning: pdflatex (file ./figuras/f2_brecha_y_corte.pdf): PDF inclusion:
+ found PDF version <1.7>, but at most version <1.5> allowed
+<figuras/f2_brecha_y_corte.pdf, id=147, 677.53125pt x 239.39438pt>
+File: figuras/f2_brecha_y_corte.pdf Graphic file (type pdf)
+<use figuras/f2_brecha_y_corte.pdf>
+Package pdftex.def Info: figuras/f2_brecha_y_corte.pdf  used on input line 98.
+(pdftex.def)             Requested size: 353.31439pt x 124.8401pt.
+
+
+pdfTeX warning: pdflatex (file ./figuras/f1_mapa.pdf): PDF inclusion: found PDF
+ version <1.7>, but at most version <1.5> allowed
+<figuras/f1_mapa.pdf, id=151, 677.53125pt x 427.5975pt>
 File: figuras/f1_mapa.pdf Graphic file (type pdf)
 <use figuras/f1_mapa.pdf>
-Package pdftex.def Info: figuras/f1_mapa.pdf  used on input line 109.
-(pdftex.def)             Requested size: 371.43698pt x 234.38335pt.
- [7 <./figuras/f1_mapa.pdf>]
-[8]
-Overfull \hbox (11.12473pt too wide) in paragraph at lines 158--159
-\T1/cmr/m/n/10.95 Code: []$\T1/cmtt/m/n/10.95 https : / / github . com / dfadam
-es / AI-[]safety-[]equipo-[]perdomo$[] \T1/cmr/m/n/10.95 (har-ness in \T1/cmtt/
-m/n/10.95 CS/hormiguero\T1/cmr/m/n/10.95 ).
- []
+Package pdftex.def Info: figuras/f1_mapa.pdf  used on input line 115.
+(pdftex.def)             Requested size: 362.37569pt x 228.70694pt.
+[5 <./figuras/f2_brecha_y_corte.pdf>]
 
-[9]
-Overfull \hbox (29.7392pt too wide) in paragraph at lines 165--166
+pdfTeX warning: pdflatex (file ./figuras/f3_deteccion.pdf): PDF inclusion: foun
+d PDF version <1.7>, but at most version <1.5> allowed
+<figuras/f3_deteccion.pdf, id=180, 677.53125pt x 201.75375pt>
+File: figuras/f3_deteccion.pdf Graphic file (type pdf)
+<use figuras/f3_deteccion.pdf>
+Package pdftex.def Info: figuras/f3_deteccion.pdf  used on input line 132.
+(pdftex.def)             Requested size: 353.31439pt x 105.21117pt.
+[6 <./figuras/f1_mapa.pdf>] [7 <./figuras/f3_deteccion.pdf>] [8]
+Overfull \hbox (29.7392pt too wide) in paragraph at lines 184--185
 \T1/cmr/m/n/10.95 i-tor-ing De-com-po-si-tion At-tacks in LLMs with Lightweight
  Se-quen-tial Mon-i-tors. arXiv:2506.10949. 
  []
 
 
-Overfull \hbox (20.98203pt too wide) in paragraph at lines 167--168
+Overfull \hbox (20.98203pt too wide) in paragraph at lines 186--187
 []\T1/cmr/m/n/10.95 Costa, M., et al. (2025). Se-cur-ing AI Agents with Informa
 tion-Flow Con-trol. arXiv:2505.23643. 
  []
 
 
-Overfull \hbox (125.8473pt too wide) in paragraph at lines 175--176
+Overfull \hbox (125.8473pt too wide) in paragraph at lines 194--195
 \T1/cmr/m/n/10.95 METR, 26 Au-gust 2026. []$\T1/cmtt/m/n/10.95 https : / / metr
  . org / blog / 2026-[]08-[]26-[]openai-[]hugging-[]face-[]incident-[]investiga
 tion/$[] 
  []
 
-
-Overfull \hbox (22.2246pt too wide) in paragraph at lines 180--181
+[9{/usr/share/texlive/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
+Overfull \hbox (22.2246pt too wide) in paragraph at lines 199--200
 \T1/cmr/m/n/10.95 Based Eval-u-a-tion of Post-Exposure Con-tain-ment in Tool-Us
 ing LLM Agents. arXiv:2607.23999. 
  []
 
-[10{/usr/share/texlive/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
-Overfull \hbox (30.6085pt too wide) in paragraph at lines 188--189
+
+Overfull \hbox (30.6085pt too wide) in paragraph at lines 207--208
 []\T1/cmr/m/n/10.95 Meinke, A., et al. (2024). Fron-tier Mod-els are Ca-pa-ble 
 of In-context Schem-ing. arXiv:2412.04984. 
  []
 
 
-Overfull \hbox (35.96129pt too wide) in paragraph at lines 193--194
+Overfull \hbox (35.96129pt too wide) in paragraph at lines 212--213
 \T1/cmr/m/n/10.95 (2026). De-tect-ing Multi-Agent Col-lu-sion Through Multi-Age
 nt In-ter-pretabil-ity. arXiv:2604.01151. 
  []
 
+[10]
+Overfull \hbox (11.12473pt too wide) in paragraph at lines 232--233
+\T1/cmr/m/n/10.95 Code: []$\T1/cmtt/m/n/10.95 https : / / github . com / dfadam
+es / AI-[]safety-[]equipo-[]perdomo$[] \T1/cmr/m/n/10.95 (har-ness in \T1/cmtt/
+m/n/10.95 CS/hormiguero\T1/cmr/m/n/10.95 ).
+ []
+
 [11]
-Overfull \hbox (0.46112pt too wide) in paragraph at lines 230--231
-[]\T1/cmr/bx/n/10.95 Decoy file \T1/cmr/m/n/10.95 (im-pos-si-ble task only). ``
-RE-STRICTED -- OP-ER-A-TIONS STAFF ONLY. Backup
+Overfull \hbox (7.64166pt too wide) in paragraph at lines 249--250
+[]\T1/cmr/bx/n/10.95 Sample and set-ting. \T1/cmr/m/n/10.95 Points have 5--10 e
+pisodes; all agents and the judge are \T1/cmtt/m/n/10.95 deepseek-flash
  []
 
-[12]
-Overfull \hbox (9.38498pt too wide) in paragraph at lines 237--238
-\T1/cmr/m/n/10.95 only vol-ume with its hint, a \T1/cmtt/m/n/10.95 config.yml \
-T1/cmr/m/n/10.95 con-tain-ing one line \T1/cmtt/m/n/10.95 clave_prod_parte_$\OM
-L/cmm/m/it/10.95 k$\T1/cmtt/m/n/10.95 _de_$\OML/cmm/m/it/10.95 P$\T1/cmtt/m/n/1
-0.95 : <part>
- []
 
-[13] [14]
-<figuras/f2_brecha_y_corte.pdf, id=231, 677.65169pt x 239.93639pt>
-File: figuras/f2_brecha_y_corte.pdf Graphic file (type pdf)
-<use figuras/f2_brecha_y_corte.pdf>
-Package pdftex.def Info: figuras/f2_brecha_y_corte.pdf  used on input line 289.
+LaTeX Warning: `h' float specifier changed to `ht'.
 
-(pdftex.def)             Requested size: 407.66833pt x 144.34735pt.
-
+[12] [13] [14] [15] [16]
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
@@ -646,49 +675,43 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[15 <./figuras/f2_brecha_y_corte.pdf>]
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[16] [17] [18] (out-build/main.aux)
+[17] [18] [19] [20] (out-build/main.aux)
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 4B541AB307595B81CDD7DB8ACB5066D4;3312.
+(rerunfilecheck)             Checksum: 296160F89349DE33632DA9F3973DC609;3839.
  ) 
 Here is how much of TeX's memory you used:
- 11663 strings out of 476034
- 184376 string characters out of 5792864
- 1883388 words of memory out of 6000000
- 31893 multiletter control sequences out of 15000+600000
- 527338 words of font info for 65 fonts, out of 8000000 for 9000
+ 13009 strings out of 476034
+ 210549 string characters out of 5792864
+ 1888388 words of memory out of 6000000
+ 33221 multiletter control sequences out of 15000+600000
+ 529926 words of font info for 71 fonts, out of 8000000 for 9000
  1137 hyphenation exceptions out of 8191
- 76i,12n,77p,2645b,511s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 76i,12n,77p,2647b,537s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share
-/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texliv
-e/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-
-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/f
-onts/type1/public/cm-super/sfbx1000.pfb></usr/share/texlive/texmf-dist/fonts/ty
-pe1/public/cm-super/sfbx1095.pfb></usr/share/texlive/texmf-dist/fonts/type1/pub
-lic/cm-super/sfbx1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-
-super/sfbx1440.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/s
-frm0800.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm1000
-.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb></
-usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm1728.pfb></usr/share/texl
-ive/texmf-dist/fonts/type1/public/cm-super/sfti1095.pfb></usr/share/texlive/tex
-mf-dist/fonts/type1/public/cm-super/sfti1200.pfb></usr/share/texlive/texmf-dist
-/fonts/type1/public/cm-super/sftt1000.pfb></usr/share/texlive/texmf-dist/fonts/
-type1/public/cm-super/sftt1095.pfb>
-Output written on out-build/main.pdf (18 pages, 500871 bytes).
+/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texliv
+e/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type
+1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/publ
+ic/cm-super/sfbx1000.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-s
+uper/sfbx1095.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sf
+bx1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx1440.
+pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm0800.pfb></u
+sr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm0900.pfb></usr/shar
+e/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texli
+ve/texmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb></usr/share/texlive/texm
+f-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texlive/texmf-dist/
+fonts/type1/public/cm-super/sfrm1728.pfb></usr/share/texlive/texmf-dist/fonts/t
+ype1/public/cm-super/sfti1000.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
+blic/cm-super/sfti1095.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm
+-super/sfti1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/
+sftt1000.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sftt109
+5.pfb>
+Output written on out-build/main.pdf (20 pages, 569618 bytes).
 PDF statistics:
- 359 PDF objects out of 1000 (max. 8388607)
- 285 compressed objects within 3 object streams
- 51 named destinations out of 1000 (max. 500000)
- 163 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 442 PDF objects out of 1000 (max. 8388607)
+ 346 compressed objects within 4 object streams
+ 56 named destinations out of 1000 (max. 500000)
+ 192 words of extra memory for PDF output out of 10000 (max. 10000000)
 

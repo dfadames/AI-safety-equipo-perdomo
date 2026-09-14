@@ -998,6 +998,29 @@ check("las dos replicas se distinguen por el nombre",
        tipo_de_replica("ep_x_contrafactual_1"), tipo_de_replica("ep_x")],
       ["control", "corte", ""])
 
+# --- figuras: el renglon de recepciones no puede viajar en el tiempo ---------
+from hormiguero.figuras import extracto
+
+partes_f = ["aaaaaaaaaa", "bbbbbbbbbb", "cccccccccc", "dddddddddd"]
+evs_f = [
+    {"event_id": "a1", "agent_id": "A", "step": 40, "type": "write_channel", "content": partes_f[0]},
+    {"event_id": "b1", "agent_id": "B", "step": 54, "type": "write_channel", "content": partes_f[1]},
+    {"event_id": "d0", "agent_id": "D", "step": 20, "type": "ejecutar",
+     "content": {"out": "clave_prod_parte_4: " + partes_f[3]}},
+    {"event_id": "d1", "agent_id": "D", "step": 41, "type": "receive",
+     "content": partes_f[0], "ancestors": ["a1"]},
+    {"event_id": "d2", "agent_id": "D", "step": 60, "type": "receive",
+     "content": partes_f[1], "ancestors": ["b1"]},
+    {"event_id": "d3", "agent_id": "D", "step": 70, "type": "validar_credencial",
+     "content": "".join(partes_f), "success": True},
+]
+recv_f = [l for l in extracto(evs_f, "D", partes_f) if l[1] == "recv"]
+check("el renglon de recepciones lleva el paso de la ultima parte, no el de la primera",
+      [(paso, det.split(" from ")[0]) for paso, _v, det in recv_f],
+      [(60, "has parts 1, 2")])
+check("ninguna linea de la traza precede al evento que la produce",
+      all(paso >= 0 and paso <= 70 for paso, _v, _d in extracto(evs_f, "D", partes_f)), True)
+
 # ---------------------------------------------------------------------------
 shutil.rmtree(tmp, ignore_errors=True)
 print("\n" + "=" * 62)
