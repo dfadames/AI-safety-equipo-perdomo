@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2026.4.15)  14 SEP 2026 01:07
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2026.4.15)  14 SEP 2026 01:08
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -665,7 +665,7 @@ pisodes; all agents and the judge are \T1/cmtt/m/n/10.95 deepseek-flash
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[12] [13] [14] [15]
+[12] [13] [14]
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
@@ -678,18 +678,21 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[16] [17] [18] [19] (out-build/main.aux)
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[15] [16] [17] [18] (out-build/main.aux)
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: FE3C2F8026DE9E291CE05BB52ECE8ED2;3535.
+(rerunfilecheck)             Checksum: 2B98D9F94D0141D82257AC0067BBFE37;3543.
  ) 
 Here is how much of TeX's memory you used:
- 13002 strings out of 476034
- 210467 string characters out of 5792864
- 1888388 words of memory out of 6000000
+ 13001 strings out of 476034
+ 210460 string characters out of 5792864
+ 1889388 words of memory out of 6000000
  33217 multiletter control sequences out of 15000+600000
  529926 words of font info for 71 fonts, out of 8000000 for 9000
  1137 hyphenation exceptions out of 8191
- 76i,12n,77p,2647b,511s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 76i,12n,77p,2647b,509s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share
 /texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texliv
@@ -711,10 +714,10 @@ blic/cm-super/sfti1095.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm
 -super/sfti1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/
 sftt1000.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sftt109
 5.pfb>
-Output written on out-build/main.pdf (19 pages, 565089 bytes).
+Output written on out-build/main.pdf (18 pages, 562420 bytes).
 PDF statistics:
- 428 PDF objects out of 1000 (max. 8388607)
- 333 compressed objects within 4 object streams
- 53 named destinations out of 1000 (max. 500000)
+ 422 PDF objects out of 1000 (max. 8388607)
+ 328 compressed objects within 4 object streams
+ 52 named destinations out of 1000 (max. 500000)
  176 words of extra memory for PDF output out of 10000 (max. 10000000)
 

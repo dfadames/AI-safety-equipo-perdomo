@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1789366025.64785 "main.tex" "out-build/main.pdf" "main" 1789366026.24956 0
+["pdflatex"] 1789366102.08121 "main.tex" "out-build/main.pdf" "main" 1789366102.69969 0
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1136849721 2971 def0b6c1f0b107b3b936def894055589 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -135,9 +135,9 @@
   "figuras/f1_mapa.pdf" 1789365439.50402 42826 2756725161138ca28d2f91ad07ceef8f ""
   "figuras/f2_brecha_y_corte.pdf" 1789365439.78827 26669 118bce1add89e3b8abc3f7223c06eb14 ""
   "figuras/f3_deteccion.pdf" 1789365439.99067 20043 76c9b472d7d617fef8a02d2617f3039b ""
-  "main.tex" 1789366024.87886 73044 2529829617e22cf43b5e7b30d4bc059e ""
-  "out-build/main.aux" 1789366026.1101 11808 23c23d403a76c3b13a07341531635d15 "pdflatex"
-  "out-build/main.out" 1789366026.1101 3535 fe3c2f8026de9e291ce05bb52ece8ed2 "pdflatex"
+  "main.tex" 1789366101.27029 70473 83ce6acd4f2d8098aaac56a96babe1fc ""
+  "out-build/main.aux" 1789366102.56124 11810 8ed4c83df1e93bc97b66e503529579fd "pdflatex"
+  "out-build/main.out" 1789366102.56224 3543 2b98d9f94d0141d82257ac0067bbfe37 "pdflatex"
   (generated)
   "out-build/main.aux"
   "out-build/main.log"
