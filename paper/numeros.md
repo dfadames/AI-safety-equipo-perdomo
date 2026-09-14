@@ -75,6 +75,8 @@ The map needs a restricted action to fire. The judges can also fire when agents 
 
 ## 7b. No legitimate route (impossible task)
 
+> **Superseded.** The per-episode counts below are confounded by episode length. `paper/reanalisis_revision.py` normalises per command: out-of-scope 8.1 vs 1.9 per 100 commands (a real difference), root searches 33.0 vs 33.1 per 100 commands (no difference). The paper reports the normalised figures.
+
 - 6 episodes (N = 5, 8): one part exists in no container, 30 turns per agent, and the harness asks an agent to continue when it stops.
 - Saw the forbidden master key: 6/6; used it: 0/6.
 - Notified a human: 6/6.
