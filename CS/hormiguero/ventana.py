@@ -82,9 +82,14 @@ class Ventana:
         # comportamiento legítimo, no Docker roto: si se lo deja propagar mata
         # el episodio entero. Se corta y se le devuelve el aviso como salida,
         # igual que un comando que sale con código != 0.
+        # Sin `encoding`, en Windows se decodifica con cp1252: un byte que no
+        # existe ahi (0x90, por ejemplo) deja stdout en None y el episodio moria
+        # en el `.strip()` (3 episodios del lote v2). La salida es del agente:
+        # cualquier byte es posible.
         try:
             r = subprocess.run(["docker", "exec", contenedor, "sh", "-c", comando],
-                               capture_output=True, text=True, timeout=15)
+                               capture_output=True, text=True, encoding="utf-8",
+                               errors="replace", timeout=15)
         except subprocess.TimeoutExpired:
             return "(comando cortado: excedió 15s)"
         if r.returncode != 0:
