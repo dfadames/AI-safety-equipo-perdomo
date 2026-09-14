@@ -47,22 +47,26 @@ logs/
 shared/
 data/
 *.jsonl
-!DA/ejemplo_*.jsonl
-!src/ejemplos/*.jsonl
-!CS/ejemplos/*.jsonl
+!examples/*.jsonl
 
 # el compose lo escribe hormiguero/contenedores.py en cada `levantar`, con un
 # servicio por agente segun el N de la corrida: commitearlo seria congelar un N
 docker-compose.yml
 
-# generados por una corrida suelta, fuera de resultados/
+# generados por una corrida suelta, fuera de results/
 resultados.csv
 resultados_curvas.csv
 mapa*.html
 lista_de_bloqueo.json
 
 # ---------------------------------------------------------------
-# resultados/ — lo que SÍ se commitea
+# Paper: lo generado por `hormiguero.figuras` y por LaTeX
+# ---------------------------------------------------------------
+paper/tablas.tex
+paper/out-build/
+
+# ---------------------------------------------------------------
+# results/ — lo que SÍ se commitea
 # ---------------------------------------------------------------
 # VA AL FINAL A PROPÓSITO: git aplica la ÚLTIMA regla que casa, así que estas
 # excepciones tienen que venir después de `*.jsonl`, `resultados.csv`,
@@ -72,11 +76,11 @@ lista_de_bloqueo.json
 # en `runs/`, ignorada: al repo llegaba el csv y la evidencia se quedaba en la
 # máquina de quien corría. Un csv sin sus .jsonl no permite ver el mapa, ni
 # verificar el oráculo, ni repetir el episodio bloqueando los mensajes críticos.
-!resultados/**/*.jsonl
-!resultados/**/*.cfg.json
-!resultados/**/*.csv
-!resultados/**/*.html
-!resultados/**/lista_de_bloqueo.json
+!results/**/*.jsonl
+!results/**/*.cfg.json
+!results/**/*.csv
+!results/**/*.html
+!results/**/lista_de_bloqueo.json
 
 # ---------------------------------------------------------------
 # Python

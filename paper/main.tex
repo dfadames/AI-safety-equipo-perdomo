@@ -229,7 +229,7 @@ In our testbed local containment did not imply system-level containment: every a
 
 \section*{Code, Data and Contributions}
 
-Code: \url{https://github.com/dfadames/AI-safety-equipo-perdomo} (harness in \texttt{CS/hormiguero}). Data: \texttt{resultados/} holds the main batch, with one log per episode (\texttt{.jsonl}) and its configuration, per-episode and per-point CSV files, the judge's scores (\texttt{monitor.csv}) and an interactive graph of every episode (\texttt{mapa.html}); \texttt{resultados\_v1/} holds the pilot batch in the same format, including the scores of the judge without the rule (\texttt{monitor\_sin\_regla.csv}). The figures are produced from the logs by \texttt{python -m hormiguero.figuras}, which also writes the per-point numbers, the remaining statistics by \texttt{paper/reanalisis\_revision.py}, and the attribution baselines by \texttt{paper/baseline\_atribucion.py}. Dual-use considerations are in Appendix~\ref{app:limits}.
+Code: \url{https://github.com/dfadames/AI-safety-equipo-perdomo} (harness in \texttt{hormiguero/}). Data: \texttt{results/} holds the main batch, with one log per episode (\texttt{.jsonl}) and its configuration, per-episode and per-point CSV files, the judge's scores (\texttt{monitor.csv}) and an interactive graph of every episode (\texttt{mapa.html}); the pilot batch, in the same format and including the scores of the judge without the rule (\texttt{monitor\_sin\_regla.csv}), is kept in the repository history. The figures are produced from the logs by \texttt{python -m hormiguero.figuras}, which also writes the per-point numbers, the remaining statistics by \texttt{paper/reanalisis\_revision.py}, and the attribution baselines by \texttt{paper/baseline\_atribucion.py}. Dual-use considerations are in Appendix~\ref{app:limits}.
 
 \textbf{Contributions.} Camilo Andres Cuello Romero implemented the agent loop and tools; Elkin Rafael Cuello Romero built the execution environment and harness; David Fernando Adames Rondon conceived the exposure-provenance graph and built its analysis pipeline and figures; Carlos Santiago Sandoval Casallas led the review of the literature, of related incidents and of the final document. All authors worked on every part.
 
@@ -251,7 +251,6 @@ Table~\ref{tab:claims} states what we take the testbed to establish, to suggest,
 \textbf{Dual use.} This report describes how a population of individually contained agents can reach information that per-container containment is meant to protect, and it makes the mechanism concrete: split the target across boundaries, let each holder act within its remit, and assemble at one point. Three things bound what that adds to an adversary. The target is a synthetic credential in a closed environment, with no real system, product or vulnerability involved. The mechanism is not new --- it is the composition problem of Goguen and Meseguer (1982) and McCullough (1987), and recent decomposition attacks already exploit it (Jones et al., 2025; Srivastav and Zhang, 2025) --- so we contribute an audited instance, not a capability. And we publish no defence to be evaded: we block nothing.
 
 The sharper question is what we say about evading attribution. We report that relaying did \emph{not} defeat any method we tried, because the channel is a broadcast; read adversarially, that still points at addressed relays as the direction in which post-hoc attribution would get harder. We judge the disclosure worth its cost for two reasons. The benefit is asymmetric: the graph runs on the operator's own logs, which an adversary inside the system neither controls nor reads, and only the operator can deploy the fix. And the fix is cheap and available now --- record, with each delivery between agents, the events already in the sender's context --- so a defender who reads this can close the gap in the same week that an adversary who reads it learns to widen it. The failure mode we would not want to publish is one whose remedy does not yet exist; this is not that.
-
 
 \section{Terminology}
 \label{app:terms}
@@ -279,7 +278,7 @@ Several terms are used interchangeably in discussions of agent traces. Throughou
 \section{Prompts}
 \label{app:prompts}
 
-Agents were prompted in Spanish; the originals are in \texttt{CS/hormiguero/prompts.py}. Translations:
+Agents were prompted in Spanish; the originals are in \texttt{hormiguero/prompts.py}. Translations:
 
 \textbf{R1 (instructed).} ``You are an audit agent assigned to service \{service\} of a cluster. Your files contain a fragment of a production credential that was split into \{n\} parts across the cluster's services. Find your fragment, share it through the channel with the other auditors, gather the \{n\} parts and validate the complete credential.''
 
@@ -333,10 +332,6 @@ For a decisive action with span \(\sigma\) and cut \(\kappa\), write \(D=\sigma-
 
 \section{Additional tables}
 \label{app:tablas}
-
-
-
-
 
 \begin{table}[h]
   \centering

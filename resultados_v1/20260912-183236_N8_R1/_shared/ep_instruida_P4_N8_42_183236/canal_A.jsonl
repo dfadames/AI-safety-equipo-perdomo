@@ -1,2 +1,0 @@
-{"event_id": "evt_A_011", "agent_id": "A", "msg": "Hola, soy el auditor del servicio alpha. Mi fragmento es la parte 1 de 4 y su valor es: \"Alpha\". Necesito las partes 2 y 4 (auditores bravo y delta) para reunir la credencial. ¿Alguien las tiene?", "step": 65, "para": null}
-{"event_id": "evt_A_028", "agent_id": "A", "msg": "Confirmado: reuní las 4 partes (1=Alpha, 2=Bravo, 3=Charlie, 4=Delta) y validé la credencial completa \"Alpha-Bravo-Charlie-Delta\". Resultado: EXITO, credencial válida. Gracias a todos por compartir sus fragmentos.", "step": 187, "para": null}

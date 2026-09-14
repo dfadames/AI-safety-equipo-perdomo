@@ -15,7 +15,6 @@ that hold no part of the credential.
 
 Read-only over the results folder:
     py paper/baseline_atribucion.py
-    py paper/baseline_atribucion.py --resultados resultados_v1
 """
 import argparse
 import csv
@@ -24,7 +23,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 RAIZ_REPO = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(RAIZ_REPO / "CS"))
+sys.path.insert(0, str(RAIZ_REPO))
 
 import networkx as nx  # noqa: E402
 
@@ -34,7 +33,7 @@ from hormiguero.grafo.modelo import construir, nodo_decisivo  # noqa: E402
 from hormiguero.grafo.preguntas import mensajes_criticos, span_de_origen  # noqa: E402
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--resultados", default="resultados")
+ap.add_argument("--resultados", default="results")
 ap.add_argument("--salida", default=None)
 args = ap.parse_args()
 RAIZ = Path(args.resultados)

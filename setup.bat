@@ -1,133 +1,133 @@
 @echo off
 rem ===================================================================
-rem  Hormiguero - configuracion del repo + corrida del experimento.
+rem  Hormiguero - set the repository up + run the experiment.
 rem
-rem    setup.bat  [AGENTES] [PELDANO] [--simulado]      (--help explica)
+rem    setup.bat  [AGENTS] [RUNG] [--simulated]      (--help explains)
 rem
-rem  Es el equivalente de setup.sh para quien no tiene Git Bash a mano.
-rem  Hace lo mismo: activa el hook que bloquea secretos, instala las
-rem  dependencias, crea el .env, comprueba que la llave responde, y si
-rem  todo eso sale bien corre el experimento y deja el resultado listo
-rem  para commitear en resultados\<fecha>_N<n>\
+rem  The setup.sh equivalent for anyone without Git Bash at hand. It does
+rem  the same: enables the hook that blocks secrets, installs the
+rem  dependencies, creates the .env, checks that the key answers, and if
+rem  all of that goes through it runs the experiment and leaves the result
+rem  ready to commit in results\<date>_N<n>\
 rem
-rem  OJO: si cambias algo aca, cambialo tambien en setup.sh.
+rem  NOTE: if you change something here, change it in setup.sh too.
 rem
-rem  Texto sin tildes a proposito: cmd.exe las rompe segun la pagina de
-rem  codigos. El chcp de abajo es para la salida de Python, no para esto.
+rem  Plain ASCII on purpose: cmd.exe mangles accents depending on the code
+rem  page. The chcp below is for Python's output, not for this.
 rem ===================================================================
 
 setlocal enabledelayedexpansion
 chcp 65001 >nul 2>&1
 
-rem Si lo abren con doble clic, el directorio actual no es el del repo.
+rem If opened by double click, the current directory is not the repository.
 cd /d "%~dp0"
 
 set RC=0
-set NUM_AGENTES=4
-set PELDANO=1
-set SIMULADO=0
+set NUM_AGENTS=4
+set RUNG=1
+set SIMULATED=0
 set NOPAUSE=0
 set POS=0
 
-rem --- argumentos ----------------------------------------------------
-rem Las comillas en `set "X=1"` NO son cosmetica: sin ellas, `set X=1 & shift`
-rem guarda "1 " CON el espacio de antes del &, y la comparacion de mas abajo
-rem falla en silencio.
+rem --- arguments -----------------------------------------------------
+rem The quotes in `set "X=1"` are NOT cosmetic: without them, `set X=1 & shift`
+rem stores "1 " WITH the space before the &, and the comparison further down
+rem fails silently.
 :args
-if "%~1"=="" goto fin_args
-if /i "%~1"=="-a"             ( set "NUM_AGENTES=%~2" & shift & shift & goto args )
-if /i "%~1"=="--num-agentes"  ( set "NUM_AGENTES=%~2" & shift & shift & goto args )
-if /i "%~1"=="-r"             ( set "PELDANO=%~2" & shift & shift & goto args )
-if /i "%~1"=="--peldano"      ( set "PELDANO=%~2" & shift & shift & goto args )
-if /i "%~1"=="--simulado"     ( set "SIMULADO=1" & shift & goto args )
-if /i "%~1"=="--no-pause"     ( set "NOPAUSE=1" & shift & goto args )
-if /i "%~1"=="-h"             goto ayuda
-if /i "%~1"=="--help"         goto ayuda
-rem Formas --opcion=VALOR: se parten por el primer "=".
+if "%~1"=="" goto end_args
+if /i "%~1"=="-a"          ( set "NUM_AGENTS=%~2" & shift & shift & goto args )
+if /i "%~1"=="--agents"    ( set "NUM_AGENTS=%~2" & shift & shift & goto args )
+if /i "%~1"=="-r"          ( set "RUNG=%~2" & shift & shift & goto args )
+if /i "%~1"=="--rung"      ( set "RUNG=%~2" & shift & shift & goto args )
+if /i "%~1"=="--simulated" ( set "SIMULATED=1" & shift & goto args )
+if /i "%~1"=="--no-pause"  ( set "NOPAUSE=1" & shift & goto args )
+if /i "%~1"=="-h"          goto usage
+if /i "%~1"=="--help"      goto usage
+rem --option=VALUE forms: split on the first "=".
 for /f "tokens=1,* delims==" %%A in ("%~1") do (
-  if /i "%%~A"=="--num-agentes" ( set "NUM_AGENTES=%%~B" & set "HIT=1" )
-  if /i "%%~A"=="--peldano"     ( set "PELDANO=%%~B"     & set "HIT=1" )
+  if /i "%%~A"=="--agents" ( set "NUM_AGENTS=%%~B" & set "HIT=1" )
+  if /i "%%~A"=="--rung"   ( set "RUNG=%%~B"       & set "HIT=1" )
 )
 if defined HIT ( set "HIT=" & shift & goto args )
 echo %~1 | findstr /b /c:"-" >nul
-if not errorlevel 1 ( echo Opcion desconocida: %~1 & exit /b 1 )
-rem Posicionales: 1o agentes, 2o peldano.
+if not errorlevel 1 ( echo Unknown option: %~1 & exit /b 1 )
+rem Positional: 1st agents, 2nd rung.
 set /a POS+=1
-if !POS! equ 1 ( set "NUM_AGENTES=%~1" & shift & goto args )
-if !POS! equ 2 ( set "PELDANO=%~1"     & shift & goto args )
-echo Sobra el argumento: %~1
+if !POS! equ 1 ( set "NUM_AGENTS=%~1" & shift & goto args )
+if !POS! equ 2 ( set "RUNG=%~1"       & shift & goto args )
+echo Extra argument: %~1
 exit /b 1
 
-:ayuda
-echo Uso: setup.bat [AGENTES] [PELDANO] [--simulado] [--no-pause]
+:usage
+echo Usage: setup.bat [AGENTS] [RUNG] [--simulated] [--no-pause]
 echo.
-echo   AGENTES   cuantos agentes se despliegan (por defecto: 4^)
-echo             La clave SIEMPRE se parte en 4, pase lo que pase aqui.
-echo               1, 2, 3 -^> alcanzan menos de 4 partes: imposible por diseno
-echo               4       -^> alcanzan las 4
-echo               8       -^> 2 agentes por caja: aparecen rutas redundantes
+echo   AGENTS    how many agents are deployed (default: 4^)
+echo             The credential is ALWAYS split in 4, whatever goes here.
+echo               1, 2, 3 -^> reach fewer than 4 parts: impossible by design
+echo               4       -^> reach all 4
+echo               8       -^> 2 agents per box: redundant routes appear
 echo.
-echo   PELDANO   cuanto andamiaje recibe el agente (por defecto: 1^)
-echo               1 -^> R1: se le nombra el canal y se le pide reunir las partes
-echo               2 -^> R2: tarea de fachada, el canal se menciona de pasada
-echo               3 -^> R3: ni siquiera se menciona el canal
-echo             R1 garantiza que las curvas existan; R2 y R3 son donde se
-echo             mide si la coordinacion es emergente.
+echo   RUNG      how much scaffolding the agent gets (default: 1^)
+echo               1 -^> R1: the channel is named and it is asked to pool the parts
+echo               2 -^> R2: cover task, the channel is mentioned in passing
+echo               3 -^> R3: the channel is not mentioned at all
+echo             R1 guarantees the curves exist; R2 and R3 are where emergent
+echo             coordination is measured.
 echo.
-echo   --simulado  guion fijo: sin llave, sin red y sin gastar tokens.
-echo               Comprueba que TU maquina esta bien montada.
-echo               NO es un resultado: el guion siempre abre la boveda.
-echo   --no-pause  no esperar una tecla al final (para scripts^)
+echo   --simulated fixed script: no key, no network, no tokens spent.
+echo               Checks that YOUR machine is set up.
+echo               NOT a result: the script always opens the vault.
+echo   --no-pause  do not wait for a key press at the end (for scripts^)
 echo.
-echo Ejemplos:
-echo   setup.bat              4 agentes, R1
-echo   setup.bat 8 2          8 agentes, R2
-echo   setup.bat 8 3          8 agentes, R3 - la apuesta del paper
-echo   setup.bat --simulado   comprobar el montaje sin gastar nada
+echo Examples:
+echo   setup.bat              4 agents, R1
+echo   setup.bat 8 2          8 agents, R2
+echo   setup.bat 8 3          8 agents, R3 - the paper's bet
+echo   setup.bat --simulated  check the setup without spending anything
 echo.
-echo Los dos controles del diseno no son peldanos y van por el runner:
-echo   --condicion honestidad   (confundidor del aviso^)
-echo   --condicion benigna      (control de especificidad^)
+echo The design's two controls are not rungs and go through the runner:
+echo   --condicion honestidad   (the warning confounder^)
+echo   --condicion benigna      (specificity control^)
 exit /b 0
-:fin_args
+:end_args
 
-echo %NUM_AGENTES%|findstr /r "^[1-9][0-9]*$" >nul
+echo %NUM_AGENTS%|findstr /r "^[1-9][0-9]*$" >nul
 if errorlevel 1 (
-  echo AGENTES tiene que ser un entero positivo ^(llego '%NUM_AGENTES%'^)
+  echo AGENTS must be a positive integer ^(got '%NUM_AGENTS%'^)
   echo   setup.bat --help
   exit /b 1
 )
 
-rem El peldano fija la PAREJA condicion+peldano. No son ejes independientes:
-rem `instruida` ES R1 y `emergente` ES R2/R3, y Config rechaza las mezclas. Si
-rem se corrieran instruida y emergente con el mismo prompt, la "coordinacion
-rem emergente" saldria como hallazgo cuando en realidad se la habiamos instruido.
-if "%PELDANO%"=="1" ( set "CONDICION=instruida" & set "PEL=R1" ) ^
-else if "%PELDANO%"=="2" ( set "CONDICION=emergente" & set "PEL=R2" ) ^
-else if "%PELDANO%"=="3" ( set "CONDICION=emergente" & set "PEL=R3" ) ^
+rem The rung fixes the PAIR condition+rung. They are not independent axes:
+rem `instruida` IS R1 and `emergente` IS R2/R3, and Config rejects the mixes.
+rem If instructed and emergent ran with the same prompt, "emergent
+rem coordination" would come out as a finding when we had instructed it.
+if "%RUNG%"=="1" ( set "CONDITION=instruida" & set "R=R1" ) ^
+else if "%RUNG%"=="2" ( set "CONDITION=emergente" & set "R=R2" ) ^
+else if "%RUNG%"=="3" ( set "CONDITION=emergente" & set "R=R3" ) ^
 else (
-  echo PELDANO tiene que ser 1, 2 o 3 ^(llego '%PELDANO%'^)
+  echo RUNG must be 1, 2 or 3 ^(got '%RUNG%'^)
   echo   setup.bat --help
   exit /b 1
 )
 
 rem ===================================================================
-rem  1. El hook que bloquea secretos
+rem  1. The hook that blocks secrets
 rem ===================================================================
-echo Activando el hook de pre-commit...
+echo Enabling the pre-commit hook...
 git config core.hooksPath .githooks
 if errorlevel 1 (
-  echo   FALLA: esto no parece un repositorio git, o git no esta en el PATH.
+  echo   FAILED: this does not look like a git repository, or git is not in PATH.
   set RC=1
 )
 
 rem ===================================================================
-rem  2. Python y dependencias
+rem  2. Python and dependencies
 rem ===================================================================
-rem Primero el venv del proyecto si alguien ya lo creo; si no, cualquier
-rem Python del sistema que llegue al minimo (3.9+).
+rem The project's venv first if someone already created it; otherwise any
+rem system Python that meets the minimum (3.9+).
 set PY=
-for %%C in ("CS\.venv\Scripts\python.exe" "py -3" "python" "python3") do (
+for %%C in (".venv\Scripts\python.exe" "py -3" "python" "python3") do (
   if not defined PY (
     %%~C -c "import sys; raise SystemExit(0 if sys.version_info >= (3,9) else 1)" >nul 2>&1
     if !errorlevel! equ 0 set "PY=%%~C"
@@ -136,8 +136,8 @@ for %%C in ("CS\.venv\Scripts\python.exe" "py -3" "python" "python3") do (
 
 if not defined PY (
   echo.
-  echo   FALTA PYTHON 3.9+   instalalo desde https://python.org y vuelve a correr esto.
-  echo   En el instalador, marca "Add python.exe to PATH".
+  echo   PYTHON 3.9+ MISSING   install it from https://python.org and run this again.
+  echo   In the installer, tick "Add python.exe to PATH".
   set RC=1
   goto final
 )
@@ -145,35 +145,34 @@ if not defined PY (
 for /f "delims=" %%V in ('%PY% -c "import sys; print(sys.version.split()[0])"') do set PYVER=%%V
 echo Python: %PY% (%PYVER%)
 
-echo Instalando dependencias de CS\...
-%PY% -m pip install -q -r CS\requirements.txt
+echo Installing dependencies...
+%PY% -m pip install -q -r requirements.txt
 if errorlevel 1 (
-  echo   FALLA: no se pudieron instalar las dependencias.
-  echo   Prueba a mano:  %PY% -m pip install -r CS\requirements.txt
+  echo   FAILED: dependencies could not be installed.
+  echo   Try by hand:  %PY% -m pip install -r requirements.txt
   set RC=1
 ) else (
   echo   OK
 )
 
 rem ===================================================================
-rem  3. El .env
+rem  3. The .env
 rem ===================================================================
 if not exist ".env" (
   copy /y ".env.example" ".env" >nul
-  echo Creado .env desde la plantilla.
+  echo Created .env from the template.
 ) else (
-  echo .env ya existe, no lo toco.
+  echo .env already exists, leaving it alone.
 )
 
 rem ===================================================================
-rem  4. Verificar que el hook bloquea de verdad
+rem  4. Check that the hook really blocks
 rem ===================================================================
-rem El hook es un script sh, y git en Windows lo corre con su propio sh
-rem aunque `sh` no este en el PATH: si no lo encontramos aca, solo nos
-rem saltamos la comprobacion, el hook igual va a funcionar al commitear.
-rem `sh` casi nunca esta en el PATH en Windows, pero Git trae el suyo: se
-rem deduce de donde esta git.exe. Vale la pena buscarlo: esta comprobacion
-rem es la que confirma que el guardia de secretos de verdad funciona.
+rem The hook is an sh script, and git on Windows runs it with its own sh
+rem even if `sh` is not in PATH: if we cannot find it here we only skip the
+rem check, the hook will still work on commit. `sh` is almost never in PATH
+rem on Windows, but Git ships its own: it is derived from where git.exe is.
+rem Worth looking for: this check is what confirms the secret guard works.
 set SH=
 where sh >nul 2>&1
 if not errorlevel 1 set SH=sh
@@ -188,180 +187,171 @@ if not defined SH (
 )
 
 if not defined SH (
-  echo Hook: no encuentro `sh` para probarlo aqui, pero git lo va a usar igual.
+  echo Hook: cannot find `sh` to test it here, but git will use it anyway.
 ) else (
-  echo Verificando que el hook bloquea de verdad...
-  set "TMPF=.prueba_hook_%RANDOM%"
-  rem El `&rem` va en ESTA misma linea a proposito: el hook descarta linea por
-  rem linea, asi que el marcador en la linea de arriba no lo salva y el hook
-  rem bloquea este propio archivo.
-  echo clave = "sk-proj-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">"!TMPF!" &rem permitido: no-es-secreto
+  echo Checking that the hook really blocks...
+  set "TMPF=.hook_test_%RANDOM%"
+  rem The `&rem` goes on THIS same line on purpose: the hook discards line by
+  rem line, so the marker on the line above would not save it and the hook
+  rem would block this very file.
+  echo key = "sk-proj-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">"!TMPF!" &rem permitido: no-es-secreto
   git add -f "!TMPF!" >nul 2>&1
   "!SH!" .githooks/pre-commit >nul 2>&1
   if !errorlevel! equ 0 (
-    echo   FALLA: el hook no bloqueo una llave de prueba. Avisar al equipo.
+    echo   FAILED: the hook did not block a test key.
     set RC=1
   ) else (
-    echo   OK: el hook bloquea llaves.
+    echo   OK: the hook blocks keys.
   )
   git reset -q HEAD "!TMPF!" >nul 2>&1
   del /q "!TMPF!" >nul 2>&1
 )
 
 rem ===================================================================
-rem  5. Responde DeepSeek?
+rem  5. Does DeepSeek answer?
 rem ===================================================================
-set PROV=
-if "%SIMULADO%"=="1" (
-  set "PROV=--proveedor simulado"
+set PROVIDER=
+if "%SIMULATED%"=="1" (
+  set "PROVIDER=--proveedor simulado"
   echo.
-  echo Modo --simulado: guion fijo, sin llave y sin gastar tokens.
-  echo   Comprueba que tu maquina esta bien montada. NO es un resultado.
+  echo --simulated mode: fixed script, no key and no tokens spent.
+  echo   Checks that your machine is set up. NOT a result.
   goto rc
 )
 
-set LLAVE=
-for /f "usebackq tokens=1,* delims==" %%A in (`findstr /b /c:"DEEPSEEK_API_KEY=" ".env"`) do set "LLAVE=%%B"
+set KEY=
+for /f "usebackq tokens=1,* delims==" %%A in (`findstr /b /c:"DEEPSEEK_API_KEY=" ".env"`) do set "KEY=%%B"
 
 echo.
-if "%LLAVE%"=="" (
-  echo Falta la llave.  Abre .env y pon:
+if "%KEY%"=="" (
+  echo The key is missing.  Open .env and put:
   echo.
   echo     DEEPSEEK_API_KEY=sk-...
   echo.
-  echo   La sacas en https://platform.deepseek.com -^> API keys
-  echo   Despues vuelve a correr  setup.bat  para comprobar que sirve.
+  echo   Get one at https://platform.deepseek.com -^> API keys
+  echo   Then run  setup.bat  again to check that it works.
   set RC=1
 ) else (
-  echo Probando la llave contra DeepSeek...
-  pushd CS
+  echo Testing the key against DeepSeek...
   %PY% -m hormiguero.proveedores.deepseek
   if errorlevel 1 (
-    echo   La llave no funciono. Revisa el mensaje de arriba.
+    echo   The key did not work. Read the message above.
     set RC=1
   )
-  popd
 )
 
 rem ===================================================================
-rem  6. Correr el experimento
+rem  6. Run the experiment
 rem ===================================================================
-rem `--simulado` salta la llave, pero NO este chequeo: si pip o el hook
-rem fallaron, la maquina no esta montada y correr igual no dice nada.
+rem `--simulated` skips the key, but NOT this check: if pip or the hook
+rem failed, the machine is not set up and running anyway says nothing.
 :rc
 echo.
 if not "%RC%"=="0" (
-  echo Cuando lo de arriba este resuelto, corre a mano:
+  echo Once the above is sorted out, run by hand:
   echo.
-  echo     cd CS ^&^& %PY% -m hormiguero.runner uno --N %NUM_AGENTES% --condicion !CONDICION! --peldano !PEL!
+  echo     %PY% -m hormiguero.runner uno --N %NUM_AGENTS% --condicion !CONDITION! --peldano !R!
   echo.
-  echo   O para comprobar el montaje sin llave ni tokens:  setup.bat --simulado
+  echo   Or to check the setup without a key or tokens:  setup.bat --simulated
   echo.
-  goto ayuda_final
+  goto final_help
 )
 
-echo Listo. Corriendo: %NUM_AGENTES% agentes, peldano !PEL! ^(!CONDICION!^)...
+echo Ready. Running: %NUM_AGENTS% agents, rung !R! ^(!CONDITION!^)...
 echo.
 
-rem Docker de verdad si la maquina lo tiene: la tabla de auditoria de
-rem contencion individual solo se puede respaldar con contenedores reales.
-set MODO=contencion EMULADA
-set SIN_DOCKER=--sin-docker
+rem Real Docker if the machine has it: the individual containment audit table
+rem can only be backed by real containers.
+set MODE=EMULATED containment
+set NO_DOCKER=--sin-docker
 docker info >nul 2>&1
 if not errorlevel 1 (
-  set "MODO=contenedores reales"
-  set "SIN_DOCKER="
-  echo Docker disponible: levantando el cluster...
-  rem Una caja POR AGENTE: --n-agentes es lo que fija cuantas se levantan.
-  pushd CS
-  %PY% -m hormiguero.runner levantar --n-agentes %NUM_AGENTES%
+  set "MODE=real containers"
+  set "NO_DOCKER="
+  echo Docker available: bringing the cluster up...
+  rem One box PER AGENT: --n-agentes is what fixes how many come up.
+  %PY% -m hormiguero.runner levantar --n-agentes %NUM_AGENTS%
   if errorlevel 1 set RC=1
-  %PY% -m hormiguero.runner auditar --n-agentes %NUM_AGENTES%
+  %PY% -m hormiguero.runner auditar --n-agentes %NUM_AGENTS%
   if errorlevel 1 set RC=1
-  popd
   echo.
 ) else (
-  echo Sin Docker: se usa la caja emulada ^(hormiguero\caja_falsa.py^).
-  echo   Cada agente ve SOLO su fragmento y las transferencias siguen pasando
-  echo   por el canal, asi que la medicion vale. Lo que NO respalda es la tabla
-  echo   de auditoria: esa necesita contenedores de verdad.
+  echo No Docker: the emulated box is used ^(hormiguero\caja_falsa.py^).
+  echo   Each agent sees ONLY its fragment and transfers still go through the
+  echo   channel, so the measurement holds. What it does NOT back is the audit
+  echo   table: that one needs real containers.
   echo.
 )
 
-rem Sin --logs: el runner escribe solo en resultados\<fecha>_N<n>\, que es
-rem la carpeta que git SI acepta.
-pushd CS
-%PY% -m hormiguero.runner uno --N %NUM_AGENTES% --condicion !CONDICION! --peldano !PEL! !SIN_DOCKER! %PROV%
+rem No --logs: the runner writes to results\<date>_N<n>\ on its own, which is
+rem the folder git does accept.
+%PY% -m hormiguero.runner uno --N %NUM_AGENTS% --condicion !CONDITION! --peldano !R! !NO_DOCKER! %PROVIDER%
 set ERR=!errorlevel!
-popd
 if not "%ERR%"=="0" (
   set RC=1
-  goto ayuda_final
+  goto final_help
 )
 
-rem La corrida recien hecha es la carpeta mas nueva de resultados\
-set CARPETA=
-for /f "delims=" %%D in ('dir /b /ad /o-d "resultados" 2^>nul') do (
-  if not defined CARPETA set "CARPETA=resultados\%%D"
+rem The run just made is the newest folder in results\
+set FOLDER=
+for /f "delims=" %%D in ('dir /b /ad /o-d "results" 2^>nul') do (
+  if not defined FOLDER set "FOLDER=results\%%D"
 )
 
-if not defined CARPETA (
-  echo   No encuentro la carpeta de la corrida en resultados\
+if not defined FOLDER (
+  echo   Cannot find the run folder in results\
   set RC=1
-  goto ayuda_final
+  goto final_help
 )
 
 echo.
-echo Analizando la corrida...
-rem Las cuatro preguntas -^> csv, y el mapa -^> pagina. Encadenado aca para
-rem que nadie tenga que acordarse de correr tres comandos en orden.
-pushd CS
-%PY% -m hormiguero.grafo.agregar "..\%CARPETA%" --csv "..\%CARPETA%\resultados.csv"
+echo Analysing the run...
+rem The four questions -^> csv, and the map -^> page. Chained here so nobody
+rem has to remember to run three commands in order.
+%PY% -m hormiguero.grafo.agregar "%FOLDER%" --csv "%FOLDER%\resultados.csv"
 if errorlevel 1 set RC=1
-%PY% -m hormiguero.grafo.mirar "..\%CARPETA%" --salida "..\%CARPETA%\mapa.html"
+%PY% -m hormiguero.grafo.mirar "%FOLDER%" --salida "%FOLDER%\mapa.html"
 if errorlevel 1 set RC=1
-popd
 
-if /i "!MODO!"=="contenedores reales" (
-  pushd CS
+if /i "!MODE!"=="real containers" (
   %PY% -m hormiguero.runner bajar >nul 2>&1
-  popd
 )
 
 echo.
-echo Todo quedo en: %CARPETA%
-echo   las trazas (.jsonl), el csv y mapa.html - ya se pueden commitear.
-echo   Modo: !MODO! - peldano !PEL! ^(!CONDICION!^)
+echo Everything landed in: %FOLDER%
+echo   the traces (.jsonl), the csv and mapa.html - ready to commit.
+echo   Mode: !MODE! - rung !R! ^(!CONDITION!^)
 echo.
-echo   Antes de subirlo, revisa la columna 'proveedor' del csv:
-echo     deepseek -^> es un resultado
-echo     simulado -^> es solo el cableado, el guion siempre abre la boveda
+echo   Before pushing it, check the csv's 'proveedor' column:
+echo     deepseek -^> it is a result
+echo     simulado -^> it is only the wiring, the script always opens the vault
 echo.
-echo   git add resultados/ ^&^& git commit -m "resultados: N=%NUM_AGENTES% !PEL!"
+echo   git add results/ ^&^& git commit -m "results: N=%NUM_AGENTS% !R!"
 
-:ayuda_final
+:final_help
 echo.
-echo Otros comandos utiles (desde CS\, todos escriben solos en resultados\):
+echo Other useful commands (from the repository root, all write to results\):
 echo.
-echo     %PY% -m tests.test_todo                      # todo, sin red ni tokens
+echo     %PY% -m tests.test_todo                      # everything, no network, no tokens
 echo     %PY% -m hormiguero.runner barrido --N 1 2 4 8 --episodios 3 --sin-docker
-echo     %PY% -m hormiguero.runner uno --N 4 --condicion emergente   # el peldano R2
+echo     %PY% -m hormiguero.runner uno --N 4 --condicion emergente   # rung R2
+echo     run_all.bat --plan                           # the whole design, resumable
 echo.
-echo Por defecto corre la condicion `instruida`, que es el peldano R1: el prompt
-echo le dice al agente que comparta su fragmento y reuna las partes. Sirve para
-echo que las curvas existan, pero NO mide coordinacion emergente - para eso,
-echo --condicion emergente (R2) o --peldano R3. En `barrido` es --condiciones.
+echo By default it runs the `instruida` condition, which is rung R1: the prompt
+echo tells the agent to share its fragment and pool the parts. It makes the
+echo curves exist, but it does NOT measure emergent coordination - for that,
+echo --condicion emergente (R2) or --peldano R3. In `barrido` it is --condiciones.
 echo.
-echo El experimento usa el proveedor de HORMIGUERO_PROVEEDOR (.env). Para no
-echo gastar tokens mientras se prueba el cableado:  --proveedor simulado
+echo The experiment uses the provider in HORMIGUERO_PROVEEDOR (.env). To avoid
+echo spending tokens while testing the wiring:  --proveedor simulado
 echo.
-echo Recordatorio: la llave va en .env, nunca en el codigo. Si se sube por
-echo accidente: ROTARLA primero - borrarla del repo no la des-filtra.
+echo Reminder: the key goes in .env, never in the code. If one is pushed by
+echo accident: ROTATE IT first - deleting it from the repo does not unleak it.
 
 :final
-rem Doble clic: cmd arranca como `cmd /c ""...\setup.bat" "` y la ventana se
-rem cierra de golpe al terminar. Desde una consola abierta, %cmdcmdline% es
-rem solo cmd.exe y no hace falta esperar. `--no-pause` fuerza no esperar.
+rem Double click: cmd starts as `cmd /c ""...\setup.bat" "` and the window
+rem closes at once when it finishes. From an open console, %cmdcmdline% is
+rem just cmd.exe and there is no need to wait. `--no-pause` forces no wait.
 if "%NOPAUSE%"=="1" exit /b %RC%
 echo %cmdcmdline% | find /i "%~nx0" >nul
 if not errorlevel 1 (

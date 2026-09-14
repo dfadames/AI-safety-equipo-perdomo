@@ -1,5 +1,0 @@
-networkx>=3.0
-
-# opcionales, segun el proveedor que usen
-# ollama>=0.3
-# openai>=1.0

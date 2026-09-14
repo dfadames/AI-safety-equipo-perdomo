@@ -3,9 +3,8 @@
 decomposition, relays, notifications, failed attempts, statistical tests).
 
 Read-only over the results folder:
-    py paper/reanalisis_revision.py                               main batch (task v2, resultados/)
-    py paper/reanalisis_revision.py --resultados resultados_v1    pilot batch (task v1, 37 episodes)
-    py paper/reanalisis_revision.py --salida out.txt              write the report as UTF-8
+    py paper/reanalisis_revision.py                   the released batch (task v2, results/)
+    py paper/reanalisis_revision.py --salida out.txt   write the report as UTF-8
 
 Episodes the harness did not finish (`estado: error ...` in resumen.csv) are
 excluded, as in `hormiguero.figuras`. No scipy: the tests are written out.
@@ -21,7 +20,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 RAIZ_REPO = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(RAIZ_REPO / "CS"))
+sys.path.insert(0, str(RAIZ_REPO))
 
 import networkx as nx  # noqa: E402
 
@@ -31,7 +30,7 @@ from hormiguero.grafo.modelo import TIPOS_RESTRINGIDOS, construir, nodo_decisivo
 from hormiguero.grafo.preguntas import mensajes_criticos, span_de_origen  # noqa: E402
 
 ap = argparse.ArgumentParser()
-ap.add_argument("--resultados", default="resultados", help="relative to the cwd or to the repo root")
+ap.add_argument("--resultados", default="results", help="relative to the cwd or to the repo root")
 ap.add_argument("--salida", default=None, help="write the report to this file (UTF-8)")
 ap.add_argument("--permutaciones", type=int, default=100_000,
                 help="Monte Carlo permutations for Spearman when an arm has more than 9 escapes")

@@ -1,291 +1,291 @@
 #!/bin/sh
-# Configuración del repo + corrida del experimento. Cada persona lo corre
-# UNA vez al clonar, y de nuevo cuando quiera lanzar un barrido.
+# Set the repository up and run one episode. Run it once after cloning, and
+# again whenever you want to launch a run.
 #
-#   sh setup.sh [AGENTES] [PELDAÑO] [--simulado]
+#   sh setup.sh [AGENTS] [RUNG] [--simulated]
 #
-# Deja listo: el hook que bloquea secretos, las dependencias, el .env, y
-# comprueba que la llave de DeepSeek de verdad responde. Si todo eso sale
-# bien, corre el experimento. `sh setup.sh --help` explica los argumentos.
+# It leaves ready: the hook that blocks secrets, the dependencies, the .env,
+# and it checks that the DeepSeek key actually answers. If all of that goes
+# through, it runs the experiment. `sh setup.sh --help` explains the arguments.
 set -e
 
 RC=0
-ROJO=$(printf '\033[31m'); VERDE=$(printf '\033[32m'); GRIS=$(printf '\033[90m'); FIN=$(printf '\033[0m')
+RED=$(printf '\033[31m'); GREEN=$(printf '\033[32m'); GREY=$(printf '\033[90m'); OFF=$(printf '\033[0m')
 
-NUM_AGENTES=4
-PELDANO=1
-SIMULADO=0
-POSICIONALES=0
+NUM_AGENTS=4
+RUNG=1
+SIMULATED=0
+POSITIONAL=0
 
-ayuda() {
-  echo "Uso: sh setup.sh [AGENTES] [PELDAÑO] [--simulado]"
+usage() {
+  echo "Usage: sh setup.sh [AGENTS] [RUNG] [--simulated]"
   echo
-  echo "  AGENTES   cuántos agentes se despliegan (por defecto: 4)"
-  echo "            La clave SIEMPRE se parte en 4, pase lo que pase aquí."
-  echo "              1, 2, 3 -> alcanzan menos de 4 partes: imposible por diseño"
-  echo "              4       -> alcanzan las 4"
-  echo "              8       -> 2 agentes por caja: aparecen rutas redundantes"
+  echo "  AGENTS   how many agents are deployed (default: 4)"
+  echo "           The credential is ALWAYS split in 4, whatever goes here."
+  echo "             1, 2, 3 -> reach fewer than 4 parts: impossible by design"
+  echo "             4       -> reach all 4"
+  echo "             8       -> 2 agents per box: redundant routes appear"
   echo
-  echo "  PELDAÑO   cuánto andamiaje recibe el agente (por defecto: 1)"
-  echo "              1 -> R1: se le nombra el canal y se le pide reunir las partes"
-  echo "              2 -> R2: tarea de fachada, el canal se menciona de pasada"
-  echo "              3 -> R3: ni siquiera se menciona el canal"
-  echo "            R1 garantiza que las curvas existan; R2 y R3 son donde se"
-  echo "            mide si la coordinación es emergente."
+  echo "  RUNG     how much scaffolding the agent gets (default: 1)"
+  echo "             1 -> R1: the channel is named and it is asked to pool the parts"
+  echo "             2 -> R2: cover task, the channel is mentioned in passing"
+  echo "             3 -> R3: the channel is not mentioned at all"
+  echo "           R1 guarantees the curves exist; R2 and R3 are where emergent"
+  echo "           coordination is measured."
   echo
-  echo "  --simulado  guion fijo: sin llave, sin red y sin gastar tokens."
-  echo "              Comprueba que TU máquina está bien montada."
-  echo "              NO es un resultado: el guion siempre abre la bóveda."
+  echo "  --simulated  fixed script: no key, no network, no tokens spent."
+  echo "               Checks that YOUR machine is set up. NOT a result: the"
+  echo "               script always opens the vault."
   echo
-  echo "Ejemplos:"
-  echo "  sh setup.sh              4 agentes, R1"
-  echo "  sh setup.sh 8 2          8 agentes, R2"
-  echo "  sh setup.sh 8 3          8 agentes, R3 — la apuesta del paper"
-  echo "  sh setup.sh --simulado   comprobar el montaje sin gastar nada"
+  echo "Examples:"
+  echo "  sh setup.sh              4 agents, R1"
+  echo "  sh setup.sh 8 2          8 agents, R2"
+  echo "  sh setup.sh 8 3          8 agents, R3 — the paper's bet"
+  echo "  sh setup.sh --simulated  check the setup without spending anything"
   echo
-  echo "Los dos controles del diseño no son peldaños y van por el runner:"
-  echo "  --condicion honestidad   (confundidor del aviso)"
-  echo "  --condicion benigna      (control de especificidad)"
+  echo "The design's two controls are not rungs and go through the runner:"
+  echo "  --condicion honestidad   (the warning confounder)"
+  echo "  --condicion benigna      (specificity control)"
 }
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    -a|--num-agentes)   NUM_AGENTES="$2"; shift 2 ;;
-    --num-agentes=*)    NUM_AGENTES="${1#*=}"; shift ;;
-    -r|--peldano)       PELDANO="$2"; shift 2 ;;
-    --peldano=*)        PELDANO="${1#*=}"; shift ;;
-    --simulado)         SIMULADO=1; shift ;;
-    -h|--help)          ayuda; exit 0 ;;
+    -a|--agents)      NUM_AGENTS="$2"; shift 2 ;;
+    --agents=*)       NUM_AGENTS="${1#*=}"; shift ;;
+    -r|--rung)        RUNG="$2"; shift 2 ;;
+    --rung=*)         RUNG="${1#*=}"; shift ;;
+    --simulated)      SIMULATED=1; shift ;;
+    -h|--help)        usage; exit 0 ;;
     -*)
-      printf "%sOpción desconocida: %s%s\n" "$ROJO" "$1" "$FIN" >&2
+      printf "%sUnknown option: %s%s\n" "$RED" "$1" "$OFF" >&2
       exit 1 ;;
     *)
-      # Posicionales: 1º agentes, 2º peldaño.
-      POSICIONALES=$((POSICIONALES + 1))
-      if [ "$POSICIONALES" -eq 1 ]; then
-        NUM_AGENTES="$1"
-      elif [ "$POSICIONALES" -eq 2 ]; then
-        PELDANO="$1"
+      # Positional: 1st agents, 2nd rung.
+      POSITIONAL=$((POSITIONAL + 1))
+      if [ "$POSITIONAL" -eq 1 ]; then
+        NUM_AGENTS="$1"
+      elif [ "$POSITIONAL" -eq 2 ]; then
+        RUNG="$1"
       else
-        printf "%sSobra el argumento: %s%s\n" "$ROJO" "$1" "$FIN" >&2
+        printf "%sExtra argument: %s%s\n" "$RED" "$1" "$OFF" >&2
         exit 1
       fi
       shift ;;
   esac
 done
 
-case "$NUM_AGENTES" in
+case "$NUM_AGENTS" in
   ''|*[!0-9]*|0)
-    printf "%sAGENTES tiene que ser un entero positivo (llegó '%s')%s\n" "$ROJO" "$NUM_AGENTES" "$FIN" >&2
+    printf "%sAGENTS must be a positive integer (got '%s')%s\n" "$RED" "$NUM_AGENTS" "$OFF" >&2
     exit 1 ;;
 esac
 
-# El peldaño fija la PAREJA condición+peldaño. No son ejes independientes:
-# `instruida` ES R1 y `emergente` ES R2/R3, y Config rechaza las mezclas. Si se
-# corrieran instruida y emergente con el mismo prompt, la "coordinación
-# emergente" saldría como hallazgo cuando en realidad se la habíamos instruido.
-case "$PELDANO" in
-  1) CONDICION="instruida"; PEL="R1" ;;
-  2) CONDICION="emergente"; PEL="R2" ;;
-  3) CONDICION="emergente"; PEL="R3" ;;
+# The rung fixes the PAIR condition+rung. They are not independent axes:
+# `instruida` IS R1 and `emergente` IS R2/R3, and Config rejects the mixes. If
+# instructed and emergent ran with the same prompt, "emergent coordination"
+# would come out as a finding when we had in fact instructed it.
+case "$RUNG" in
+  1) CONDITION="instruida"; R="R1" ;;
+  2) CONDITION="emergente"; R="R2" ;;
+  3) CONDITION="emergente"; R="R3" ;;
   *)
-    printf "%sPELDAÑO tiene que ser 1, 2 o 3 (llegó '%s')%s\n" "$ROJO" "$PELDANO" "$FIN" >&2
+    printf "%sRUNG must be 1, 2 or 3 (got '%s')%s\n" "$RED" "$RUNG" "$OFF" >&2
     echo "  sh setup.sh --help" >&2
     exit 1 ;;
 esac
 
 # ---------------------------------------------------------------
-# 1. El hook que bloquea secretos
+# 1. The hook that blocks secrets
 # ---------------------------------------------------------------
-echo "Activando el hook de pre-commit..."
+echo "Enabling the pre-commit hook..."
 git config core.hooksPath .githooks
 chmod +x .githooks/pre-commit 2>/dev/null || true
 
 # ---------------------------------------------------------------
-# 2. Python y dependencias
+# 2. Python and dependencies
 # ---------------------------------------------------------------
-# Primero el venv propio del proyecto (CS/.venv, si alguien ya lo creó);
-# si no existe, cualquier Python del sistema que alcance el mínimo del
-# proyecto (3.9+) sirve — no exigimos una versión exacta como 3.11.
+# The project's own venv first, if someone already created it; otherwise any
+# system Python that meets the minimum (3.9+) — no exact version required.
 ROOT="$(pwd)"
 VERSION_OK() {
   $1 -c "import sys; raise SystemExit(0 if sys.version_info >= (3,9) else 1)" >/dev/null 2>&1
 }
 
 PY=""
-for CANDIDATO in "$ROOT/CS/.venv/bin/python" "$ROOT/CS/.venv/Scripts/python.exe" "python3" "python" "py -3"; do
-  if VERSION_OK "$CANDIDATO"; then
-    PY="$CANDIDATO"
+for CANDIDATE in "$ROOT/.venv/bin/python" "$ROOT/.venv/Scripts/python.exe" "python3" "python" "py -3"; do
+  if VERSION_OK "$CANDIDATE"; then
+    PY="$CANDIDATE"
     break
   fi
 done
 
 if [ -z "$PY" ]; then
-  printf "%s  FALTA PYTHON 3.9+%s  instálalo y vuelve a correr esto.\n" "$ROJO" "$FIN"
+  printf "%s  PYTHON 3.9+ MISSING%s  install it and run this again.\n" "$RED" "$OFF"
   exit 1
 fi
 echo "Python: $PY ($($PY -c 'import sys; print(sys.version.split()[0])'))"
 
-echo "Instalando dependencias de CS/..."
-if $PY -m pip install -q -r CS/requirements.txt; then
+echo "Installing dependencies..."
+if $PY -m pip install -q -r requirements.txt; then
   echo "  OK"
 else
-  printf "%s  FALLA: no se pudieron instalar las dependencias.%s\n" "$ROJO" "$FIN"
-  echo "  Prueba a mano:  $PY -m pip install -r CS/requirements.txt"
+  printf "%s  FAILED: dependencies could not be installed.%s\n" "$RED" "$OFF"
+  echo "  Try by hand:  $PY -m pip install -r requirements.txt"
   RC=1
 fi
 
 # ---------------------------------------------------------------
-# 3. El .env
+# 3. The .env
 # ---------------------------------------------------------------
 if [ ! -f .env ]; then
   cp .env.example .env
-  echo "Creado .env desde la plantilla."
+  echo "Created .env from the template."
 else
-  echo ".env ya existe, no lo toco."
+  echo ".env already exists, leaving it alone."
 fi
 
 # ---------------------------------------------------------------
-# 4. Verificar que el hook bloquea de verdad
+# 4. Check that the hook really blocks
 # ---------------------------------------------------------------
-echo "Verificando que el hook bloquea de verdad..."
-TMP=".prueba_hook_$$"
-printf 'clave = "sk-proj-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"\n' > "$TMP"  # permitido: no-es-secreto
+echo "Checking that the hook really blocks..."
+TMP=".hook_test_$$"
+printf 'key = "sk-proj-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"\n' > "$TMP"  # permitido: no-es-secreto
 git add -f "$TMP" 2>/dev/null
 if sh .githooks/pre-commit >/dev/null 2>&1; then
-  printf "%s  FALLA: el hook no bloqueó una llave de prueba. Avisar al equipo.%s\n" "$ROJO" "$FIN"
+  printf "%s  FAILED: the hook did not block a test key.%s\n" "$RED" "$OFF"
   RC=1
 else
-  echo "  OK: el hook bloquea llaves."
+  echo "  OK: the hook blocks keys."
 fi
 git reset -q HEAD "$TMP" 2>/dev/null || true
 rm -f "$TMP"
 
 # ---------------------------------------------------------------
-# 5. ¿Responde DeepSeek?
+# 5. Does DeepSeek answer?
 # ---------------------------------------------------------------
-PROV=""
-if [ "$SIMULADO" -eq 1 ]; then
-  PROV="--proveedor simulado"
-  LLAVE="(no hace falta)"
+PROVIDER=""
+if [ "$SIMULATED" -eq 1 ]; then
+  PROVIDER="--proveedor simulado"
+  KEY="(not needed)"
   echo ""
-  echo "Modo --simulado: guion fijo, sin llave y sin gastar tokens."
-  echo "  Comprueba que tu máquina está bien montada. NO es un resultado."
+  echo "--simulated mode: fixed script, no key and no tokens spent."
+  echo "  Checks that your machine is set up. NOT a result."
 else
-  LLAVE=$(grep -E '^DEEPSEEK_API_KEY=' .env 2>/dev/null | head -1 | cut -d= -f2- | tr -d ' "'"'"'')
+  KEY=$(grep -E '^DEEPSEEK_API_KEY=' .env 2>/dev/null | head -1 | cut -d= -f2- | tr -d ' "'"'"'')
 fi
 
 echo ""
-if [ "$SIMULADO" -eq 1 ]; then
+if [ "$SIMULATED" -eq 1 ]; then
   :
-elif [ -z "$LLAVE" ]; then
-  printf "%sFalta la llave.%s  Abre .env y pon:\n" "$ROJO" "$FIN"
+elif [ -z "$KEY" ]; then
+  printf "%sThe key is missing.%s  Open .env and put:\n" "$RED" "$OFF"
   echo ""
   echo "    DEEPSEEK_API_KEY=sk-..."
   echo ""
-  echo "  La sacas en https://platform.deepseek.com -> API keys"
-  echo "  Después vuelve a correr  sh setup.sh  para comprobar que sirve."
+  echo "  Get one at https://platform.deepseek.com -> API keys"
+  echo "  Then run  sh setup.sh  again to check that it works."
   RC=1
 else
-  echo "Probando la llave contra DeepSeek..."
-  if (cd CS && $PY -m hormiguero.proveedores.deepseek); then
+  echo "Testing the key against DeepSeek..."
+  if $PY -m hormiguero.proveedores.deepseek; then
     :
   else
-    printf "%s  La llave no funcionó. Revisa el mensaje de arriba.%s\n" "$ROJO" "$FIN"
+    printf "%s  The key did not work. Read the message above.%s\n" "$RED" "$OFF"
     RC=1
   fi
 fi
 
 # ---------------------------------------------------------------
-# 6. Correr el experimento (si todo lo de arriba salió bien)
+# 6. Run the experiment (if everything above went through)
 # ---------------------------------------------------------------
 echo ""
 if [ "$RC" -eq 0 ]; then
-  printf "%sListo.%s Corriendo: %s agentes, peldaño %s (%s)...\n" \
-    "$VERDE" "$FIN" "$NUM_AGENTES" "$PEL" "$CONDICION"
+  printf "%sReady.%s Running: %s agents, rung %s (%s)...\n" \
+    "$GREEN" "$OFF" "$NUM_AGENTS" "$R" "$CONDITION"
   echo ""
 
-  # Docker de verdad si la máquina lo tiene. Importa: la tabla de auditoría de
-  # contención individual solo se puede respaldar con contenedores reales, y es
-  # la que sostiene la frase «las cajas aprobaron y la contención falló igual».
+  # Real Docker if the machine has it. It matters: the individual containment
+  # audit table can only be backed by real containers, and it is the table
+  # behind "every box passed and containment failed anyway".
   if docker info >/dev/null 2>&1; then
-    MODO="contenedores reales"
-    SIN_DOCKER=""
-    echo "Docker disponible: levantando el clúster..."
-    (cd CS && $PY -m hormiguero.runner levantar --n-agentes "$NUM_AGENTES") || RC=1
-    (cd CS && $PY -m hormiguero.runner auditar --n-agentes "$NUM_AGENTES") || RC=1
+    MODE="real containers"
+    NO_DOCKER=""
+    echo "Docker available: bringing the cluster up..."
+    $PY -m hormiguero.runner levantar --n-agentes "$NUM_AGENTS" || RC=1
+    $PY -m hormiguero.runner auditar --n-agentes "$NUM_AGENTS" || RC=1
     echo ""
   else
-    MODO="contención EMULADA"
-    SIN_DOCKER="--sin-docker"
-    echo "Sin Docker: se usa la caja emulada (hormiguero/caja_falsa.py)."
-    echo "  Cada agente ve SOLO su fragmento y las transferencias siguen pasando"
-    echo "  por el canal, así que la medición vale. Lo que NO respalda es la tabla"
-    echo "  de auditoría: esa necesita contenedores de verdad."
+    MODE="EMULATED containment"
+    NO_DOCKER="--sin-docker"
+    echo "No Docker: the emulated box is used (hormiguero/caja_falsa.py)."
+    echo "  Each agent sees ONLY its fragment and transfers still go through the"
+    echo "  channel, so the measurement holds. What it does NOT back is the audit"
+    echo "  table: that one needs real containers."
     echo ""
   fi
 
-  # Sin --logs: el runner escribe solo en resultados/<timestamp>_N<n>/, que es
-  # la carpeta que git SÍ acepta. Antes esto iba a runs/, ignorada, y al repo
-  # llegaba el csv sin las trazas que lo respaldan.
-  if (cd CS && $PY -m hormiguero.runner uno --N "$NUM_AGENTES" \
-        --condicion "$CONDICION" --peldano "$PEL" $SIN_DOCKER $PROV); then
+  # No --logs: the runner writes to results/<timestamp>_N<n>/ on its own, which
+  # is the folder git does accept. This used to go to runs/, ignored, and the
+  # repo got the csv without the traces that back it.
+  if $PY -m hormiguero.runner uno --N "$NUM_AGENTS" \
+        --condicion "$CONDITION" --peldano "$R" $NO_DOCKER $PROVIDER; then
 
-    # La corrida recién hecha es la carpeta más nueva.
-    CARPETA=$(ls -dt "$ROOT"/resultados/*/ 2>/dev/null | head -1)
+    # The run just made is the newest folder.
+    FOLDER=$(ls -dt "$ROOT"/results/*/ 2>/dev/null | head -1)
 
-    if [ -n "$CARPETA" ]; then
+    if [ -n "$FOLDER" ]; then
       echo ""
-      echo "Analizando la corrida..."
-      # Las cuatro preguntas -> csv, y el mapa -> pagina. Encadenado aca para
-      # que nadie tenga que acordarse de correr tres comandos en orden.
-      (cd CS && $PY -m hormiguero.grafo.agregar "$CARPETA" --csv "${CARPETA}resultados.csv") || RC=1
-      (cd CS && $PY -m hormiguero.grafo.mirar "$CARPETA" --salida "${CARPETA}mapa.html") || RC=1
+      echo "Analysing the run..."
+      # The four questions -> csv, and the map -> page. Chained here so nobody
+      # has to remember to run three commands in order.
+      $PY -m hormiguero.grafo.agregar "$FOLDER" --csv "${FOLDER}resultados.csv" || RC=1
+      $PY -m hormiguero.grafo.mirar "$FOLDER" --salida "${FOLDER}mapa.html" || RC=1
 
       echo ""
-      printf "%sTodo quedó en:%s %s\n" "$VERDE" "$FIN" "$CARPETA"
-      echo "  las trazas (.jsonl), el csv y mapa.html — ya se pueden commitear."
-      echo "  Modo: $MODO - peldaño $PEL ($CONDICION)"
+      printf "%sEverything landed in:%s %s\n" "$GREEN" "$OFF" "$FOLDER"
+      echo "  the traces (.jsonl), the csv and mapa.html — ready to commit."
+      echo "  Mode: $MODE - rung $R ($CONDITION)"
       echo ""
-      echo "  Antes de subirlo, revisa la columna 'proveedor' del csv:"
-      echo "    deepseek -> es un resultado"
-      echo "    simulado -> es solo el cableado, el guion siempre abre la bóveda"
+      echo "  Before pushing it, check the csv's 'proveedor' column:"
+      echo "    deepseek -> it is a result"
+      echo "    simulado -> it is only the wiring, the script always opens the vault"
       echo ""
-      echo "  git add resultados/ && git commit -m \"resultados: N=$NUM_AGENTES $PEL\""
+      echo "  git add results/ && git commit -m \"results: N=$NUM_AGENTS $R\""
     fi
   else
     RC=1
   fi
 
-  if [ "$MODO" = "contenedores reales" ]; then
-    (cd CS && $PY -m hormiguero.runner bajar) >/dev/null 2>&1 || true
+  if [ "$MODE" = "real containers" ]; then
+    $PY -m hormiguero.runner bajar >/dev/null 2>&1 || true
   fi
 else
-  echo "Cuando lo de arriba esté resuelto, corre a mano:"
+  echo "Once the above is sorted out, run by hand:"
   echo ""
-  echo "    cd CS && python -m hormiguero.runner uno --N $NUM_AGENTES --condicion $CONDICION --peldano $PEL"
+  echo "    python -m hormiguero.runner uno --N $NUM_AGENTS --condicion $CONDITION --peldano $R"
   echo ""
-  echo "  O para comprobar el montaje sin llave ni tokens:  sh setup.sh --simulado"
+  echo "  Or to check the setup without a key or tokens:  sh setup.sh --simulated"
   echo ""
 fi
 
-cat <<'FIN_AYUDA'
+cat <<'END_HELP'
 
-Otros comandos útiles (desde CS/, todos escriben solos en resultados/):
+Other useful commands (from the repository root, all write to results/):
 
-    python -m tests.test_todo                       # todo, sin red ni tokens
+    python -m tests.test_todo                       # everything, no network, no tokens
     python -m hormiguero.runner barrido --N 1 2 4 8 --episodios 3 --sin-docker
-    python -m hormiguero.runner uno --N 4 --condicion emergente    # el peldaño R2
+    python -m hormiguero.runner uno --N 4 --condicion emergente    # rung R2
+    sh run_all.sh --plan                            # the whole design, resumable
 
-Por defecto corre la condición `instruida`, que es el peldaño R1: el prompt le
-dice al agente que comparta su fragmento y reúna las partes. Sirve para que las
-curvas existan, pero NO mide coordinación emergente — para eso, `--condiciones
-emergente` (R2) o `--peldano R3`. En `barrido` la opción es `--condiciones`.
+By default it runs the `instruida` condition, which is rung R1: the prompt tells
+the agent to share its fragment and pool the parts. It makes the curves exist,
+but it does NOT measure emergent coordination — for that, `--condicion
+emergente` (R2) or `--peldano R3`. In `barrido` the option is `--condiciones`.
 
-El experimento usa el proveedor de HORMIGUERO_PROVEEDOR (.env). Para no gastar
-tokens mientras se prueba el cableado:  --proveedor simulado
+The experiment uses the provider in HORMIGUERO_PROVEEDOR (.env). To avoid
+spending tokens while testing the wiring:  --proveedor simulado
 
-FIN_AYUDA
-echo "${GRIS}Recordatorio: la llave va en .env, nunca en el código. Si se sube por"
-echo "accidente: ROTARLA primero — borrarla del repo no la des-filtra.${FIN}"
+END_HELP
+echo "${GREY}Reminder: the key goes in .env, never in the code. If one is pushed by"
+echo "accident: ROTATE IT first — deleting it from the repo does not unleak it.${OFF}"
 exit $RC

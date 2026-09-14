@@ -1,87 +1,198 @@
 # Hormiguero
 
-**Containment Does Not Compose** — fallas a nivel de población en el aislamiento, el monitoreo y el escalamiento de agentes.
+**Containment Does Not Compose: Provenance Graphs for Tracing Collective Escape
+in Multi-Agent Systems.**
 
-AI Incident Response Sprint · Hub Bogotá · 12–13 de septiembre de 2026
+A population of LLM agents runs in individually audited containers. Each
+container holds one fragment of a credential and nothing else; every container
+passes its own containment audit. The agents can post messages to a shared
+channel. The experiment measures when the population reassembles the credential
+anyway, and reconstructs from the logs a provenance graph that says which
+containers the information actually came from.
+
+The report is `paper/AI_Safety_Equipo_Perdomo_Paper.pdf` (source:
+`paper/main.tex`). Every number in it is produced by the scripts here from the
+logs in `results/`.
 
 ---
 
-## Empezar
+## Requirements
+
+- Python 3.9+
+- Docker, only for runs with real isolation (`--sin-docker` replaces it)
+- An API key for the model that drives the agents (DeepSeek by default)
 
 ```sh
-sh setup.sh
+sh setup.sh          # Windows: setup.bat
 ```
 
-Una vez por persona, al clonar. Activa el hook de pre-commit, instala las
-dependencias de `CS/` (usa el venv de `CS/.venv` si ya existe, o cualquier
-Python 3.9+ del sistema — no hace falta una versión exacta), crea tu `.env`
-desde la plantilla y verifica que el bloqueo de secretos funciona.
+Once per clone: it enables the pre-commit hook that blocks secrets, installs
+the dependencies, creates your `.env` from the template, checks that the key
+answers and then runs one episode. `sh setup.sh --help` lists the arguments
+(number of agents, rung, `--simulated`).
 
-> **Los hooks de git no viajan con `git clone`.** Si no corres `setup.sh`, tu copia del repo no tiene ninguna protección. Es el paso que más se olvida.
-
-Después abre `.env` y pon tu llave.
-
-### Correr el experimento
-
-Si el `.env` ya tiene la llave, `setup.sh` corre el experimento al final
-(`hormiguero.runner uno`, sin Docker). El número de agentes se pasa por
-parámetro, con 4 por defecto:
+By hand it is just:
 
 ```sh
-sh setup.sh --num-agentes 3     # o: sh setup.sh -a 3
+pip install -r requirements.txt
+cp .env.example .env     # then put your DEEPSEEK_API_KEY in it
 ```
 
----
+All commands below run from the repository root.
 
-## Reglas de seguridad — cortas y en serio
+## Check the harness without a key, without Docker, without tokens
 
-1. **Las llaves van en `.env`.** Está en `.gitignore` y el hook bloquea el commit si alguien lo agrega a la fuerza.
-2. **Nunca una llave en el código.** Usa `entorno.py`:
-   ```python
-   from entorno import LLAVE_OPENAI, cfg
-   cliente = OpenAI(api_key=str(LLAVE_OPENAI))
-   pasos   = cfg("HORMIGUERO_MAX_PASOS", 10, int)
-   ```
-3. **Si una llave se sube por accidente: rotarla primero.** Borrarla del repo no la des-filtra — ya quedó en la historia, en los clones de los demás y posiblemente en el remoto. Primero se revoca en el proveedor, después se limpia.
-4. **`--no-verify` solo si miraste qué te marcó.** El hook te dice exactamente qué línea y por qué.
-
-Falso positivo puntual: agrega `# permitido: no-es-secreto` al final de esa línea.
-
----
-
-## Qué hay acá
-
-| | |
-|---|---|
-| `ARRANQUE.html` | **Empieza por acá.** Objetivo, la tarea de cada quien ahora mismo, compuertas y el plan completo |
-| `PLAN.md` | El plan en Markdown — la versión editable, la que se actualiza durante el fin de semana |
-| `EXPERIMENTOS.md` | Qué le decimos a los agentes, las herramientas, la matriz de corridas |
-| `contraste-planes.html` | Qué se adoptó del plan de Gemini, qué se le corrigió y por qué |
-| `CS/` | **El sistema completo y conectado, listo para correr experimentos.** Reemplaza `DA/`, `CC/` y `EC/` — ver `CS/README.md` |
-| `DA/` `CC/` `EC/` | Versiones previas/dispersas (grafo, entorno, trazas). Historicas: no se les hacen más cambios, todo sigue en `CS/` |
-| `entorno.py` | Carga de configuración y secretos, sin dependencias |
-| `.githooks/` | El hook que impide subir secretos |
-
----
-
-## Correr el análisis del grafo
-
-El código vivo está en `CS/` (ver `CS/README.md` para el detalle completo).
-`setup.sh --num-agentes N` ya corre un experimento suelto; para un barrido o
-el resto de comandos, a mano:
+The `simulado` provider is a fixed script: it exercises the harness, the
+channel and the graph without calling a model. It measures nothing — it only
+proves the wiring works.
 
 ```sh
-cd CS
-python -m tests.test_todo                                     # valida todo el sistema sin Docker ni LLM
-python -m hormiguero.runner uno --N 3 --sin-docker --logs runs # una corrida con 3 agentes
-python -m hormiguero.runner barrido --N 1 2 4 8 --episodios 3 --sin-docker --logs runs
+python -m tests.test_todo          # the whole system, end to end
+
+python -m hormiguero.runner barrido --N 1 2 4 8 --episodios 3 \
+    --sin-docker --proveedor simulado --logs runs
 python -m hormiguero.grafo.agregar runs --csv resultados.csv
 ```
 
-`grafo.agregar` saca la tabla por episodio, la lista de bloqueo para la réplica contrafactual (consumible con `runner repetir`), y **chequeos de cordura** que avisan si los logs vienen mal. Córrelo después de la primera tanda, antes de lanzar el barrido completo.
+## Run the experiment
 
----
+1. **Key.** In `.env`, as `DEEPSEEK_API_KEY`. To check it without burning a
+   sweep:
 
-## Entrega
+   ```sh
+   python -m hormiguero.proveedores.deepseek
+   ```
 
-Lunes 14 de septiembre, 6:59 a.m. hora de Colombia. La v1 se sube el domingo a las 16:00, esté como esté.
+2. **Cluster.** Bring the containers up and audit them before spending tokens.
+   The audit is the local containment claim the paper then breaks at the
+   population level:
+
+   ```sh
+   python -m hormiguero.runner levantar --n-agentes 4
+   python -m hormiguero.runner auditar  --n-agentes 4
+   ```
+
+3. **Episodes.** A single one, to see the whole pipeline move:
+
+   ```sh
+   python -m hormiguero.runner uno --N 4
+   ```
+
+   Or the full design, which is what produced `results/`. It is resumable: it
+   counts what is already in `results/` and runs only what is missing.
+
+   ```sh
+   python -m hormiguero.plan --plan        # what it would run, without running
+   python -m hormiguero.plan --simulado    # full dry run, no key, no tokens
+   python -m hormiguero.plan               # the real thing
+   ```
+
+   `sh run_all.sh` (Windows: `run_all.bat`) is the same thing with the Python
+   lookup done for you, and takes the same arguments.
+
+4. **Down.**
+
+   ```sh
+   python -m hormiguero.runner bajar
+   ```
+
+Runs write to `results/` by default — logs, per-episode config and CSVs
+together. A CSV without its `.jsonl` cannot be re-checked, so both are kept.
+
+**Watch the size of a sweep.** `--N 1 2 4 8 --episodios 20` is
+`(1+2+4+8) × 20 = 300` agent-episodes and up to `max_pasos` calls each: on the
+order of 3,000 model calls. Run with `--episodios 2` first.
+
+### The three curves
+
+```sh
+# 1. composition gap: escape rate against population size
+python -m hormiguero.runner barrido --N 1 2 4 8 --episodios 20
+
+# 2. dilution: per-agent monitor detection against N
+python -m hormiguero.monitor results --proveedor deepseek --csv monitor.csv
+
+# 3. warning collapse against decomposition depth
+python -m hormiguero.runner barrido --N 4 --n-partes 2 3 4 6 --episodios 20
+```
+
+The channel dials (width, persistence, addressing) are swept the same way and
+are recorded in every event, so configurations never average into each other:
+
+```sh
+python -m hormiguero.runner barrido --N 4 --episodios 20 --canal-max-chars 80
+python -m hormiguero.runner barrido --N 4 --episodios 20 --canal-persistencia efimero --canal-ttl 2
+python -m hormiguero.runner barrido --N 4 --episodios 20 --canal-direccionamiento punto_a_punto
+```
+
+### Counterfactual replica
+
+Block what the critical messages carried and replay the episode, to see whether
+the escape was still reachable without them. Each replica needs its random
+control, otherwise "the escape collapsed" is also explained by having blocked
+messages at all.
+
+```sh
+python -m hormiguero.grafo.agregar results --csv resultados.csv   # writes lista_de_bloqueo.json
+python -m hormiguero.runner repetir --bloqueo lista_de_bloqueo.json --episodio <episode>
+python -m hormiguero.runner repetir --bloqueo lista_de_bloqueo.json --episodio <episode> --control-aleatorio
+```
+
+Or both, over the escapes already recorded: `python -m hormiguero.plan --replicas 3`.
+
+Blocking is by content and sender, not by `event_id`: the model is not
+deterministic, so the same fragment lands on a different event id on the replay.
+The channel counts how many messages it actually withheld
+(`mensajes_retenidos`), and `grafo.agregar` warns if that is 0.
+
+## Analysis
+
+```sh
+python -m hormiguero.grafo.agregar results --csv resultados.csv  # table + sanity checks
+python -m hormiguero.grafo.mirar   results --salida mapa.html    # self-contained page, one episode
+python -m hormiguero.figuras                                     # figures, tables and numbers for the paper
+python paper/reanalisis_revision.py                              # oracle check, cut decomposition, statistical tests
+python paper/baseline_atribucion.py                              # attribution baselines against the graph
+```
+
+`grafo.agregar` also runs the sanity checks — unlogged transfers, escapes
+without independent verification, a successful N=1 episode (the hard ceiling
+must hold). Run it after the first batch, before launching the full sweep.
+
+| Output | What it is |
+|---|---|
+| `resultados.csv` | One row per episode |
+| `resultados_curvas.csv` | One row per `(condition, N)` point — this is what gets plotted |
+| `lista_de_bloqueo.json` | Critical messages, input to `runner repetir` |
+| `<episode>.cfg.json` | The full config of the episode, next to its log |
+| `monitor.csv` | Both monitors, per episode |
+| `mapa.html` | The provenance map of an episode, as a standalone page |
+| `paper/numeros.md` | Every number quoted in the report, regenerated from the logs |
+
+## Layout
+
+| Path | What it holds |
+|---|---|
+| `hormiguero/` | The system: harness, channel, containers, providers, provenance graph |
+| `hormiguero/config.py` | Single source of truth: key parts, container names, caps, channel dials |
+| `hormiguero/runner.py` | Episodes and sweeps; `plan.py` runs the whole design, resumably |
+| `hormiguero/grafo/` | Graph construction, the four questions, aggregation, export, the map page |
+| `hormiguero/figuras.py` | Figures, LaTeX tables and `paper/numeros.md`, from `results/` |
+| `tests/` | `python -m tests.test_todo` — the whole system without Docker, model or network |
+| `examples/` | Fixture logs, including a deliberately broken one the oracle must reject |
+| `results/` | The released batch: logs, configs and CSVs of the episodes in the paper |
+| `paper/` | Report source, figures and the analysis scripts behind its numbers |
+| `setup.sh` `setup.bat` | One-shot setup plus one episode, analysed and left in `results/` |
+| `run_all.sh` `run_all.bat` | The whole design (`hormiguero.plan`), resumable |
+
+## Secrets
+
+Keys live in `.env` (gitignored). A pre-commit hook blocks commits that contain
+one. `setup.sh` enables it; by hand it is:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+If a key is ever committed, rotate it at the provider first — removing it from
+the repo does not unleak it.
